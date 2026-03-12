@@ -1,0 +1,29 @@
+@import "tailwindcss";
+
+:root {
+    font-family: 'Poppins', sans-serif;
+}
+
+html,
+body {
+    font-family: 'Poppins', sans-serif;
+}
+
+/* ===== Animasi Foto Profil ===== */
+@keyframes masuk-bg {
+    0%   { opacity: 0; transform: translateY(30px) scale(0.9); }
+    100% { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+@keyframes masuk-foto {
+    0%   { opacity: 0; transform: translateY(40px) scale(0.95); }
+    100% { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+.anim-bg-biru {
+    animation: masuk-bg 2000ms ease-in 400ms both;
+}
+
+.anim-foto {
+    animation: masuk-foto 2000ms ease-in 800ms both;
+}
