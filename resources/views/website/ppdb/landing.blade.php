@@ -194,7 +194,8 @@
                         Jalur untuk siswa yang memiliki prestasi akademik maupun non-akademik sesuai persyaratan yang berlaku.
                     </p>
                     <div class="border-t border-slate-100 mt-8">
-                        <a href="#" class="inline-flex items-center gap-1.5 py-4 text-[#16A9D1] font-semibold text-sm group">
+                        <a href="{{ route('ppdb.jalur', 'prestasi') }}"
+                           class="inline-flex items-center gap-1.5 py-4 text-[#16A9D1] font-semibold text-sm group">
                             Baca Selengkapnya
                             <span class="group-hover:translate-x-1 transition-transform">→</span>
                         </a>
@@ -214,7 +215,8 @@
                         Jalur umum untuk calon peserta didik baru yang memenuhi persyaratan administrasi pendaftaran.
                     </p>
                     <div class="border-t border-slate-100 mt-8">
-                        <a href="#" class="inline-flex items-center gap-1.5 py-4 text-[#16A9D1] font-semibold text-sm group">
+                        <a href="{{ route('ppdb.jalur', 'reguler') }}"
+                           class="inline-flex items-center gap-1.5 py-4 text-[#16A9D1] font-semibold text-sm group">
                             Baca Selengkapnya
                             <span class="group-hover:translate-x-1 transition-transform">→</span>
                         </a>
@@ -234,7 +236,8 @@
                         Jalur untuk peserta didik sesuai ketentuan afirmasi dan dokumen pendukung yang telah ditetapkan.
                     </p>
                     <div class="border-t border-slate-100 mt-8">
-                        <a href="#" class="inline-flex items-center gap-1.5 py-4 text-[#16A9D1] font-semibold text-sm group">
+                        <a href="{{ route('ppdb.jalur', 'afirmasi') }}"
+                           class="inline-flex items-center gap-1.5 py-4 text-[#16A9D1] font-semibold text-sm group">
                             Baca Selengkapnya
                             <span class="group-hover:translate-x-1 transition-transform">→</span>
                         </a>
@@ -247,7 +250,6 @@
 </section>
 
 <style>
-    /* === Scroll animasi heading === */
     .jalur-heading {
         opacity: 0;
         transform: translateY(24px);
@@ -257,8 +259,6 @@
         opacity: 1;
         transform: translateY(0);
     }
-
-    /* === Scroll animasi card === */
     .jalur-card {
         opacity: 0;
         transform: translateY(50px);
@@ -268,34 +268,23 @@
         opacity: 1;
         transform: translateY(0);
     }
-
-    /* === Normal === */
     .jalur-inner {
         transition: box-shadow 300ms ease, transform 300ms ease, border 300ms ease;
         cursor: pointer;
         border: 2px solid transparent;
     }
-
-    /* === Hover === */
     .jalur-card:hover .jalur-inner {
-        box-shadow:
-            0px 4px 4px 0px rgba(0,0,0,0.25),
-            inset 0px 4px 4px 0px rgba(89,175,255,0.5);
+        box-shadow: 0px 4px 4px 0px rgba(0,0,0,0.25), inset 0px 4px 4px 0px rgba(89,175,255,0.5);
         transform: translateY(-4px);
     }
-
-    /* === Klik - border biru muncul === */
     .jalur-card.active .jalur-inner {
         border: 2px solid #27C2DE;
-        box-shadow:
-            0px 4px 4px 0px rgba(0,0,0,0.25),
-            inset 0px 4px 4px 0px rgba(89,175,255,0.5);
+        box-shadow: 0px 4px 4px 0px rgba(0,0,0,0.25), inset 0px 4px 4px 0px rgba(89,175,255,0.5);
         transform: translateY(0px);
     }
 </style>
 
 <script>
-    // Scroll observer
     const jalurObserver = new IntersectionObserver((entries) => {
         entries.forEach(entry => {
             if (entry.isIntersecting) {
@@ -310,13 +299,10 @@
         jalurObserver.observe(el);
     });
 
-    // Klik - toggle active, hanya satu card aktif sekaligus
     document.querySelectorAll('.jalur-card').forEach(card => {
         card.addEventListener('click', () => {
             const isActive = card.classList.contains('active');
-            // Reset semua
             document.querySelectorAll('.jalur-card').forEach(c => c.classList.remove('active'));
-            // Toggle yang diklik
             if (!isActive) card.classList.add('active');
         });
     });
