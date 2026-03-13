@@ -6,6 +6,7 @@ Route::view('/', 'website.ppdb.landing')->name('beranda');
 
 Route::prefix('ppdb')->group(function () {
     Route::view('/', 'website.ppdb.landing')->name('ppdb.landing');
+    Route::view('/login', 'ppdb.auth.login')->name('ppdb.login');
     Route::view('/informasi', 'website.ppdb.informasi')->name('ppdb.informasi');
     Route::view('/alur', 'website.ppdb.alur')->name('ppdb.alur');
     Route::view('/persyaratan', 'website.ppdb.persyaratan')->name('ppdb.persyaratan');
@@ -20,6 +21,13 @@ Route::prefix('ppdb')->group(function () {
         }
         return view('website.ppdb.jalur', compact('slug'));
     })->name('ppdb.jalur');
+});
+Route::prefix('ppdb')->group(function () {
+    // ... route lainnya ...
+    Route::view('/login', 'ppdb.auth.login')->name('ppdb.login');
+    Route::view('/daftar', 'ppdb.auth.registrasi')->name('ppdb.daftar');
+    Route::view('/daftar/step2', 'ppdb.auth.registrasi2')->name('ppdb.daftar.step2');
+    Route::view('/lupa-password', 'ppdb.auth.lupa-password')->name('ppdb.lupa-password');
 });
 
 Route::prefix('siswa')->group(function () {
