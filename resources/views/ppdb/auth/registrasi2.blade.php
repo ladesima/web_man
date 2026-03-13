@@ -31,7 +31,7 @@
                 <span class="text-xs text-green-700">NISN <strong>{{ request('nisn') }}</strong> ditemukan</span>
             </div>
 
-            <form method="POST" action="#" class="w-full max-w-xs space-y-3">
+            <form method="GET" action="#" class="w-full max-w-xs space-y-3">
                 @csrf
                 <input type="hidden" name="nisn" value="{{ request('nisn') }}">
 

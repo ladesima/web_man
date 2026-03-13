@@ -116,7 +116,7 @@ $jadwals = [
                 <p class="mt-4 text-sm md:text-base leading-7 text-white/90 max-w-lg">
                     {{ $jalur['deskripsi'] }}
                 </p>
-             <a href="/ppdb/daftar"
+            <a href="{{ route('ppdb.daftar') }}"
                 class="mt-6 inline-block bg-white text-[#00758A] font-semibold px-8 py-2.5 rounded-full transition-all text-sm w-fit hover:bg-slate-100">
                     Daftar Sekarang
             </a>
