@@ -1,6 +1,9 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\Ppdb\CekNisnController;
+use App\Http\Controllers\Ppdb\AuthPpdbController;
+
 
 Route::view('/', 'website.ppdb.landing')->name('beranda');
 
@@ -19,6 +22,15 @@ Route::prefix('ppdb')->group(function () {
         return view('website.ppdb.jalur', compact('slug'));
     })->name('ppdb.jalur');
 
+    // halaman login
+    Route::get('/login', function () {
+        return view('ppdb.auth.login');
+    })->name('ppdb.login');
+
+    // proses login
+    Route::post('/login', [AuthPpdbController::class, 'login'])
+        ->name('ppdb.login.post');
+
 
     Route::view('/login', 'ppdb.auth.login')->name('ppdb.login');
     Route::view('/daftar', 'ppdb.auth.registrasi')->name('ppdb.daftar');
@@ -27,6 +39,13 @@ Route::prefix('ppdb')->group(function () {
     Route::post('/daftar/step2', function () {
         return redirect()->route('siswa.dashboard');
     })->name('ppdb.daftar.step2.post');
+
+    Route::post('/register', [AuthPpdbController::class, 'register'])
+    ->name('ppdb.register');
+
+Route::post('/cek-nisn', [CekNisnController::class, 'cek'])
+    ->name('ppdb.cek.nisn');
+
 });
 
 
