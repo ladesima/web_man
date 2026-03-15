@@ -13,7 +13,7 @@
     </style>
     @stack('styles')
 </head>
-<body class="bg-white text-slate-800 antialiased">
+<body class="min-h-screen" style="background-color: #F4F8FF;">
 
     {{-- NAVBAR --}}
     <nav class="bg-[#27C2DE] shadow-[0px_4px_4px_rgba(101,101,101,0.25)] sticky top-0 z-50">

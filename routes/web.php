@@ -22,55 +22,66 @@ Route::prefix('ppdb')->group(function () {
         return view('website.ppdb.jalur', compact('slug'));
     })->name('ppdb.jalur');
 
-    // halaman login
+    // Auth
     Route::get('/login', function () {
         return view('ppdb.auth.login');
     })->name('ppdb.login');
+    Route::post('/login', [AuthPpdbController::class, 'login'])->name('ppdb.login.post');
 
-    // proses login
-    Route::post('/login', [AuthPpdbController::class, 'login'])
-        ->name('ppdb.login.post');
-
-
-    Route::view('/login', 'ppdb.auth.login')->name('ppdb.login');
     Route::view('/daftar', 'ppdb.auth.registrasi')->name('ppdb.daftar');
     Route::view('/daftar/step2', 'ppdb.auth.registrasi2')->name('ppdb.daftar.step2');
     Route::view('/lupa-password', 'ppdb.auth.lupa-password')->name('ppdb.lupa-password');
+
     Route::post('/daftar/step2', function () {
         return redirect()->route('siswa.dashboard');
     })->name('ppdb.daftar.step2.post');
 
-    Route::post('/register', [AuthPpdbController::class, 'register'])
-    ->name('ppdb.register');
-
-Route::post('/cek-nisn', [CekNisnController::class, 'cek'])
-    ->name('ppdb.cek.nisn');
-
+    Route::post('/register', [AuthPpdbController::class, 'register'])->name('ppdb.register');
+    Route::post('/cek-nisn', [CekNisnController::class, 'cek'])->name('ppdb.cek.nisn');
 });
 
 
 Route::prefix('siswa')->group(function () {
     Route::view('/dashboard', 'ppdb.dashboard.beranda')->name('siswa.dashboard');
 
+    // Isi Formulir
     Route::get('/pendaftaran/{jalur}', function ($jalur) {
         $allowed = ['prestasi', 'reguler', 'afirmasi'];
         if (!in_array($jalur, $allowed)) abort(404);
         return view('ppdb.pendaftaran.isi-formulir', compact('jalur'));
     })->name('siswa.pendaftaran');
 
+    Route::post('/pendaftaran/{jalur}', function ($jalur) {
+        // simpan data formulir nanti pakai controller
+        return redirect()->route('siswa.berkas', $jalur);
+    })->name('siswa.pendaftaran.post');
+
+    // Upload Berkas
     Route::get('/berkas/{jalur}', function ($jalur) {
         return view('ppdb.berkas.index', compact('jalur'));
     })->name('siswa.berkas');
 
+    Route::post('/berkas/{jalur}', function ($jalur) {
+        // simpan berkas nanti pakai controller
+        return redirect()->route('siswa.verifikasi', $jalur);
+    })->name('siswa.berkas.post');
+
+    // Verifikasi
     Route::get('/verifikasi/{jalur}', function ($jalur) {
         return view('ppdb.dashboard.status', compact('jalur'));
     })->name('siswa.verifikasi');
 
+    // Pengumuman
     Route::get('/pengumuman/{jalur}', function ($jalur) {
         return view('ppdb.pengumuman.index', compact('jalur'));
     })->name('siswa.pengumuman');
 
+    // Daftar Ulang
     Route::get('/daftar-ulang/{jalur}', function ($jalur) {
         return view('ppdb.daftar-ulang.index', compact('jalur'));
     })->name('siswa.daftar-ulang');
+
+    Route::post('/daftar-ulang/{jalur}', function ($jalur) {
+        return redirect()->route('siswa.dashboard');
+    })->name('siswa.daftar-ulang.post');
 });
