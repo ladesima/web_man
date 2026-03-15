@@ -1,11 +1,23 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
+use Illuminate\Support\Facades\Session;
 use App\Http\Controllers\Ppdb\CekNisnController;
 use App\Http\Controllers\Ppdb\AuthPpdbController;
-
+use App\Http\Controllers\Ppdb\LandingPpdbController;
 
 Route::view('/', 'website.ppdb.landing')->name('beranda');
+
+Route::get('/ppdb/pilih/{jalur}', function ($jalur) {
+
+    session(['jalur_daftar' => $jalur]);
+
+    return redirect()->route('ppdb.daftar');
+
+})->name('ppdb.pilih_jalur');
+
+Route::get('/ppdb/dashboard', [LandingPpdbController::class, 'index'])
+    ->name('ppdb.dashboard');
 
 Route::prefix('ppdb')->group(function () {
     Route::view('/', 'website.ppdb.landing')->name('ppdb.landing');

@@ -20,7 +20,7 @@
             <h1 class="text-xl font-bold text-[#2B2A28]">Selamat Datang</h1>
             <p class="text-xs text-slate-400 mt-1 mb-6">Masuk untuk melanjutkan pendaftaran PPDB</p>
 
-            <form method="POST" action="{{ route('ppdb.login.post') }}
+            <form method="POST" action="{{ route('ppdb.login.post') }}">
                 @csrf
 
                 <div>

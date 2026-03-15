@@ -15,7 +15,7 @@
                 class="w-full h-auto block">
             <div class="absolute inset-0 flex flex-col justify-center px-10">
                 <h2 class="text-white text-2xl font-bold">
-                    Assalamu'alaikum, {{ session('nama', 'Siswa') }}
+                    Assalamu'alaikum,  {{ session('nama', 'Siswa') }}!
                 </h2>
                 <p class="text-white/90 text-sm mt-2 leading-7">
                     Kamu belum memilih jalur pendaftaran.<br>

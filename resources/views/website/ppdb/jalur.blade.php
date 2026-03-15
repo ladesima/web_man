@@ -86,7 +86,7 @@ $jadwals = [
                    class="text-sm text-slate-500 hover:text-[#00758A] transition-colors px-5">
                     Beranda
                 </a>
-                <a href="{{ route('ppdb.landing') }}"
+                <a href="{{ route('beranda') }}"
                    class="text-sm text-slate-500 hover:text-[#00758A] transition-colors px-5">
                     PPDB
                 </a>
@@ -116,10 +116,10 @@ $jadwals = [
                 <p class="mt-4 text-sm md:text-base leading-7 text-white/90 max-w-lg">
                     {{ $jalur['deskripsi'] }}
                 </p>
-            <a href="{{ route('ppdb.daftar') }}"
-                class="mt-6 inline-block bg-white text-[#00758A] font-semibold px-8 py-2.5 rounded-full transition-all text-sm w-fit hover:bg-slate-100">
-                    Daftar Sekarang
-            </a>
+            <a href="{{ route('ppdb.pilih_jalur', $slug) }}"
+    class="mt-6 inline-block bg-white text-[#00758A] font-semibold px-8 py-2.5 rounded-full transition-all text-sm w-fit hover:bg-slate-100">
+        Daftar Sekarang
+</a>
             </div>
 
         </div>
