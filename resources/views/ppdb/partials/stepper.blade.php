@@ -10,35 +10,51 @@ $steps = [
 ];
 @endphp
 
-{{-- STEPPER dengan max-width agar tidak melebar --}}
 <div class="max-w-5xl mx-auto flex items-start justify-between relative px-4 py-6 mb-2">
-
-    {{-- Garis penghubung --}}
-    <div class="absolute z-0" style="top: 55px; left: 70px; right: 70px;">
-        <div style="width:100%; border-top: 2px dashed #27C2DE;"></div>
-    </div>
 
     @foreach($steps as $i => $step)
     @php
         $stepNum  = $i + 1;
         $isDone   = $stepNum < $currentStep;
         $isActive = $stepNum === $currentStep;
+        $isLast   = $i === count($steps) - 1;
+
+        // Garis setelah step ini: selesai kalau step berikutnya sudah done atau active
+        $lineIsDone = ($stepNum + 1) <= $currentStep;
     @endphp
 
-    <div class="relative z-10 flex flex-col items-center gap-1.5" style="width: 80px;">
+    <div class="relative z-10 flex flex-col items-center gap-1.5" style="flex: 1; min-width: 0;">
 
-        {{-- Icon --}}
-        <div class="w-14 h-14 flex items-center justify-center rounded-full bg-[#F4F8FF]">
-            @if($isDone)
-                <img src="{{ asset('ppdb/ceklis.jpg') }}"
-                     alt="selesai"
-                     class="w-12 h-12 object-contain rounded-full">
-            @else
-                <img src="{{ asset('ppdb/' . $step['icon']) }}"
-                     alt="{{ $step['label'] }}"
-                     class="w-12 h-12 object-contain rounded-full"
-                     style="{{ !$isActive ? 'opacity: 0.3;' : '' }}">
+        {{-- Icon + Garis kanan --}}
+        <div class="relative w-full flex items-center justify-center" style="height: 56px;">
+
+            {{-- Icon --}}
+            <div class="relative z-10 w-14 h-14 flex items-center justify-center rounded-full bg-[#F4F8FF]">
+                @if($isDone)
+                    <img src="{{ asset('ppdb/ceklis.jpg') }}"
+                         alt="selesai"
+                         class="w-12 h-12 object-contain rounded-full">
+                @else
+                    <img src="{{ asset('ppdb/' . $step['icon']) }}"
+                         alt="{{ $step['label'] }}"
+                         class="w-12 h-12 object-contain rounded-full"
+                         style="{{ !$isActive ? 'opacity: 0.3;' : '' }}">
+                @endif
+            </div>
+
+            {{-- Garis ke kanan (kecuali step terakhir) --}}
+            @if(!$isLast)
+            <div class="absolute z-0"
+                 style="left: calc(50% + 28px);
+                        right: calc(-50% + 28px);
+                        top: 50%;
+                        transform: translateY(-50%);
+                        height: 2px;
+                        background: {{ $lineIsDone ? '#27C2DE' : 'transparent' }};
+                        border-top: {{ $lineIsDone ? 'none' : '2px dashed #27C2DE' }};">
+            </div>
             @endif
+
         </div>
 
         {{-- Label --}}

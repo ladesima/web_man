@@ -97,3 +97,32 @@ Route::prefix('siswa')->group(function () {
         return redirect()->route('siswa.dashboard');
     })->name('siswa.daftar-ulang.post');
 });
+
+// =====================
+// AUTH ADMIN & PANITIA
+// =====================
+Route::get('/login', function () {
+    return view('auth.login');
+})->name('login');
+
+Route::post('/login', function () {
+    // logic login nanti diisi di controller
+})->name('login.post');
+
+// Admin
+Route::prefix('admin')->group(function () {
+    Route::view('/dashboard', 'admin.dashboard')->name('admin.dashboard');
+});
+
+// Panitia
+Route::prefix('panitia')->group(function () {
+    Route::view('/dashboard', 'panitia.dashboard')->name('panitia.dashboard');
+});
+
+// Logout
+Route::post('/logout', function () {
+    auth()->logout();
+    request()->session()->invalidate();
+    request()->session()->regenerateToken();
+    return redirect('/login');
+})->name('logout');
