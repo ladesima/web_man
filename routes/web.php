@@ -5,8 +5,15 @@ use Illuminate\Support\Facades\Session;
 use App\Http\Controllers\Ppdb\CekNisnController;
 use App\Http\Controllers\Ppdb\AuthPpdbController;
 use App\Http\Controllers\Ppdb\LandingPpdbController;
+use App\Http\Controllers\Ppdb\PendaftaranController;
+use App\Http\Controllers\Ppdb\UploadBerkasController;
+
 
 Route::view('/', 'website.ppdb.landing')->name('beranda');
+
+Route::post('/siswa/pendaftaran/{jalur}', 
+    [PendaftaranController::class, 'store']
+)->name('siswa.pendaftaran.post');
 
 Route::get('/ppdb/pilih/{jalur}', function ($jalur) {
 
@@ -18,6 +25,14 @@ Route::get('/ppdb/pilih/{jalur}', function ($jalur) {
 
 Route::get('/ppdb/dashboard', [LandingPpdbController::class, 'index'])
     ->name('ppdb.dashboard');
+
+Route::get('/siswa/upload-berkas/{jalur}', 
+    [UploadBerkasController::class, 'index']
+)->name('siswa.upload.berkas');
+
+Route::post('/siswa/upload-berkas/{jalur}', 
+    [UploadBerkasController::class, 'store']
+)->name('siswa.upload.berkas.post');
 
 Route::prefix('ppdb')->group(function () {
     Route::view('/', 'website.ppdb.landing')->name('ppdb.landing');
@@ -97,32 +112,3 @@ Route::prefix('siswa')->group(function () {
         return redirect()->route('siswa.dashboard');
     })->name('siswa.daftar-ulang.post');
 });
-
-// =====================
-// AUTH ADMIN & PANITIA
-// =====================
-Route::get('/login', function () {
-    return view('auth.login');
-})->name('login');
-
-Route::post('/login', function () {
-    // logic login nanti diisi di controller
-})->name('login.post');
-
-// Admin
-Route::prefix('admin')->group(function () {
-    Route::view('/dashboard', 'admin.dashboard')->name('admin.dashboard');
-});
-
-// Panitia
-Route::prefix('panitia')->group(function () {
-    Route::view('/dashboard', 'panitia.dashboard')->name('panitia.dashboard');
-});
-
-// Logout
-Route::post('/logout', function () {
-    auth()->logout();
-    request()->session()->invalidate();
-    request()->session()->regenerateToken();
-    return redirect('/login');
-})->name('logout');
