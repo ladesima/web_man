@@ -8,29 +8,25 @@ use App\Http\Controllers\Ppdb\LandingPpdbController;
 use App\Http\Controllers\Ppdb\PendaftaranController;
 use App\Http\Controllers\Ppdb\UploadBerkasController;
 
-
 Route::view('/', 'website.ppdb.landing')->name('beranda');
 
-Route::post('/siswa/pendaftaran/{jalur}', 
+Route::post('/siswa/pendaftaran/{jalur}',
     [PendaftaranController::class, 'store']
 )->name('siswa.pendaftaran.post');
 
 Route::get('/ppdb/pilih/{jalur}', function ($jalur) {
-
     session(['jalur_daftar' => $jalur]);
-
     return redirect()->route('ppdb.daftar');
-
 })->name('ppdb.pilih_jalur');
 
 Route::get('/ppdb/dashboard', [LandingPpdbController::class, 'index'])
     ->name('ppdb.dashboard');
 
-Route::get('/siswa/upload-berkas/{jalur}', 
+Route::get('/siswa/upload-berkas/{jalur}',
     [UploadBerkasController::class, 'index']
 )->name('siswa.upload.berkas');
 
-Route::post('/siswa/upload-berkas/{jalur}', 
+Route::post('/siswa/upload-berkas/{jalur}',
     [UploadBerkasController::class, 'store']
 )->name('siswa.upload.berkas.post');
 
@@ -49,7 +45,6 @@ Route::prefix('ppdb')->group(function () {
         return view('website.ppdb.jalur', compact('slug'));
     })->name('ppdb.jalur');
 
-    // Auth
     Route::get('/login', function () {
         return view('ppdb.auth.login');
     })->name('ppdb.login');
@@ -67,43 +62,31 @@ Route::prefix('ppdb')->group(function () {
     Route::post('/cek-nisn', [CekNisnController::class, 'cek'])->name('ppdb.cek.nisn');
 });
 
-
 Route::prefix('siswa')->group(function () {
     Route::view('/dashboard', 'ppdb.dashboard.beranda')->name('siswa.dashboard');
 
-    // Isi Formulir
     Route::get('/pendaftaran/{jalur}', function ($jalur) {
         $allowed = ['prestasi', 'reguler', 'afirmasi'];
         if (!in_array($jalur, $allowed)) abort(404);
         return view('ppdb.pendaftaran.isi-formulir', compact('jalur'));
     })->name('siswa.pendaftaran');
 
-    Route::post('/pendaftaran/{jalur}', function ($jalur) {
-        // simpan data formulir nanti pakai controller
-        return redirect()->route('siswa.berkas', $jalur);
-    })->name('siswa.pendaftaran.post');
-
-    // Upload Berkas
     Route::get('/berkas/{jalur}', function ($jalur) {
         return view('ppdb.berkas.index', compact('jalur'));
     })->name('siswa.berkas');
 
     Route::post('/berkas/{jalur}', function ($jalur) {
-        // simpan berkas nanti pakai controller
         return redirect()->route('siswa.verifikasi', $jalur);
     })->name('siswa.berkas.post');
 
-    // Verifikasi
     Route::get('/verifikasi/{jalur}', function ($jalur) {
         return view('ppdb.dashboard.status', compact('jalur'));
     })->name('siswa.verifikasi');
 
-    // Pengumuman
     Route::get('/pengumuman/{jalur}', function ($jalur) {
         return view('ppdb.pengumuman.index', compact('jalur'));
     })->name('siswa.pengumuman');
 
-    // Daftar Ulang
     Route::get('/daftar-ulang/{jalur}', function ($jalur) {
         return view('ppdb.daftar-ulang.index', compact('jalur'));
     })->name('siswa.daftar-ulang');
@@ -111,4 +94,78 @@ Route::prefix('siswa')->group(function () {
     Route::post('/daftar-ulang/{jalur}', function ($jalur) {
         return redirect()->route('siswa.dashboard');
     })->name('siswa.daftar-ulang.post');
+});
+
+// =====================
+// AUTH ADMIN & PANITIA
+// =====================
+Route::get('/login', function () {
+    return view('auth.login');
+})->name('login');
+
+Route::post('/login', function () {
+    // logic login nanti diisi controller
+})->name('login.post');
+
+Route::post('/logout', function () {
+    auth()->logout();
+    request()->session()->invalidate();
+    request()->session()->regenerateToken();
+    return redirect('/login');
+})->name('logout');
+
+// =====================
+// ADMIN
+// =====================
+Route::prefix('admin')->group(function () {
+
+    // Dashboard
+    Route::get('/dashboard', function () {
+        return view('admin.dashboard');
+    })->name('admin.dashboard');
+
+    // Master PPDB
+    Route::get('/master-ppdb', function () {
+        return view('admin.ppdb.master.index');
+    })->name('admin.master');
+
+    Route::get('/master-ppdb/{tahun}', function ($tahun) {
+        return view('admin.ppdb.master.detail', compact('tahun'));
+    })->name('admin.master.detail');
+
+    Route::get('/master-ppdb/{tahun}/tambah-syarat', function ($tahun) {
+        return view('admin.ppdb.master.tambah-syarat', compact('tahun'));
+    })->name('admin.master.tambah-syarat');
+
+    // Operasional
+    Route::get('/operasional/verifikasi', function () {
+        return view('admin.ppdb.operasional.verifikasi-berkas');
+    })->name('admin.operasional.verifikasi');
+
+    Route::get('/operasional/pengumuman', function () {
+        return view('admin.ppdb.operasional.pengumuman');
+    })->name('admin.operasional.pengumuman');
+
+    Route::get('/operasional/faq', function () {
+        return view('admin.ppdb.operasional.faq');
+    })->name('admin.operasional.faq');
+
+    // Manajemen Sistem
+    Route::get('/manajemen/akun', function () {
+        return view('admin.ppdb.manajemen.akun-panitia');
+    })->name('admin.manajemen.akun');
+
+    Route::get('/manajemen/riwayat', function () {
+        return view('admin.ppdb.manajemen.riwayat-aktivitas');
+    })->name('admin.manajemen.riwayat');
+
+});
+
+// =====================
+// PANITIA
+// =====================
+Route::prefix('panitia')->group(function () {
+    Route::get('/dashboard', function () {
+        return view('panitia.dashboard');
+    })->name('panitia.dashboard');
 });

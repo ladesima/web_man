@@ -10,67 +10,75 @@ $steps = [
 ];
 @endphp
 
-<div class="max-w-5xl mx-auto flex items-start justify-between relative px-4 py-6 mb-2">
+<div class="w-full px-4 py-6 mb-2">
+    <div class="flex items-start justify-between relative w-full">
 
-    @foreach($steps as $i => $step)
-    @php
-        $stepNum  = $i + 1;
-        $isDone   = $stepNum < $currentStep;
-        $isActive = $stepNum === $currentStep;
-        $isLast   = $i === count($steps) - 1;
+        @foreach($steps as $i => $step)
+        @php
+            $stepNum    = $i + 1;
+            $isDone     = $stepNum < $currentStep;
+            $isActive   = $stepNum === $currentStep;
+            $isLast     = $i === count($steps) - 1;
+            $lineIsDone = ($stepNum + 1) <= $currentStep;
+        @endphp
 
-        // Garis setelah step ini: selesai kalau step berikutnya sudah done atau active
-        $lineIsDone = ($stepNum + 1) <= $currentStep;
-    @endphp
+        <div class="relative flex flex-col items-center flex-1 min-w-0">
 
-    <div class="relative z-10 flex flex-col items-center gap-1.5" style="flex: 1; min-width: 0;">
+            {{-- Icon + Garis --}}
+            <div class="relative w-full flex items-center justify-center" style="height: 56px;">
 
-        {{-- Icon + Garis kanan --}}
-        <div class="relative w-full flex items-center justify-center" style="height: 56px;">
-
-            {{-- Icon --}}
-            <div class="relative z-10 w-14 h-14 flex items-center justify-center rounded-full bg-[#F4F8FF]">
-                @if($isDone)
-                    <img src="{{ asset('ppdb/ceklis.jpg') }}"
-                         alt="selesai"
-                         class="w-12 h-12 object-contain rounded-full">
-                @else
-                    <img src="{{ asset('ppdb/' . $step['icon']) }}"
-                         alt="{{ $step['label'] }}"
-                         class="w-12 h-12 object-contain rounded-full"
-                         style="{{ !$isActive ? 'opacity: 0.3;' : '' }}">
+                {{-- Garis kiri --}}
+                @if($i > 0)
+                <div class="absolute z-0"
+                     style="right: 50%; left: 0; top: 50%; transform: translateY(-50%); height: 2px;
+                            background: {{ $isDone ? '#27C2DE' : 'transparent' }};
+                            border-top: {{ $isDone ? 'none' : '2px dashed #27C2DE' }};">
+                </div>
                 @endif
+
+                {{-- Icon --}}
+                <div class="relative z-10 w-12 h-12 flex items-center justify-center rounded-full"
+                     style="background: #F4F8FF; flex-shrink: 0;">
+                    @if($isDone)
+                        <img src="{{ asset('ppdb/ceklis.jpg') }}"
+                             alt="selesai"
+                             class="w-10 h-10 object-contain rounded-full">
+                    @else
+                        <img src="{{ asset('ppdb/' . $step['icon']) }}"
+                             alt="{{ $step['label'] }}"
+                             class="w-10 h-10 object-contain rounded-full"
+                             style="{{ !$isActive ? 'opacity: 0.3;' : '' }}">
+                    @endif
+                </div>
+
+                {{-- Garis kanan --}}
+                @if(!$isLast)
+                <div class="absolute z-0"
+                     style="left: 50%; right: 0; top: 50%; transform: translateY(-50%); height: 2px;
+                            background: {{ $lineIsDone ? '#27C2DE' : 'transparent' }};
+                            border-top: {{ $lineIsDone ? 'none' : '2px dashed #27C2DE' }};">
+                </div>
+                @endif
+
             </div>
 
-            {{-- Garis ke kanan (kecuali step terakhir) --}}
-            @if(!$isLast)
-            <div class="absolute z-0"
-                 style="left: calc(50% + 28px);
-                        right: calc(-50% + 28px);
-                        top: 50%;
-                        transform: translateY(-50%);
-                        height: 2px;
-                        background: {{ $lineIsDone ? '#27C2DE' : 'transparent' }};
-                        border-top: {{ $lineIsDone ? 'none' : '2px dashed #27C2DE' }};">
-            </div>
-            @endif
+            {{-- Label --}}
+            <p class="text-center font-semibold leading-tight mt-1"
+               style="font-size: clamp(9px, 1vw, 11px);
+                      color: {{ $isActive || $isDone ? '#27C2DE' : '#94a3b8' }};">
+                {{ $step['label'] }}
+            </p>
+
+            {{-- Badge --}}
+            <span class="px-2 py-0.5 rounded-full font-medium mt-0.5"
+                  style="font-size: clamp(8px, 0.8vw, 10px);
+                         background: {{ $isDone ? '#DCFCE7' : ($isActive ? '#E0F7FC' : '#EEF2F7') }};
+                         color: {{ $isDone ? '#16a34a' : ($isActive ? '#0891b2' : '#94a3b8') }};">
+                {{ $isDone ? 'Selesai' : ($isActive ? 'Proses' : 'Belum') }}
+            </span>
 
         </div>
-
-        {{-- Label --}}
-        <p class="text-center text-[11px] font-semibold leading-tight"
-           style="color: {{ $isActive || $isDone ? '#27C2DE' : '#94a3b8' }};">
-            {{ $step['label'] }}
-        </p>
-
-        {{-- Badge --}}
-        <span class="text-[9px] px-2 py-0.5 rounded-full font-medium"
-              style="background: {{ $isDone ? '#DCFCE7' : ($isActive ? '#E0F7FC' : '#EEF2F7') }};
-                     color: {{ $isDone ? '#16a34a' : ($isActive ? '#0891b2' : '#94a3b8') }};">
-            {{ $isDone ? 'Selesai' : ($isActive ? 'Proses' : 'Belum') }}
-        </span>
+        @endforeach
 
     </div>
-    @endforeach
-
 </div>
