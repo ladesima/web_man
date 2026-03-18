@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\PpdbUser;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
+use App\Models\Pendaftaran;
 
 class AuthPpdbController extends Controller
 {
@@ -33,11 +34,13 @@ class AuthPpdbController extends Controller
 
     public function login(Request $request)
     {
+        // ✅ VALIDASI
         $request->validate([
             'nisn' => 'required|digits:10',
             'password' => 'required'
         ]);
 
+        // 🔍 CEK USER
         $user = PpdbUser::where('nisn', $request->nisn)->first();
 
         if (!$user || !Hash::check($request->password, $user->password)) {
@@ -46,26 +49,43 @@ class AuthPpdbController extends Controller
             ]);
         }
 
-        // Simpan session login
+        // 🔐 REGENERATE SESSION
         $request->session()->regenerate();
 
+        // 💾 SIMPAN SESSION
         session([
             'ppdb_user_id' => $user->id,
             'nama' => $user->nama
         ]);
 
-        // Ambil jalur yang dipilih sebelumnya
+        // 🔥 CEK DATA PENDAFTARAN
+        $pendaftaran = Pendaftaran::where('user_id', $user->id)->first();
+
+        if ($pendaftaran) {
+
+            // 🔒 SUDAH FINAL → VERIFIKASI
+            if ($pendaftaran->status === 'verifikasi') {
+                return redirect()->route('siswa.verifikasi', $pendaftaran->jalur);
+            }
+
+            // 🟡 SUDAH ISI FORM → LANJUT UPLOAD
+            if ($pendaftaran->status === 'form_selesai') {
+                return redirect()->route('siswa.upload.berkas', $pendaftaran->jalur);
+            }
+
+            // 🔄 fallback aman
+            return redirect()->route('ppdb.dashboard');
+        }
+
+        // 🔥 JIKA BELUM PERNAH DAFTAR → CEK JALUR
         $jalur = session('jalur_daftar');
 
         if ($jalur) {
-
-            // Hapus session jalur setelah digunakan
             session()->forget('jalur_daftar');
-
             return redirect("/siswa/pendaftaran/$jalur");
         }
 
-        // Jika login tanpa memilih jalur
+        // 🔵 DEFAULT
         return redirect()->route('ppdb.dashboard');
     }
 }
