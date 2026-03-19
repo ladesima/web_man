@@ -26,6 +26,7 @@ class Pendaftaran extends Model
         'rapor',
         'verifikasi_pd',
         'sertifikat_prestasi',
-        'sk_sekolah'
+        'sk_sekolah',
+        'last_step'
     ];
 }

@@ -1,5 +1,6 @@
 <?php
 
+use App\Models\PpdbUser;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Session;
 use App\Http\Controllers\Ppdb\CekNisnController;
@@ -7,6 +8,9 @@ use App\Http\Controllers\Ppdb\AuthPpdbController;
 use App\Http\Controllers\Ppdb\LandingPpdbController;
 use App\Http\Controllers\Ppdb\PendaftaranController;
 use App\Http\Controllers\Ppdb\UploadBerkasController;
+use App\Http\Controllers\Auth\AdminAuthController;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 
 /*
 |--------------------------------------------------------------------------
@@ -14,6 +18,38 @@ use App\Http\Controllers\Ppdb\UploadBerkasController;
 |--------------------------------------------------------------------------
 */
 Route::view('/', 'website.ppdb.landing')->name('beranda');
+
+/*
+|--------------------------------------------------------------------------
+| EMAIL VERIFICATION (PPDB)
+|--------------------------------------------------------------------------
+*/
+Route::get('/email/verify', function () {
+    return view('ppdb.auth.verify-email');
+})->name('verification.notice');
+
+Route::get('/email/verify/{id}/{hash}', function ($id, $hash) {
+
+    $user = PpdbUser::findOrFail($id);
+
+    if (!hash_equals(sha1($user->getEmailForVerification()), $hash)) {
+        abort(403);
+    }
+
+    if (!$user->hasVerifiedEmail()) {
+        $user->markEmailAsVerified();
+    }
+
+    Auth::guard('ppdb')->login($user);
+
+    return redirect()->route('ppdb.dashboard');
+
+})->middleware(['signed'])->name('verification.verify');
+
+Route::post('/email/verification-notification', function (Request $request) {
+    $request->user('ppdb')->sendEmailVerificationNotification();
+    return back()->with('message', 'Link verifikasi dikirim ulang!');
+})->middleware(['auth:ppdb', 'throttle:6,1'])->name('verification.send');
 
 /*
 |--------------------------------------------------------------------------
@@ -43,11 +79,11 @@ Route::get('/ppdb/pilih/{jalur}', function ($jalur) {
 Route::get('/ppdb/dashboard', [
     LandingPpdbController::class,
     'index'
-])->name('ppdb.dashboard');
+])->middleware(['auth:ppdb'])->name('ppdb.dashboard');
 
 /*
 |--------------------------------------------------------------------------
-| UPLOAD BERKAS (CONTROLLER)
+| UPLOAD BERKAS
 |--------------------------------------------------------------------------
 */
 Route::get('/siswa/upload-berkas/{jalur}', [
@@ -62,12 +98,11 @@ Route::post('/siswa/upload-berkas/{jalur}', [
 
 /*
 |--------------------------------------------------------------------------
-| PPDB (PUBLIC PAGES + AUTH)
+| PPDB (PUBLIC + AUTH)
 |--------------------------------------------------------------------------
 */
 Route::prefix('ppdb')->group(function () {
 
-    // Landing & Info
     Route::view('/', 'website.ppdb.landing')->name('ppdb.landing');
     Route::view('/informasi', 'website.ppdb.informasi')->name('ppdb.informasi');
     Route::view('/alur', 'website.ppdb.alur')->name('ppdb.alur');
@@ -76,17 +111,14 @@ Route::prefix('ppdb')->group(function () {
     Route::view('/tutorial', 'website.ppdb.tutorial')->name('ppdb.tutorial');
     Route::view('/pengumuman', 'website.ppdb.pengumuman')->name('ppdb.pengumuman');
 
-    // Jalur
     Route::get('/jalur/{slug}', function ($slug) {
         $allowed = ['prestasi', 'reguler', 'afirmasi'];
         if (!in_array($slug, $allowed)) abort(404);
         return view('website.ppdb.jalur', compact('slug'));
     })->name('ppdb.jalur');
 
-    // Auth
-    Route::get('/login', function () {
-        return view('ppdb.auth.login');
-    })->name('ppdb.login');
+    // AUTH SISWA
+    Route::get('/login', fn() => view('ppdb.auth.login'))->name('ppdb.login');
 
     Route::post('/login', [
         AuthPpdbController::class,
@@ -96,10 +128,6 @@ Route::prefix('ppdb')->group(function () {
     Route::view('/daftar', 'ppdb.auth.registrasi')->name('ppdb.daftar');
     Route::view('/daftar/step2', 'ppdb.auth.registrasi2')->name('ppdb.daftar.step2');
     Route::view('/lupa-password', 'ppdb.auth.lupa-password')->name('ppdb.lupa-password');
-
-    Route::post('/daftar/step2', function () {
-        return redirect()->route('siswa.dashboard');
-    })->name('ppdb.daftar.step2.post');
 
     Route::post('/register', [
         AuthPpdbController::class,
@@ -114,58 +142,89 @@ Route::prefix('ppdb')->group(function () {
 
 /*
 |--------------------------------------------------------------------------
-| SISWA (DASHBOARD & FLOW)
+| SISWA (PROTECTED)
 |--------------------------------------------------------------------------
 */
-Route::prefix('siswa')->group(function () {
+Route::prefix('siswa')
+    ->middleware(['auth:ppdb', 'ppdb.step'])
+    ->group(function () {
 
     // Dashboard
     Route::view('/dashboard', 'ppdb.dashboard.beranda')->name('siswa.dashboard');
 
-    // Form Pendaftaran
+    // ========================
+    // FORM PENDAFTARAN
+    // ========================
     Route::get('/pendaftaran/{jalur}', function ($jalur) {
+
         $allowed = ['prestasi', 'reguler', 'afirmasi'];
         if (!in_array($jalur, $allowed)) abort(404);
+
         return view('ppdb.pendaftaran.isi-formulir', compact('jalur'));
+
     })->name('siswa.pendaftaran');
 
-    // Berkas (view only)
-    Route::get('/berkas/{jalur}', function ($jalur) {
-        return view('ppdb.berkas.index', compact('jalur'));
-    })->name('siswa.berkas');
+    // ========================
+    // UPLOAD BERKAS
+    // ========================
+    Route::get('/upload-berkas/{jalur}', function ($jalur) {
 
-    // Verifikasi
+        $allowed = ['prestasi', 'reguler', 'afirmasi'];
+        if (!in_array($jalur, $allowed)) abort(404);
+
+        return view('ppdb.berkas.index', compact('jalur'));
+
+    })->name('siswa.upload.berkas');
+
+    // ========================
+    // VERIFIKASI
+    // ========================
     Route::get('/verifikasi/{jalur}', function ($jalur) {
+
+        $allowed = ['prestasi', 'reguler', 'afirmasi'];
+        if (!in_array($jalur, $allowed)) abort(404);
+
         return view('ppdb.dashboard.status', compact('jalur'));
+
     })->name('siswa.verifikasi');
 
-    // Pengumuman
+    // ========================
+    // PENGUMUMAN
+    // ========================
     Route::get('/pengumuman/{jalur}', function ($jalur) {
+
+        $allowed = ['prestasi', 'reguler', 'afirmasi'];
+        if (!in_array($jalur, $allowed)) abort(404);
+
         return view('ppdb.pengumuman.index', compact('jalur'));
+
     })->name('siswa.pengumuman');
 
-    // Daftar Ulang
+    // ========================
+    // DAFTAR ULANG
+    // ========================
     Route::get('/daftar-ulang/{jalur}', function ($jalur) {
+
+        $allowed = ['prestasi', 'reguler', 'afirmasi'];
+        if (!in_array($jalur, $allowed)) abort(404);
+
         return view('ppdb.daftar-ulang.index', compact('jalur'));
+
     })->name('siswa.daftar-ulang');
 
     Route::post('/daftar-ulang/{jalur}', function ($jalur) {
         return redirect()->route('siswa.dashboard');
     })->name('siswa.daftar-ulang.post');
+
 });
 
 /*
 |--------------------------------------------------------------------------
-| AUTH ADMIN & PANITIA
+| ADMIN AUTH
 |--------------------------------------------------------------------------
 */
-Route::get('/login', function () {
-    return view('auth.login');
-})->name('login');
-
-Route::post('/login', function () {
-    // logic login nanti diisi controller
-})->name('login.post');
+Route::get('/login', [AdminAuthController::class, 'showLogin'])->name('login');
+Route::post('/login', [AdminAuthController::class, 'login'])->name('login.post');
 
 Route::post('/logout', function () {
     auth()->logout();
@@ -179,43 +238,26 @@ Route::post('/logout', function () {
 | ADMIN
 |--------------------------------------------------------------------------
 */
-Route::prefix('admin')->group(function () {
+Route::prefix('admin')->middleware(['auth'])->group(function () {
 
-    Route::get('/dashboard', function () {
-        return view('admin.dashboard');
-    })->name('admin.dashboard');
+    Route::view('/dashboard', 'admin.dashboard')->name('admin.dashboard');
 
-    Route::get('/master-ppdb', function () {
-        return view('admin.ppdb.master.index');
-    })->name('admin.master');
+    Route::view('/master-ppdb', 'admin.ppdb.master.index')->name('admin.master');
 
-    Route::get('/master-ppdb/{tahun}', function ($tahun) {
-        return view('admin.ppdb.master.detail', compact('tahun'));
-    })->name('admin.master.detail');
+    Route::get('/master-ppdb/{tahun}', fn($tahun) =>
+        view('admin.ppdb.master.detail', compact('tahun'))
+    )->name('admin.master.detail');
 
-    Route::get('/master-ppdb/{tahun}/tambah-syarat', function ($tahun) {
-        return view('admin.ppdb.master.tambah-syarat', compact('tahun'));
-    })->name('admin.master.tambah-syarat');
+    Route::get('/master-ppdb/{tahun}/tambah-syarat', fn($tahun) =>
+        view('admin.ppdb.master.tambah-syarat', compact('tahun'))
+    )->name('admin.master.tambah-syarat');
 
-    Route::get('/operasional/verifikasi', function () {
-        return view('admin.ppdb.operasional.verifikasi-berkas');
-    })->name('admin.operasional.verifikasi');
+    Route::view('/operasional/verifikasi', 'admin.ppdb.operasional.verifikasi-berkas')->name('admin.operasional.verifikasi');
+    Route::view('/operasional/pengumuman', 'admin.ppdb.operasional.pengumuman')->name('admin.operasional.pengumuman');
+    Route::view('/operasional/faq', 'admin.ppdb.operasional.faq')->name('admin.operasional.faq');
 
-    Route::get('/operasional/pengumuman', function () {
-        return view('admin.ppdb.operasional.pengumuman');
-    })->name('admin.operasional.pengumuman');
-
-    Route::get('/operasional/faq', function () {
-        return view('admin.ppdb.operasional.faq');
-    })->name('admin.operasional.faq');
-
-    Route::get('/manajemen/akun', function () {
-        return view('admin.ppdb.manajemen.akun-panitia');
-    })->name('admin.manajemen.akun');
-
-    Route::get('/manajemen/riwayat', function () {
-        return view('admin.ppdb.manajemen.riwayat-aktivitas');
-    })->name('admin.manajemen.riwayat');
+    Route::view('/manajemen/akun', 'admin.ppdb.manajemen.akun-panitia')->name('admin.manajemen.akun');
+    Route::view('/manajemen/riwayat', 'admin.ppdb.manajemen.riwayat-aktivitas')->name('admin.manajemen.riwayat');
 });
 
 /*
@@ -224,8 +266,5 @@ Route::prefix('admin')->group(function () {
 |--------------------------------------------------------------------------
 */
 Route::prefix('panitia')->group(function () {
-
-    Route::get('/dashboard', function () {
-        return view('panitia.dashboard');
-    })->name('panitia.dashboard');
+    Route::view('/dashboard', 'panitia.dashboard')->name('panitia.dashboard');
 });

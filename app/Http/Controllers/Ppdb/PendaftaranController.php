@@ -6,47 +6,82 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\Pendaftaran;
 use App\Models\PpdbUser;
+use Illuminate\Support\Facades\Auth;
 
 class PendaftaranController extends Controller
 {
+    /*
+    |--------------------------------------------------------------------------
+    | FORM PENDAFTARAN
+    |--------------------------------------------------------------------------
+    */
     public function index($jalur)
     {
-        $user = PpdbUser::where('id', $userId)->firstOrFail();
+        // 🔐 ambil user dari guard (FIX)
+        $user = Auth::guard('ppdb')->user();
 
-        // 🔐 Ambil data user
+        if (!$user) {
+            return redirect()->route('ppdb.login');
+        }
 
-     
+        // 🔐 cek pendaftaran
+        $pendaftaran = Pendaftaran::where('user_id', $user->id)->first();
 
-        // 🔐 Cek pendaftaran
-        $pendaftaran = Pendaftaran::where('user_id', $userId)->first();
+        /*
+        |--------------------------------------------------------------------------
+        | FLOW PROTECTION
+        |--------------------------------------------------------------------------
+        */
 
-        // 🔥 SUDAH ISI FORM → JANGAN KEMBALI
+        // 🔥 SUDAH ISI FORM → KE UPLOAD
         if ($pendaftaran && $pendaftaran->status === 'form_selesai') {
-            return redirect()->route('ppdb.dashboard');
+            return redirect()->route('siswa.upload.berkas', $pendaftaran->jalur);
+        }
+
+        // 🔥 SUDAH UPLOAD → KE VERIFIKASI
+        if ($pendaftaran && $pendaftaran->status === 'berkas_selesai') {
+            return redirect()->route('siswa.verifikasi', $pendaftaran->jalur);
         }
 
         // 🔥 SUDAH VERIFIKASI
         if ($pendaftaran && $pendaftaran->status === 'verifikasi') {
             return redirect()->route('siswa.verifikasi', $pendaftaran->jalur);
         }
-dd($user);
+
+        // 🔥 SUDAH PENGUMUMAN
+        if ($pendaftaran && $pendaftaran->status === 'pengumuman') {
+            return redirect()->route('siswa.pengumuman', $pendaftaran->jalur);
+        }
+
         return view('ppdb.pendaftaran.index', compact('jalur', 'user'));
     }
 
 
+    /*
+    |--------------------------------------------------------------------------
+    | SIMPAN DATA FORM
+    |--------------------------------------------------------------------------
+    */
     public function store(Request $request, $jalur)
     {
-        $userId = session('ppdb_user_id');
+        // 🔐 ambil user dari guard (FIX BESAR)
+        $user = Auth::guard('ppdb')->user();
 
-        // 🔐 Ambil user (WAJIB untuk keamanan)
-        $user = PpdbUser::find($userId);
+        if (!$user) {
+            return redirect()->route('ppdb.login');
+        }
 
-        // 🔐 CEK apakah sudah pernah daftar
-        $cek = Pendaftaran::where('user_id', $userId)->first();
+        // 🔐 cek apakah sudah pernah daftar
+        $pendaftaran = Pendaftaran::where('user_id', $user->id)->first();
 
-        if ($cek) {
-            return redirect()->route('siswa.upload.berkas', $cek->jalur)
-                ->with('error', 'Anda sudah mengisi data dan tidak bisa mengubahnya');
+        /*
+        |--------------------------------------------------------------------------
+        | LOCK SYSTEM (TIDAK BISA EDIT)
+        |--------------------------------------------------------------------------
+        */
+        if ($pendaftaran && !$pendaftaran->is_revisi) {
+            return redirect()->route('siswa.upload.berkas', $pendaftaran->jalur)
+                ->with('error', 'Data sudah dikunci dan tidak bisa diubah');
         }
 
         // ✅ VALIDASI
@@ -64,8 +99,13 @@ dd($user);
             'jumlah_saudara.integer' => 'Jumlah saudara harus berupa angka'
         ]);
 
-        // 💾 SIMPAN DATA (AMAN - TIDAK DARI INPUT USER)
-        Pendaftaran::create([
+        /*
+        |--------------------------------------------------------------------------
+        | SIMPAN / UPDATE DATA
+        |--------------------------------------------------------------------------
+        */
+
+        $data = [
             'user_id' => $user->id,
             'jalur' => $jalur,
 
@@ -77,16 +117,37 @@ dd($user);
             'ttl' => $request->ttl,
             'asal_sekolah' => $request->asal_sekolah,
             'alamat' => $request->alamat,
-
             'nama_ortu' => $request->nama_ortu,
             'pekerjaan_ortu' => $request->pekerjaan_ortu,
             'penghasilan_ortu' => $request->penghasilan_ortu,
             'alamat_ortu' => $request->alamat_ortu,
             'jumlah_saudara' => $request->jumlah_saudara,
 
-            // 🔥 STATUS
-            'status' => 'form_selesai'
-        ]);
+            // 🔥 STATUS SYSTEM
+            'status' => 'form_selesai',
+            'last_step' => 'berkas'
+        ];
+
+       if ($pendaftaran) {
+
+    // 🔥 UPDATE MANUAL (ANTI FAIL)
+    foreach ($data as $key => $value) {
+        $pendaftaran->$key = $value;
+    }
+
+    $pendaftaran->save();
+
+} else {
+
+    // 🆕 CREATE + PASTIKAN TERISI
+    $pendaftaran = new Pendaftaran();
+
+    foreach ($data as $key => $value) {
+        $pendaftaran->$key = $value;
+    }
+
+    $pendaftaran->save();
+}
 
         return redirect()->route('siswa.upload.berkas', $jalur)
             ->with('success', 'Data formulir berhasil disimpan');

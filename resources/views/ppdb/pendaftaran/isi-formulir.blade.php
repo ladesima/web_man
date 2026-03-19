@@ -34,7 +34,7 @@
                     <div>
                         <label class="block text-sm mb-1.5">Nama Lengkap</label>
                        <input type="text"
-    value="{{ old('nama_lengkap', $user->nama ?? session('nama')) }}"
+    value="{{ auth('ppdb')->user()->nama }}"
     readonly
                             class="w-full px-4 py-2.5 rounded text-sm bg-gray-200 cursor-not-allowed">
                     </div>
@@ -55,7 +55,7 @@
                     <div>
                         <label class="block text-sm mb-1.5">NISN</label>
                       <input type="text"
-    value="{{ \App\Models\PpdbUser::find(session('ppdb_user_id'))->nisn }}"
+    value="{{ auth('ppdb')->user()->nisn }}"
     readonly
                             class="w-full px-4 py-2.5 rounded text-sm bg-gray-200 cursor-not-allowed">
                     </div>

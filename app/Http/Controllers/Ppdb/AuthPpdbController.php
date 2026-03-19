@@ -6,10 +6,16 @@ use App\Http\Controllers\Controller;
 use App\Models\PpdbUser;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Auth;
 use App\Models\Pendaftaran;
 
 class AuthPpdbController extends Controller
 {
+    /*
+    |----------------------------------------------------------------------
+    | REGISTER
+    |----------------------------------------------------------------------
+    */
     public function register(Request $request)
     {
         $request->validate([
@@ -19,28 +25,36 @@ class AuthPpdbController extends Controller
             'password' => 'required|min:6|confirmed'
         ]);
 
-        PpdbUser::create([
+        // ✅ SIMPAN USER (BELUM VERIFIED)
+        $user = PpdbUser::create([
             'nisn' => $request->nisn,
             'nama' => $request->nama,
             'email' => $request->email,
             'password' => Hash::make($request->password),
         ]);
 
+        // 🔥 KIRIM EMAIL VERIFIKASI
+        $user->sendEmailVerificationNotification();
+
         return redirect()
-            ->route('ppdb.login')
-            ->with('success', 'Akun berhasil dibuat, silakan login');
+            ->route('verification.notice')
+            ->with('success', 'Akun berhasil dibuat, silakan cek email untuk verifikasi.');
     }
 
-
+    /*
+    |----------------------------------------------------------------------
+    | LOGIN
+    |----------------------------------------------------------------------
+    */
     public function login(Request $request)
     {
         // ✅ VALIDASI
-        $request->validate([
+        $credentials = $request->validate([
             'nisn' => 'required|digits:10',
             'password' => 'required'
         ]);
 
-        // 🔍 CEK USER
+        // 🔍 CEK USER DULU (LEBIH AMAN)
         $user = PpdbUser::where('nisn', $request->nisn)->first();
 
         if (!$user || !Hash::check($request->password, $user->password)) {
@@ -49,43 +63,100 @@ class AuthPpdbController extends Controller
             ]);
         }
 
-        // 🔐 REGENERATE SESSION
+        // ❗ CEK EMAIL VERIFICATION (SEBELUM LOGIN)
+        if (!$user->hasVerifiedEmail()) {
+            return back()->withErrors([
+                'email' => 'Silakan verifikasi email terlebih dahulu'
+            ]);
+        }
+
+        // 🔐 LOGIN SETELAH VALID
+        Auth::guard('ppdb')->login($user);
         $request->session()->regenerate();
 
-        // 💾 SIMPAN SESSION
-        session([
-            'ppdb_user_id' => $user->id,
-            'nama' => $user->nama
-        ]);
+        /*
+        |--------------------------------------------------------------
+        | FLOW PENDAFTARAN (FINAL & TIDAK LOMPAT)
+        |--------------------------------------------------------------
+        */
 
-        // 🔥 CEK DATA PENDAFTARAN
         $pendaftaran = Pendaftaran::where('user_id', $user->id)->first();
 
-        if ($pendaftaran) {
+        // ❌ BELUM ADA DATA PENDAFTARAN
+        if (!$pendaftaran) {
 
-            // 🔒 SUDAH FINAL → VERIFIKASI
-            if ($pendaftaran->status === 'verifikasi') {
-                return redirect()->route('siswa.verifikasi', $pendaftaran->jalur);
+            $jalur = session('jalur_daftar');
+
+            if ($jalur) {
+                session()->forget('jalur_daftar');
+                return redirect()->route('siswa.pendaftaran', $jalur);
             }
 
-            // 🟡 SUDAH ISI FORM → LANJUT UPLOAD
-            if ($pendaftaran->status === 'form_selesai') {
-                return redirect()->route('siswa.upload.berkas', $pendaftaran->jalur);
-            }
-
-            // 🔄 fallback aman
             return redirect()->route('ppdb.dashboard');
         }
 
-        // 🔥 JIKA BELUM PERNAH DAFTAR → CEK JALUR
-        $jalur = session('jalur_daftar');
+        /*
+        |--------------------------------------------------------------
+        | PRIORITAS LAST STEP (AGAR TIDAK RESET FLOW)
+        |--------------------------------------------------------------
+        */
+        if (!empty($pendaftaran->last_step)) {
 
-        if ($jalur) {
-            session()->forget('jalur_daftar');
-            return redirect("/siswa/pendaftaran/$jalur");
+            switch ($pendaftaran->last_step) {
+
+                case 'form':
+                    return redirect()->route('siswa.pendaftaran', $pendaftaran->jalur);
+
+                case 'berkas':
+                    return redirect()->route('siswa.upload.berkas', $pendaftaran->jalur);
+
+                case 'verifikasi':
+                    return redirect()->route('siswa.verifikasi', $pendaftaran->jalur);
+
+                case 'pengumuman':
+                    return redirect()->route('siswa.pengumuman', $pendaftaran->jalur);
+            }
         }
 
-        // 🔵 DEFAULT
-        return redirect()->route('ppdb.dashboard');
+        /*
+        |--------------------------------------------------------------
+        | FALLBACK KE STATUS (JIKA LAST_STEP BELUM ADA)
+        |--------------------------------------------------------------
+        */
+        switch ($pendaftaran->status) {
+
+            case 'belum':
+                return redirect()->route('siswa.pendaftaran', $pendaftaran->jalur);
+
+            case 'form_selesai':
+                return redirect()->route('siswa.upload.berkas', $pendaftaran->jalur);
+
+            case 'berkas_selesai':
+                return redirect()->route('siswa.verifikasi', $pendaftaran->jalur);
+
+            case 'verifikasi':
+                return redirect()->route('siswa.verifikasi', $pendaftaran->jalur);
+
+            case 'pengumuman':
+                return redirect()->route('siswa.pengumuman', $pendaftaran->jalur);
+
+            default:
+                return redirect()->route('ppdb.dashboard');
+        }
+    }
+
+    /*
+    |----------------------------------------------------------------------
+    | LOGOUT
+    |----------------------------------------------------------------------
+    */
+    public function logout(Request $request)
+    {
+        Auth::guard('ppdb')->logout();
+
+        $request->session()->invalidate();
+        $request->session()->regenerateToken();
+
+        return redirect()->route('ppdb.login');
     }
 }
