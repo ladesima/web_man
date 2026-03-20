@@ -141,8 +141,7 @@ class UploadBerkasController extends Controller
         */
         $pendaftaran->update(array_merge($data, [
             'status' => 'berkas_selesai',
-            'last_step' => 'verifikasi',
-            'is_revisi' => false
+            'last_step' => 'verifikasi'
         ]));
 
         return redirect()

@@ -12,9 +12,9 @@ use App\Models\Pendaftaran;
 class AuthPpdbController extends Controller
 {
     /*
-    |----------------------------------------------------------------------
+    |--------------------------------------------------------------------------
     | REGISTER
-    |----------------------------------------------------------------------
+    |--------------------------------------------------------------------------
     */
     public function register(Request $request)
     {
@@ -25,7 +25,7 @@ class AuthPpdbController extends Controller
             'password' => 'required|min:6|confirmed'
         ]);
 
-        // ✅ SIMPAN USER (BELUM VERIFIED)
+        // ✅ SIMPAN USER
         $user = PpdbUser::create([
             'nisn' => $request->nisn,
             'nama' => $request->nama,
@@ -42,19 +42,19 @@ class AuthPpdbController extends Controller
     }
 
     /*
-    |----------------------------------------------------------------------
+    |--------------------------------------------------------------------------
     | LOGIN
-    |----------------------------------------------------------------------
+    |--------------------------------------------------------------------------
     */
     public function login(Request $request)
     {
         // ✅ VALIDASI
-        $credentials = $request->validate([
+        $request->validate([
             'nisn' => 'required|digits:10',
             'password' => 'required'
         ]);
 
-        // 🔍 CEK USER DULU (LEBIH AMAN)
+        // 🔍 CEK USER
         $user = PpdbUser::where('nisn', $request->nisn)->first();
 
         if (!$user || !Hash::check($request->password, $user->password)) {
@@ -63,26 +63,29 @@ class AuthPpdbController extends Controller
             ]);
         }
 
-        // ❗ CEK EMAIL VERIFICATION (SEBELUM LOGIN)
+        // ❗ CEK VERIFIKASI EMAIL
         if (!$user->hasVerifiedEmail()) {
             return back()->withErrors([
                 'email' => 'Silakan verifikasi email terlebih dahulu'
             ]);
         }
 
-        // 🔐 LOGIN SETELAH VALID
+        // 🔐 LOGIN
         Auth::guard('ppdb')->login($user);
         $request->session()->regenerate();
 
         /*
-        |--------------------------------------------------------------
-        | FLOW PENDAFTARAN (FINAL & TIDAK LOMPAT)
-        |--------------------------------------------------------------
+        |--------------------------------------------------------------------------
+        | CEK DATA PENDAFTARAN
+        |--------------------------------------------------------------------------
         */
+        $pendaftaran = Pendaftaran::where('user_id', $user->id)->latest()->first();
 
-        $pendaftaran = Pendaftaran::where('user_id', $user->id)->first();
-
-        // ❌ BELUM ADA DATA PENDAFTARAN
+        /*
+        |--------------------------------------------------------------------------
+        | JIKA BELUM PERNAH DAFTAR
+        |--------------------------------------------------------------------------
+        */
         if (!$pendaftaran) {
 
             $jalur = session('jalur_daftar');
@@ -96,9 +99,9 @@ class AuthPpdbController extends Controller
         }
 
         /*
-        |--------------------------------------------------------------
-        | PRIORITAS LAST STEP (AGAR TIDAK RESET FLOW)
-        |--------------------------------------------------------------
+        |--------------------------------------------------------------------------
+        | PRIORITAS LAST STEP (PALING PENTING)
+        |--------------------------------------------------------------------------
         */
         if (!empty($pendaftaran->last_step)) {
 
@@ -119,9 +122,9 @@ class AuthPpdbController extends Controller
         }
 
         /*
-        |--------------------------------------------------------------
-        | FALLBACK KE STATUS (JIKA LAST_STEP BELUM ADA)
-        |--------------------------------------------------------------
+        |--------------------------------------------------------------------------
+        | FALLBACK BERDASARKAN STATUS
+        |--------------------------------------------------------------------------
         */
         switch ($pendaftaran->status) {
 
@@ -134,11 +137,15 @@ class AuthPpdbController extends Controller
             case 'berkas_selesai':
                 return redirect()->route('siswa.verifikasi', $pendaftaran->jalur);
 
-            case 'verifikasi':
-                return redirect()->route('siswa.verifikasi', $pendaftaran->jalur);
+            case 'perbaikan':
+                return redirect()->route('siswa.pendaftaran', $pendaftaran->jalur);
 
-            case 'pengumuman':
+            case 'lulus':
                 return redirect()->route('siswa.pengumuman', $pendaftaran->jalur);
+
+            case 'tidak_lulus':
+                return redirect()->route('ppdb.dashboard')
+                    ->with('error', 'Anda tidak lulus, silakan daftar jalur lain');
 
             default:
                 return redirect()->route('ppdb.dashboard');
@@ -146,9 +153,9 @@ class AuthPpdbController extends Controller
     }
 
     /*
-    |----------------------------------------------------------------------
+    |--------------------------------------------------------------------------
     | LOGOUT
-    |----------------------------------------------------------------------
+    |--------------------------------------------------------------------------
     */
     public function logout(Request $request)
     {

@@ -13,14 +13,14 @@ class CheckPpdbStep
     {
         $user = Auth::guard('ppdb')->user();
 
-        // kalau belum login → biarkan middleware auth handle
+        // ❌ belum login
         if (!$user) {
             return redirect()->route('ppdb.login');
         }
 
-        $pendaftaran = Pendaftaran::where('user_id', $user->id)->first();
+        $pendaftaran = Pendaftaran::where('user_id', $user->id)->latest()->first();
 
-        // ❌ BELUM ADA DATA PENDAFTARAN
+        // ❌ belum daftar sama sekali
         if (!$pendaftaran) {
             return $next($request);
         }
@@ -29,10 +29,30 @@ class CheckPpdbStep
 
         /*
         |--------------------------------------------------------------------------
-        | RULE FLOW
+        | PRIORITAS LAST STEP (PALING AKURAT)
         |--------------------------------------------------------------------------
         */
+        if (!empty($pendaftaran->last_step)) {
 
+            $routes = [
+                'form' => 'siswa.pendaftaran',
+                'berkas' => 'siswa.upload.berkas',
+                'verifikasi' => 'siswa.verifikasi',
+                'pengumuman' => 'siswa.pengumuman',
+            ];
+
+            $targetRoute = $routes[$pendaftaran->last_step] ?? null;
+
+            if ($targetRoute && $currentRoute !== $targetRoute) {
+                return redirect()->route($targetRoute, $pendaftaran->jalur);
+            }
+        }
+
+        /*
+        |--------------------------------------------------------------------------
+        | FALLBACK STATUS (JIKA LAST_STEP KOSONG)
+        |--------------------------------------------------------------------------
+        */
         switch ($pendaftaran->status) {
 
             case 'belum':
@@ -48,11 +68,6 @@ class CheckPpdbStep
                 break;
 
             case 'berkas_selesai':
-                if ($currentRoute !== 'siswa.verifikasi') {
-                    return redirect()->route('siswa.verifikasi', $pendaftaran->jalur);
-                }
-                break;
-
             case 'verifikasi':
                 if ($currentRoute !== 'siswa.verifikasi') {
                     return redirect()->route('siswa.verifikasi', $pendaftaran->jalur);
@@ -60,10 +75,21 @@ class CheckPpdbStep
                 break;
 
             case 'pengumuman':
+            case 'lulus':
                 if ($currentRoute !== 'siswa.pengumuman') {
                     return redirect()->route('siswa.pengumuman', $pendaftaran->jalur);
                 }
                 break;
+
+            case 'perbaikan':
+                if ($currentRoute !== 'siswa.pendaftaran') {
+                    return redirect()->route('siswa.pendaftaran', $pendaftaran->jalur);
+                }
+                break;
+
+            case 'tidak_lulus':
+                return redirect()->route('ppdb.dashboard')
+                    ->with('error', 'Silakan daftar jalur lain');
         }
 
         return $next($request);
