@@ -19,6 +19,14 @@ class Pendaftaran extends Model
         'pekerjaan_ortu',
         'penghasilan_ortu',
         'alamat_ortu',
-        'jumlah_saudara'
+        'jumlah_saudara',
+        'status',
+        'akta_lahir',
+        'kartu_keluarga',
+        'rapor',
+        'verifikasi_pd',
+        'sertifikat_prestasi',
+        'sk_sekolah',
+        'last_step'
     ];
 }

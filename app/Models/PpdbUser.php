@@ -2,10 +2,14 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Model;
+use Illuminate\Contracts\Auth\MustVerifyEmail;
+use Illuminate\Foundation\Auth\User as Authenticatable;
+use Illuminate\Notifications\Notifiable;
 
-class PpdbUser extends Model
+class PpdbUser extends Authenticatable implements MustVerifyEmail
 {
+    use Notifiable;
+
     protected $table = 'ppdb_users';
 
     protected $fillable = [
@@ -13,5 +17,10 @@ class PpdbUser extends Model
         'nama',
         'email',
         'password'
+    ];
+
+    protected $hidden = [
+        'password',
+        'remember_token',
     ];
 }
