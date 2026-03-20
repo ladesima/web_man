@@ -43,7 +43,7 @@
                         onmouseover="this.style.backgroundColor='#27C2DE'"
                         onmouseout="this.style.backgroundColor='#91E9F9'"
                         onmousedown="this.style.backgroundColor='#27C2DE'">
-                    Cek NISN
+                    Mauklkan NISN
                 </button>
 
                 <p class="text-center text-xs text-slate-400">
@@ -70,7 +70,7 @@
         <img src="{{ asset('ppdb/popupnisn.svg') }}" alt="NISN" style="width:100%; display:block;">
 
        <div style="position:absolute; bottom:5%; left:0; right:0; padding:0 28px; text-align:center;">
-    <h2 style="font-size:15px; font-weight:700; color:#27C2DE; margin:0;">Data Berhasil ditemukan</h2>
+    <h2 style="font-size:15px; font-weight:700; color:#27C2DE; margin:0;">Data Berhasil disimpan</h2>
     <p id="popupNisnText" style="font-size:13px; font-weight:600; color:#2B2A28; margin:4px 0 0 0;"></p>
     <p style="font-size:11px; color:#94a3b8; margin-top:6px; line-height:1.4;">
         Jika Data Sudah Benar Silahkan Melanjutkan Registrasi

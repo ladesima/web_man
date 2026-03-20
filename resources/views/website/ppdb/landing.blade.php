@@ -538,6 +538,131 @@
     </div>
 </section>
 
+{{-- ================================================================
+     POPUP HUBUNGI KAMI
+     Taruh ini di bagian PALING BAWAH landing.blade.php,
+     tepat sebelum @endsection
+================================================================ --}}
+
+@push('styles')
+<style>
+    #popup-kontak {
+        display: none;
+        position: fixed;
+        inset: 0;
+        z-index: 9999;
+        background: rgba(0,0,0,0.45);
+        backdrop-filter: blur(2px);
+        align-items: center;
+        justify-content: center;
+    }
+    #popup-kontak.active {
+        display: flex;
+    }
+    #popup-kontak .popup-box {
+        background: white;
+        border-radius: 16px;
+        padding: 40px 48px;
+        width: 100%;
+        max-width: 520px;
+        margin: 0 16px;
+        box-shadow: 0 20px 60px rgba(0,0,0,0.2);
+        animation: popupIn 0.3s ease;
+    }
+    @keyframes popupIn {
+        from { opacity: 0; transform: scale(0.95) translateY(10px); }
+        to   { opacity: 1; transform: scale(1) translateY(0); }
+    }
+</style>
+@endpush
+
+{{-- Popup Element --}}
+<div id="popup-kontak" onclick="if(event.target===this) tutupPopupKontak()">
+    <div class="popup-box">
+
+        <h2 style="text-align:center; font-size:20px; font-weight:700; color:#2B2A28; margin-bottom:28px;">
+            Tambah Pertanyaan
+        </h2>
+
+        <form onsubmit="submitKontak(event)">
+
+            {{-- Nama --}}
+            <div style="margin-bottom:18px;">
+                <label style="display:block; font-size:13px; font-weight:600; color:#2B2A28; margin-bottom:6px;">Nama</label>
+                <input type="text" name="nama" autocomplete="off"
+                       style="width:100%; border:none; border-bottom:1.5px solid #CBD5E1; padding:8px 0; font-size:13px; color:#2B2A28; outline:none; background:transparent;"
+                       onfocus="this.style.borderBottomColor='#27C2DE'"
+                       onblur="this.style.borderBottomColor='#CBD5E1'">
+            </div>
+
+            {{-- Email --}}
+            <div style="margin-bottom:18px;">
+                <label style="display:block; font-size:13px; font-weight:600; color:#2B2A28; margin-bottom:4px;">
+                    Email
+                    <span style="font-size:11px; font-weight:400; color:#27C2DE; margin-left:4px;">
+                        *email yang anda inputkan harus bisa menerima pesan
+                    </span>
+                </label>
+                <input type="email" name="email" autocomplete="off"
+                       style="width:100%; border:none; border-bottom:1.5px solid #CBD5E1; padding:8px 0; font-size:13px; color:#2B2A28; outline:none; background:transparent;"
+                       onfocus="this.style.borderBottomColor='#27C2DE'"
+                       onblur="this.style.borderBottomColor='#CBD5E1'">
+            </div>
+
+            {{-- Kategori --}}
+            <div style="margin-bottom:18px;">
+                <label style="display:block; font-size:13px; font-weight:600; color:#2B2A28; margin-bottom:6px;">Kategori</label>
+                <div style="position:relative;">
+                    <select name="kategori"
+                            style="width:100%; border:none; border-bottom:1.5px solid #CBD5E1; padding:8px 0; font-size:13px; color:#2B2A28; outline:none; background:transparent; appearance:none; cursor:pointer;"
+                            onfocus="this.style.borderBottomColor='#27C2DE'"
+                            onblur="this.style.borderBottomColor='#CBD5E1'">
+                        <option value="" disabled selected></option>
+                        <option value="pendaftaran">Pendaftaran</option>
+                        <option value="berkas">Berkas</option>
+                        <option value="jalur_seleksi">Jalur Seleksi</option>
+                        <option value="jadwal">Jadwal</option>
+                        <option value="lainnya">Lainnya</option>
+                    </select>
+                    <svg style="position:absolute; right:4px; top:50%; transform:translateY(-50%); width:16px; height:16px; color:#94A3B8; pointer-events:none;" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+                    </svg>
+                </div>
+            </div>
+
+            {{-- Pertanyaan --}}
+            <div style="margin-bottom:28px;">
+                <label style="display:block; font-size:13px; font-weight:600; color:#2B2A28; margin-bottom:6px;">Pertanyaan</label>
+                <textarea name="pertanyaan" rows="3"
+                          style="width:100%; border:none; border-bottom:1.5px solid #CBD5E1; padding:8px 0; font-size:13px; color:#2B2A28; outline:none; background:transparent; resize:none; font-family:inherit;"
+                          onfocus="this.style.borderBottomColor='#27C2DE'"
+                          onblur="this.style.borderBottomColor='#CBD5E1'"></textarea>
+            </div>
+
+            {{-- Tombol --}}
+            <div style="display:flex; justify-content:center;">
+                <button type="submit"
+                        style="width:160px; padding:12px; background:#27C2DE; border-radius:4px; border:none; cursor:pointer; color:white; font-size:15px; font-weight:600; font-family:inherit;"
+                        onmouseenter="this.style.opacity='0.85'"
+                        onmouseleave="this.style.opacity='1'">
+                    Kirim
+                </button>
+            </div>
+
+        </form>
+    </div>
+</div>
+
+@push('scripts')
+<script>
+    function submitKontak(e) {
+        e.preventDefault();
+        tutupPopupKontak();
+        // Tambahkan logic POST ke server di sini
+    }
+</script>
+@endpush
+
 <style>
     /* Tutorial */
     .tutorial-heading {
