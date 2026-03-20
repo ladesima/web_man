@@ -306,6 +306,15 @@ Route::prefix('admin')->middleware(['auth'])->group(function () {
     )->name('admin.master.tambah-syarat');
 
     Route::view('/operasional/verifikasi', 'admin.ppdb.operasional.verifikasi-berkas')->name('admin.operasional.verifikasi');
+    Route::view('/operasional/pengumuman', 'admin.ppdb.operasional.pengumuman')
+    ->name('admin.operasional.pengumuman');
+    Route::view('/operasional/faq', 'admin.ppdb.operasional.faq')
+    ->name('admin.operasional.faq');
+    Route::view('/manajemen/akun', 'admin.ppdb.manajemen.akun-panitia')
+    ->name('admin.manajemen.akun');
+    Route::view('/manajemen/riwayat', 'admin.ppdb.manajemen.riwayat')
+    ->name('admin.manajemen.riwayat');
+
 
     // 🔥 CONTROLLER VERIFIKASI
     Route::get('/verifikasi', [\App\Http\Controllers\Admin\VerifikasiController::class, 'index'])->name('admin.verifikasi');
