@@ -9,6 +9,7 @@ use Illuminate\Http\Request;
 use App\Models\MasterPpdb;
 use App\Models\PpdbJalur;
 use App\Models\PpdbTahapan;
+use App\Models\PpdbSyarat;
 
 class MasterPpdbController extends Controller
 {
@@ -72,13 +73,14 @@ class MasterPpdbController extends Controller
     | DETAIL MASTER → LIST JALUR
     |--------------------------------------------------------------------------
     */
-    public function detail($id)
+   public function detail($id)
 {
-    $master = MasterPpdb::findOrFail($id);
+    $master = MasterPpdb::with([
+        'jalurs.tahapans',
+        'syarats' // 🔥 TAMBAH INI
+    ])->findOrFail($id);
 
-    $jalurs = \App\Models\PpdbJalur::with('tahapans')
-        ->where('master_ppdb_id', $id)
-        ->get();
+    $jalurs = $master->jalurs;
 
     return view('admin.ppdb.master.detail', compact('master', 'jalurs'));
 }
@@ -97,9 +99,13 @@ public function updateJalur(Request $request, $id)
 
     $jalur = PpdbJalur::findOrFail($id);
 
-    // 🔥 kalau aktif → nonaktifkan yang lain
-    if ($request->status == 'aktif') {
+    $isActive = $request->status == 'aktif';
+
+    // 🔥 FIX LOGIC
+    if ($isActive) {
         PpdbJalur::where('master_ppdb_id', $jalur->master_ppdb_id)
+            ->where('jalur', $request->jalur) // ✅ hanya jalur yang sama
+            ->where('id', '!=', $id) // ✅ kecuali dirinya
             ->update(['is_active' => false]);
     }
 
@@ -109,7 +115,7 @@ public function updateJalur(Request $request, $id)
         'kuota' => $request->kuota,
         'tanggal_mulai' => $request->tanggal_mulai,
         'tanggal_selesai' => $request->tanggal_selesai,
-        'is_active' => $request->status == 'aktif'
+        'is_active' => $isActive
     ]);
 
     return back()->with('success', 'Jalur berhasil diupdate');
@@ -121,37 +127,42 @@ public function updateJalur(Request $request, $id)
     |--------------------------------------------------------------------------
     */
     public function storeJalur(Request $request)
-    {
-        $request->validate([
-            'master_id' => 'required',
-            'jalur' => 'required',
-            'gelombang' => 'required',
-            'kuota' => 'required|integer'
-        ]);
+{
+    $request->validate([
+        'master_id' => 'required',
+        'jalur' => 'required',
+        'gelombang' => 'required',
+        'kuota' => 'required|integer'
+    ]);
 
-        // 🔥 jika aktif → nonaktifkan jalur lain di master yang sama
-        if ($request->status == 'aktif') {
-            PpdbJalur::where('master_ppdb_id', $request->master_id)
-                ->update(['is_active' => false]);
-        }
+    $isActive = $request->status == 'aktif';
 
-        $jalur = PpdbJalur::create([
-            'master_ppdb_id' => $request->master_id,
-            'jalur' => $request->jalur,
-            'gelombang' => $request->gelombang,
-            'kuota' => $request->kuota,
-            'tanggal_mulai' => $request->tanggal_mulai 
-    ? \Carbon\Carbon::parse($request->tanggal_mulai)->format('Y-m-d')
-    : null,
-
-'tanggal_selesai' => $request->tanggal_selesai 
-    ? \Carbon\Carbon::parse($request->tanggal_selesai)->format('Y-m-d')
-    : null,
-            'is_active' => $request->status == 'aktif'
-        ]);
-
-        return back()->with('success', 'Jalur berhasil ditambahkan');
+    // 🔥 FIX LOGIC
+    if ($isActive) {
+        PpdbJalur::where('master_ppdb_id', $request->master_id)
+            ->where('jalur', $request->jalur) // ✅ hanya jalur yang sama
+            ->update(['is_active' => false]);
     }
+
+    PpdbJalur::create([
+        'master_ppdb_id' => $request->master_id,
+        'jalur' => $request->jalur,
+        'gelombang' => $request->gelombang,
+        'kuota' => $request->kuota,
+
+        'tanggal_mulai' => $request->tanggal_mulai 
+            ? \Carbon\Carbon::parse($request->tanggal_mulai)->format('Y-m-d')
+            : null,
+
+        'tanggal_selesai' => $request->tanggal_selesai 
+            ? \Carbon\Carbon::parse($request->tanggal_selesai)->format('Y-m-d')
+            : null,
+
+        'is_active' => $isActive
+    ]);
+
+    return back()->with('success', 'Jalur berhasil ditambahkan');
+}
 
     /*
     |--------------------------------------------------------------------------

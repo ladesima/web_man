@@ -144,25 +144,35 @@
             <div class="mb-4">
                 <label class="text-[12px] font-medium">Status</label>
 
-                <div class="flex gap-2 mt-2">
+                <div class="flex gap-3" x-data="{ status: '0' }">
 
-                    <label class="cursor-pointer">
-                        <input type="radio" name="is_active" value="1" class="hidden">
-                        <span class="px-4 py-1 text-xs border rounded"
-                              style="background:#DCFCE7; color:#16A34A;">
-                            Aktif
-                        </span>
-                    </label>
+    {{-- AKTIF --}}
+    <label class="cursor-pointer">
+        <input type="radio" name="is_active" value="1" class="hidden" x-model="status">
 
-                    <label class="cursor-pointer">
-                        <input type="radio" name="is_active" value="0" class="hidden" checked>
-                        <span class="px-4 py-1 text-xs border rounded"
-                              style="background:#FEE2E2; color:#EF4444;">
-                            Tidak Aktif
-                        </span>
-                    </label>
+        <span
+            class="px-4 py-1 text-xs border rounded font-semibold transition-all duration-200"
+            :class="status === '1'
+                ? 'bg-green-100 text-green-600 border-green-600 scale-105 shadow-sm'
+                : 'bg-gray-100 text-gray-400 border-gray-200 hover:bg-green-50 hover:text-green-500 hover:border-green-400'">
+            Aktif
+        </span>
+    </label>
 
-                </div>
+    {{-- TIDAK AKTIF --}}
+    <label class="cursor-pointer">
+        <input type="radio" name="is_active" value="0" class="hidden" x-model="status">
+
+        <span
+            class="px-4 py-1 text-xs border rounded font-semibold transition-all duration-200"
+            :class="status === '0'
+                ? 'bg-red-100 text-red-500 border-red-500 scale-105 shadow-sm'
+                : 'bg-gray-100 text-gray-400 border-gray-200 hover:bg-red-50 hover:text-red-500 hover:border-red-400'">
+            Tidak Aktif
+        </span>
+    </label>
+
+</div>
             </div>
 
             {{-- GELOMBANG --}}

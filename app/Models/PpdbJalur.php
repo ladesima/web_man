@@ -20,7 +20,7 @@ class PpdbJalur extends Model
 
     public function tahapans()
     {
-        return $this->hasMany(PpdbTahapan::class, 'ppdb_jalur_id');
+        return $this->hasMany(PpdbTahapan::class, 'jalur_id');
     }
 
     public function master()

@@ -9,14 +9,22 @@ class PpdbTahapan extends Model
     protected $table = 'ppdb_tahapans';
 
     protected $fillable = [
-        'ppdb_jalur_id',
+        'jalur_id',
         'nama_tahapan',
         'tanggal_mulai',
-        'tanggal_selesai'
+        'tanggal_selesai',
     ];
 
+    protected $casts = [
+    'tanggal_mulai' => 'date:d M Y',
+    'tanggal_selesai' => 'date:d M Y',
+];
+
+    /**
+     * Relasi ke Jalur
+     */
     public function jalur()
     {
-        return $this->belongsTo(PpdbJalur::class, 'ppdb_jalur_id');
+        return $this->belongsTo(PpdbJalur::class, 'jalur_id');
     }
 }
