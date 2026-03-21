@@ -11,6 +11,8 @@
     showHapus: false,
     statusForm: 'aktif',
     statusEdit: 'aktif',
+    deleteId: null,
+    editData: {}
 }">
 
     {{-- ============================= --}}
@@ -42,47 +44,91 @@
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-slate-100">
-                    @php
-                    $jalurs = [
-                        ['jalur' => 'Prestasi', 'status' => 'aktif',       'gelombang' => 'I',  'kuota' => 300, 'jadwal' => '1 Mei – 15 Mei 2026'],
-                        ['jalur' => 'Prestasi', 'status' => 'tidak_aktif', 'gelombang' => 'II', 'kuota' => 300, 'jadwal' => '1 Jun – 15 Jun 2026'],
-                        ['jalur' => 'Regular',  'status' => 'tidak_aktif', 'gelombang' => 'I',  'kuota' => 300, 'jadwal' => '1 Mei – 15 Mei 2026'],
-                        ['jalur' => 'Regular',  'status' => 'tidak_aktif', 'gelombang' => 'II', 'kuota' => 300, 'jadwal' => '1 Jun – 15 Jun 2026'],
-                    ];
-                    @endphp
                     @foreach($jalurs as $j)
-                    <tr class="hover:bg-slate-50 transition-all">
-                        <td class="text-center py-4 px-6 text-[13px] font-medium text-[#2B2A28]">{{ $j['jalur'] }}</td>
-                        <td class="text-center py-4 px-6">
-                            @if($j['status'] === 'aktif')
-                                <span class="px-4 py-1 text-[11px] font-semibold"
-                                      style="background:#DCFCE7; color:#16A34A; border:1px solid #16A34A; border-radius:4px;">Aktif</span>
-                            @else
-                                <span class="px-4 py-1 text-[11px] font-semibold"
-                                      style="background:#FEE2E2; color:#EF4444; border:1px solid #EF4444; border-radius:4px;">Tidak Aktif</span>
-                            @endif
-                        </td>
-                        <td class="text-center py-4 px-6 text-[13px] text-[#2B2A28]">{{ $j['gelombang'] }}</td>
-                        <td class="text-center py-4 px-6 text-[13px] text-[#2B2A28]">{{ $j['kuota'] }}</td>
-                        <td class="text-center py-4 px-6 text-[12px] text-[#2B2A28]">{{ $j['jadwal'] }}</td>
-                        <td class="text-center py-4 px-6">
-                            <div class="flex items-center justify-center gap-2">
-                                <button @click="view = 'detail'; tab = 'jadwal'"
-                                        class="w-7 h-7 flex items-center justify-center">
-                                    <img src="{{ asset('ppdb/admin/detail.png') }}" alt="detail" class="w-7 h-7 object-contain">
-                                </button>
-                                <button @click="showEditJalur = true"
-                                        class="w-7 h-7 flex items-center justify-center">
-                                    <img src="{{ asset('ppdb/admin/edit.png') }}" alt="edit" class="w-7 h-7 object-contain">
-                                </button>
-                                <button @click="showHapus = true"
-                                        class="w-7 h-7 flex items-center justify-center">
-                                    <img src="{{ asset('ppdb/admin/hapus.png') }}" alt="hapus" class="w-7 h-7 object-contain">
-                                </button>
-                            </div>
-                        </td>
-                    </tr>
-                    @endforeach
+<tr class="hover:bg-slate-50 transition-all">
+
+    {{-- JALUR --}}
+    <td class="text-center py-4 px-6 text-[13px] font-medium text-[#2B2A28]">
+        {{ ucfirst($j->jalur) }}
+    </td>
+
+    {{-- STATUS --}}
+    <td class="text-center py-4 px-6">
+        @if($j->is_active)
+            <span class="px-4 py-1 text-[11px] font-semibold"
+                  style="background:#DCFCE7; color:#16A34A; border:1px solid #16A34A; border-radius:4px;">
+                Aktif
+            </span>
+        @else
+            <span class="px-4 py-1 text-[11px] font-semibold"
+                  style="background:#FEE2E2; color:#EF4444; border:1px solid #EF4444; border-radius:4px;">
+                Tidak Aktif
+            </span>
+        @endif
+    </td>
+
+    {{-- GELOMBANG --}}
+    <td class="text-center py-4 px-6 text-[13px] text-[#2B2A28]">
+        {{ $j->gelombang }}
+    </td>
+
+    {{-- KUOTA --}}
+    <td class="text-center py-4 px-6 text-[13px] text-[#2B2A28]">
+        {{ $j->kuota }}
+    </td>
+
+    {{-- JADWAL --}}
+    <td class="text-center py-4 px-6 text-[12px] text-[#2B2A28]">
+        @if($j->tanggal_mulai && $j->tanggal_selesai)
+{{ $j->tanggal_mulai }} - {{ $j->tanggal_selesai }}
+        @else
+            -
+        @endif
+    </td>
+
+    {{-- AKSI --}}
+    <td class="text-center py-4 px-6">
+        <div class="flex items-center justify-center gap-2">
+
+            {{-- DETAIL --}}
+            <button @click="view = 'detail'; tab = 'jadwal'"
+                    class="w-7 h-7 flex items-center justify-center">
+                <img src="{{ asset('ppdb/admin/detail.png') }}" class="w-7 h-7">
+            </button>
+
+            {{-- EDIT --}}
+<button 
+    @click="
+        showEditJalur = true;
+        editData = {
+            id: {{ $j->id }},
+            jalur: '{{ $j->jalur }}',
+            status: '{{ $j->is_active ? 'aktif' : 'tidak' }}',
+            gelombang: '{{ $j->gelombang }}',
+            kuota: {{ $j->kuota }},
+            tanggal_mulai: '{{ $j->tanggal_mulai }}',
+            tanggal_selesai: '{{ $j->tanggal_selesai }}'
+        };
+    "
+    class="w-7 h-7 flex items-center justify-center">
+    <img src="{{ asset('ppdb/admin/edit.png') }}" class="w-7 h-7">
+</button>
+
+            {{-- HAPUS --}}
+            <button 
+    @click="
+        showHapus = true;
+        deleteId = {{ $j->id }};
+    "
+    class="w-7 h-7 flex items-center justify-center">
+    <img src="{{ asset('ppdb/admin/hapus.png') }}" class="w-7 h-7">
+</button>
+
+        </div>
+    </td>
+
+</tr>
+@endforeach
                 </tbody>
             </table>
         </div>
@@ -169,9 +215,9 @@
         {{-- TAB PERSYARATAN --}}
         <div x-show="tab === 'persyaratan'" x-cloak>
             <div class="flex justify-end mb-4">
-                <a href="{{ route('admin.master.tambah-syarat', $tahun) }}"
-                   class="flex items-center gap-1.5 px-4 py-2 rounded-xl text-white text-[12px] font-semibold"
-                   style="background:#27C2DE;">
+                <a href="{{ route('admin.master.tambah-syarat', $master->id) }}"
+   class="flex items-center gap-1.5 px-4 py-2 rounded-xl text-white text-[12px] font-semibold"
+   style="background:#27C2DE;">
                     <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
                     </svg>
@@ -214,146 +260,246 @@
     </div>
 
     {{-- ===== MODAL TAMBAH JALUR ===== --}}
-    <div x-show="showTambahJalur" x-cloak
-         class="fixed inset-0 z-50 flex items-center justify-center"
-         style="background:rgba(0,0,0,0.35);">
-        <div @click.outside="showTambahJalur = false"
-             class="bg-white rounded-2xl p-8 w-full max-w-sm shadow-2xl" x-transition>
-            <h2 class="text-[16px] font-bold text-[#2B2A28] text-center mb-6">Tambah Jalur</h2>
-            <div class="space-y-4">
-                <div>
-                    <label class="block text-[12px] font-medium text-[#2B2A28] mb-1.5">Jalur</label>
-                    <input type="text" class="w-full rounded-lg px-3 py-2.5 text-[13px] border-0 focus:outline-none focus:ring-2 focus:ring-[#27C2DE]" style="background:#F5F7FF;">
-                </div>
-                <div>
-                    <label class="block text-[12px] font-medium text-[#2B2A28] mb-1.5">Status</label>
-                    <div class="flex gap-2">
-                        <button type="button" @click="statusForm = 'aktif'"
-                                :style="statusForm === 'aktif' ? 'background:#DCFCE7; color:#16A34A; border:1px solid #16A34A;' : 'background:#F5F7FF; color:#aaa; border:1px solid #e2e8f0;'"
-                                style="border-radius:4px;" class="px-5 py-1.5 text-[12px] font-semibold transition-all">Aktif</button>
-                        <button type="button" @click="statusForm = 'tidak'"
-                                :style="statusForm === 'tidak' ? 'background:#FEE2E2; color:#EF4444; border:1px solid #EF4444;' : 'background:#F5F7FF; color:#aaa; border:1px solid #e2e8f0;'"
-                                style="border-radius:4px;" class="px-5 py-1.5 text-[12px] font-semibold transition-all">Tidak Aktif</button>
-                    </div>
-                </div>
-                <div>
-                    <label class="block text-[12px] font-medium text-[#2B2A28] mb-1.5">Gelombang</label>
-                    <div class="relative">
-                        <select class="w-full appearance-none rounded-lg px-3 py-2.5 text-[13px] border-0 focus:outline-none focus:ring-2 focus:ring-[#27C2DE]" style="background:#F5F7FF;">
-                            <option value=""></option>
-                            <option>I</option>
-                            <option>II</option>
-                        </select>
-                        <svg class="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
-                        </svg>
-                    </div>
-                </div>
-                <div>
-                    <label class="block text-[12px] font-medium text-[#2B2A28] mb-1.5">Kuota</label>
-                    <input type="number" class="w-full rounded-lg px-3 py-2.5 text-[13px] border-0 focus:outline-none focus:ring-2 focus:ring-[#27C2DE]" style="background:#F5F7FF;">
-                </div>
-                <div>
-                    <label class="block text-[12px] font-medium text-[#2B2A28] mb-1.5">Jadwal</label>
-                    <div class="relative">
-                        <input type="text" placeholder="Pilih tanggal"
-                               class="w-full rounded-lg px-3 py-2.5 pr-10 text-[13px] border-0 focus:outline-none focus:ring-2 focus:ring-[#27C2DE]" style="background:#F5F7FF;">
-                        <svg class="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
-                        </svg>
-                    </div>
-                </div>
-                <div class="flex justify-center pt-2">
-                    <button class="px-10 py-2.5 rounded-xl text-white text-[13px] font-semibold" style="background:#27C2DE;">Simpan</button>
-                </div>
+    <form method="POST" action="{{ route('admin.jalur.store') }}">
+@csrf
+<input type="hidden" name="master_id" value="{{ $master->id }}">
+
+<div x-show="showTambahJalur" x-cloak
+     class="fixed inset-0 z-50 flex items-center justify-center"
+     style="background:rgba(0,0,0,0.35);">
+
+    <div @click.outside="showTambahJalur = false"
+         class="bg-white rounded-2xl p-8 w-full max-w-md shadow-2xl">
+
+        {{-- TITLE --}}
+        <h2 class="text-center text-[18px] font-semibold text-[#2B2A28] mb-6">
+            Tambah Jalur
+        </h2>
+
+        {{-- JALUR --}}
+        <div class="mb-5">
+            <label class="text-[13px] text-[#2B2A28]">Jalur</label>
+            <select name="jalur"
+                    class="w-full mt-1 px-4 py-3 rounded-xl text-[13px] outline-none"
+                    style="background:#F4F6FB;">
+                <option value="prestasi">Prestasi</option>
+                <option value="reguler">Reguler</option>
+                <option value="afirmasi">Afirmasi</option>
+            </select>
+        </div>
+
+        {{-- STATUS --}}
+        <div class="mb-5">
+            <label class="text-[13px] text-[#2B2A28]">Status</label>
+
+            <div class="flex gap-3 mt-2">
+
+                {{-- AKTIF --}}
+                <label>
+                    <input type="radio" name="status" value="aktif" class="hidden" x-model="statusForm">
+                    <span :class="statusForm === 'aktif' ? 'bg-[#DCFCE7] text-green-600 border-green-600' : 'bg-[#F4F6FB] text-gray-400 border-gray-200'"
+                          class="px-4 py-1.5 text-[12px] rounded-md border font-semibold cursor-pointer">
+                        Aktif
+                    </span>
+                </label>
+
+                {{-- TIDAK AKTIF --}}
+                <label>
+                    <input type="radio" name="status" value="tidak" class="hidden" x-model="statusForm">
+                    <span :class="statusForm === 'tidak' ? 'bg-[#FEE2E2] text-red-500 border-red-500' : 'bg-[#F4F6FB] text-gray-400 border-gray-200'"
+                          class="px-4 py-1.5 text-[12px] rounded-md border font-semibold cursor-pointer">
+                        Tidak Aktif
+                    </span>
+                </label>
+
             </div>
         </div>
+
+        {{-- GELOMBANG --}}
+        <div class="mb-5">
+            <label class="text-[13px] text-[#2B2A28]">Gelombang</label>
+
+            <div class="relative mt-1">
+                <select name="gelombang"
+                        class="w-full px-4 py-3 rounded-xl text-[13px] outline-none appearance-none"
+                        style="background:#F4F6FB;">
+                    <option value="I">I</option>
+                    <option value="II">II</option>
+                    <option value="III">III</option>
+                </select>
+
+                {{-- ICON --}}
+                <svg class="absolute right-4 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400"
+                     fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-width="2" d="M19 9l-7 7-7-7"/>
+                </svg>
+            </div>
+        </div>
+
+        {{-- KUOTA --}}
+        <div class="mb-5">
+            <label class="text-[13px] text-[#2B2A28]">Kuota</label>
+            <input type="number" name="kuota"
+                   class="w-full mt-1 px-4 py-3 rounded-xl text-[13px] outline-none"
+                   style="background:#F4F6FB;">
+        </div>
+
+        {{-- JADWAL --}}
+<div class="mb-6">
+    <label class="text-[13px] text-[#2B2A28]">Jadwal</label>
+
+    <div class="grid grid-cols-2 gap-3 mt-1">
+
+        {{-- TANGGAL MULAI --}}
+        <div class="relative">
+            <input type="date" name="tanggal_mulai"
+                   class="w-full px-4 py-3 rounded-xl text-[13px] outline-none"
+                   style="background:#F4F6FB;">
+        </div>
+
+        {{-- TANGGAL SELESAI --}}
+        <div class="relative">
+            <input type="date" name="tanggal_selesai"
+                   class="w-full px-4 py-3 rounded-xl text-[13px] outline-none"
+                   style="background:#F4F6FB;">
+        </div>
+
     </div>
+</div>
+
+        {{-- BUTTON --}}
+        <div class="text-center">
+            <button type="submit"
+                    class="px-10 py-2.5 rounded-xl text-white text-[13px] font-semibold hover:opacity-90 transition"
+                    style="background:#27C2DE;">
+                Simpan
+            </button>
+        </div>
+
+    </div>
+</div>
+</form>
+
 
     {{-- ===== MODAL EDIT JALUR ===== --}}
-    <div x-show="showEditJalur" x-cloak
-         class="fixed inset-0 z-50 flex items-center justify-center"
-         style="background:rgba(0,0,0,0.35);">
-        <div @click.outside="showEditJalur = false"
-             class="bg-white rounded-2xl p-8 w-full max-w-sm shadow-2xl" x-transition>
-            <h2 class="text-[16px] font-bold text-[#2B2A28] text-center mb-6">Edit Jalur</h2>
-            <div class="space-y-4">
-                <div>
-                    <label class="block text-[12px] font-medium text-[#2B2A28] mb-1.5">Jalur</label>
-                    <input type="text" value="Prestasi" class="w-full rounded-lg px-3 py-2.5 text-[13px] border-0 focus:outline-none focus:ring-2 focus:ring-[#27C2DE]" style="background:#F5F7FF;">
-                </div>
-                <div>
-                    <label class="block text-[12px] font-medium text-[#2B2A28] mb-1.5">Status</label>
-                    <div class="flex gap-2">
-                        <button type="button" @click="statusEdit = 'aktif'"
-                                :style="statusEdit === 'aktif' ? 'background:#DCFCE7; color:#16A34A; border:1px solid #16A34A;' : 'background:#F5F7FF; color:#aaa; border:1px solid #e2e8f0;'"
-                                style="border-radius:4px;" class="px-5 py-1.5 text-[12px] font-semibold transition-all">Aktif</button>
-                        <button type="button" @click="statusEdit = 'tidak'"
-                                :style="statusEdit === 'tidak' ? 'background:#FEE2E2; color:#EF4444; border:1px solid #EF4444;' : 'background:#F5F7FF; color:#aaa; border:1px solid #e2e8f0;'"
-                                style="border-radius:4px;" class="px-5 py-1.5 text-[12px] font-semibold transition-all">Tidak Aktif</button>
-                    </div>
-                </div>
-                <div>
-                    <label class="block text-[12px] font-medium text-[#2B2A28] mb-1.5">Gelombang</label>
-                    <div class="relative">
-                        <select class="w-full appearance-none rounded-lg px-3 py-2.5 text-[13px] border-0 focus:outline-none focus:ring-2 focus:ring-[#27C2DE]" style="background:#F5F7FF;">
-                            <option selected>I</option>
-                            <option>II</option>
-                        </select>
-                        <svg class="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
-                        </svg>
-                    </div>
-                </div>
-                <div>
-                    <label class="block text-[12px] font-medium text-[#2B2A28] mb-1.5">Kuota</label>
-                    <input type="number" value="300" class="w-full rounded-lg px-3 py-2.5 text-[13px] border-0 focus:outline-none focus:ring-2 focus:ring-[#27C2DE]" style="background:#F5F7FF;">
-                </div>
-                <div>
-                    <label class="block text-[12px] font-medium text-[#2B2A28] mb-1.5">Jadwal</label>
-                    <div class="relative">
-                        <input type="text" value="1 Mei- 15 Mei 2026"
-                               class="w-full rounded-lg px-3 py-2.5 pr-10 text-[13px] border-0 focus:outline-none focus:ring-2 focus:ring-[#27C2DE]" style="background:#F5F7FF;">
-                        <svg class="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
-                        </svg>
-                    </div>
-                </div>
-                <div class="flex justify-center pt-2">
-                    <button class="px-10 py-2.5 rounded-xl text-white text-[13px] font-semibold" style="background:#27C2DE;">Simpan</button>
-                </div>
-            </div>
-        </div>
-    </div>
+    <form method="POST" x-ref="formEdit">
+    @csrf
+    @method('PUT')
 
-    {{-- ===== MODAL HAPUS ===== --}}
-    <div x-show="showHapus" x-cloak
-         class="fixed inset-0 z-50 flex items-center justify-center"
-         style="background:rgba(0,0,0,0.35);">
-        <div @click.outside="showHapus = false"
-             class="relative w-full max-w-sm" x-transition>
-            {{-- Gambar sebagai background --}}
-            <img src="{{ asset('ppdb/admin/delate.png') }}" alt="" class="w-full">
-            {{-- Teks & button di atas gambar --}}
-            <div class="absolute bottom-0 left-0 right-0 pb-8 px-8 text-center">
-                <h3 class="text-[15px] font-bold text-[#2B2A28] mb-2">
-                    Apa anda yakin ingin menghapus data ini?
-                </h3>
-                <p class="text-[12px] text-slate-400 mb-5">
-                    Tindakan ini tidak dapat dibatalkan dan data akan dihapus secara permanen.
-                </p>
-                <div class="flex gap-3 justify-center">
-                    <button @click="showHapus = false"
-                            class="px-6 py-2 rounded-xl border border-slate-300 text-[13px] font-semibold text-slate-600 hover:bg-slate-50 transition-all">
-                        Batal
-                    </button>
-                    <button class="px-6 py-2 rounded-xl text-white text-[13px] font-semibold bg-red-500 hover:bg-red-600 transition-all">
-                        Ya, Hapus
-                    </button>
-                </div>
+<div x-show="showEditJalur" x-cloak
+     class="fixed inset-0 z-50 flex items-center justify-center"
+     style="background:rgba(0,0,0,0.35);">
+
+    <div @click.outside="showEditJalur = false"
+         class="bg-white rounded-2xl p-8 w-full max-w-md shadow-2xl">
+
+        <h2 class="text-center text-[18px] font-semibold mb-6">Edit Jalur</h2>
+
+        {{-- JALUR --}}
+        <select name="jalur" x-model="editData.jalur"
+            class="w-full mb-4 px-4 py-3 rounded-xl bg-[#F4F6FB]">
+            <option value="prestasi">Prestasi</option>
+            <option value="reguler">Reguler</option>
+            <option value="afirmasi">Afirmasi</option>
+        </select>
+
+        {{-- STATUS --}}
+        <div class="flex gap-3 mb-4">
+            <label>
+                <input type="radio" name="status" value="aktif" x-model="editData.status" hidden>
+                <span class="px-4 py-1 border rounded">Aktif</span>
+            </label>
+
+            <label>
+                <input type="radio" name="status" value="tidak" x-model="editData.status" hidden>
+                <span class="px-4 py-1 border rounded">Tidak</span>
+            </label>
+        </div>
+
+        {{-- GELOMBANG --}}
+        <select name="gelombang" x-model="editData.gelombang"
+            class="w-full mb-4 px-4 py-3 rounded-xl bg-[#F4F6FB]">
+            <option>I</option>
+            <option>II</option>
+            <option>III</option>
+        </select>
+
+        {{-- KUOTA --}}
+        <input type="number" name="kuota" x-model="editData.kuota"
+            class="w-full mb-4 px-4 py-3 rounded-xl bg-[#F4F6FB]">
+
+        {{-- TANGGAL --}}
+        <div class="grid grid-cols-2 gap-3 mb-4">
+            <input type="date" name="tanggal_mulai" x-model="editData.tanggal_mulai"
+                class="px-4 py-3 rounded-xl bg-[#F4F6FB]">
+
+            <input type="date" name="tanggal_selesai" x-model="editData.tanggal_selesai"
+                class="px-4 py-3 rounded-xl bg-[#F4F6FB]">
+        </div>
+
+        <div class="text-center">
+            <button type="button"
+    @click="
+        $refs.formEdit.action = '/admin/jalur/' + editData.id;
+        $refs.formEdit.submit();
+    "
+    class="px-10 py-2 bg-[#27C2DE] text-white rounded-xl">
+    Simpan
+</button>
+        </div>
+
+    </div>
+</div>
+</form>
+
+    {{-- ===== MODAL HAPUS JALUR ===== --}}
+    <form method="POST" x-ref="formDelete">
+    @csrf
+    @method('DELETE')
+
+<div x-show="showHapus" x-cloak
+     class="fixed inset-0 z-50 flex items-center justify-center"
+     style="background:rgba(0,0,0,0.35);">
+
+    <div @click.outside="showHapus = false"
+         class="relative w-full max-w-sm" x-transition>
+
+        <img src="{{ asset('ppdb/admin/delate.png') }}" alt="" class="w-full">
+
+        <div class="absolute bottom-0 left-0 right-0 pb-8 px-8 text-center">
+
+            <h3 class="text-[15px] font-bold text-[#2B2A28] mb-2">
+                Apa anda yakin ingin menghapus data ini?
+            </h3>
+
+            <p class="text-[12px] text-slate-400 mb-5">
+                Tindakan ini tidak dapat dibatalkan dan data akan dihapus secara permanen.
+            </p>
+
+            <div class="flex gap-3 justify-center">
+
+                <button type="button"
+                        @click="showHapus = false"
+                        class="px-6 py-2 rounded-xl border border-slate-300 text-[13px] font-semibold text-slate-600 hover:bg-slate-50 transition-all">
+                    Batal
+                </button>
+
+                {{-- 🔥 FIX UTAMA --}}
+                <button type="button"
+                        @click="
+                            $refs.formDelete.action = '/admin/jalur/' + deleteId;
+                            $refs.formDelete.submit();
+                        "
+                        class="px-6 py-2 rounded-xl text-white text-[13px] font-semibold bg-red-500 hover:bg-red-600 transition-all">
+                    Ya, Hapus
+                </button>
+
             </div>
         </div>
+
     </div>
+</div>
+</form>
 
 </div>
 @endsection
