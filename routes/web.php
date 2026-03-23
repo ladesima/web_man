@@ -11,6 +11,9 @@ use App\Http\Controllers\Ppdb\UploadBerkasController;
 use App\Http\Controllers\Auth\AdminAuthController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use App\Http\Controllers\Admin\Ppdb\MasterPpdbController;
+use App\Http\Controllers\Admin\Ppdb\TahapanController;
+use App\Http\Controllers\Admin\Ppdb\PpdbSyaratController;
 
 /*
 |--------------------------------------------------------------------------
@@ -295,15 +298,34 @@ Route::prefix('admin')->middleware(['auth'])->group(function () {
 
     Route::view('/dashboard', 'admin.dashboard')->name('admin.dashboard');
 
-    Route::view('/master-ppdb', 'admin.ppdb.master.index')->name('admin.master');
+    Route::get('/master-ppdb', [MasterPpdbController::class, 'index'])
+        ->name('admin.master');
 
-    Route::get('/master-ppdb/{tahun}', fn($tahun) =>
-        view('admin.ppdb.master.detail', compact('tahun'))
-    )->name('admin.master.detail');
+    Route::post('/master-ppdb/store', [MasterPpdbController::class, 'store'])
+        ->name('admin.master.store');
+
+    Route::post('/master-ppdb/activate/{id}', [MasterPpdbController::class, 'activate'])
+        ->name('admin.master.activate');
+
+    Route::get('/master-ppdb/{id}', [MasterPpdbController::class, 'detail'])
+    ->name('admin.master.detail');
+
+    Route::post('/jalur/store', [MasterPpdbController::class, 'storeJalur'])
+    ->name('admin.jalur.store');
+    Route::put('/jalur/{id}', [MasterPpdbController::class, 'updateJalur'])->name('admin.jalur.update');
+    Route::delete('/jalur/{id}', [MasterPpdbController::class, 'deleteJalur'])->name('admin.jalur.delete');
+    
+    Route::post('/tahapan', [TahapanController::class, 'store'])->name('admin.tahapan.store');
+    Route::put('/tahapan/{id}', [TahapanController::class, 'update'])->name('admin.tahapan.update');
+    Route::delete('/tahapan/{id}', [TahapanController::class, 'destroy'])->name('admin.tahapan.delete');
+
 
     Route::get('/master-ppdb/{tahun}/tambah-syarat', fn($tahun) =>
         view('admin.ppdb.master.tambah-syarat', compact('tahun'))
     )->name('admin.master.tambah-syarat');
+    Route::post('/syarat', [PpdbSyaratController::class, 'store'])->name('admin.syarat.store');
+    Route::put('/syarat/{id}', [PpdbSyaratController::class, 'update'])->name('admin.syarat.update');
+    Route::delete('/syarat/{id}', [PpdbSyaratController::class, 'destroy'])->name('admin.syarat.delete');
 
     Route::view('/operasional/verifikasi', 'admin.ppdb.operasional.verifikasi-berkas')->name('admin.operasional.verifikasi');
     Route::view('/operasional/pengumuman', 'admin.ppdb.operasional.pengumuman')
@@ -314,6 +336,7 @@ Route::prefix('admin')->middleware(['auth'])->group(function () {
     ->name('admin.manajemen.akun');
     Route::view('/manajemen/riwayat', 'admin.ppdb.manajemen.riwayat')
     ->name('admin.manajemen.riwayat');
+
 
 
     // 🔥 CONTROLLER VERIFIKASI
