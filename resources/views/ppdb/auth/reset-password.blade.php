@@ -5,6 +5,23 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Kata Sandi Baru - PPDB MAN Jeneponto</title>
     @vite(['resources/css/app.css', 'resources/js/app.js'])
+    <script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
+    <style>
+        [x-cloak] { display: none !important; }
+
+        /* Sembunyikan tombol mata bawaan browser (Edge/Chrome) */
+        input[type="password"]::-ms-reveal,
+        input[type="password"]::-ms-clear {
+            display: none !important;
+        }
+        input::-webkit-credentials-auto-fill-button {
+            visibility: hidden;
+            pointer-events: none;
+        }
+        input[type="password"] {
+            -moz-appearance: none;
+        }
+    </style>
 </head>
 <body class="min-h-screen flex items-center justify-center p-4 relative overflow-hidden">
 
@@ -13,7 +30,8 @@
         <div class="absolute inset-0 bg-white/10 backdrop-blur-[2px]"></div>
     </div>
 
-    <div class="relative z-10 w-full max-w-4xl bg-white rounded-3xl shadow-2xl flex px-6 pt-6 pb-8 gap-6 pr-4">
+    <div class="relative z-10 w-full max-w-4xl bg-white rounded-3xl shadow-2xl flex px-6 pt-6 pb-8 gap-6 pr-4"
+         x-data="{ showSuccess: {{ session('password_updated') ? 'true' : 'false' }} }">
 
         {{-- Form Section --}}
         <div class="flex-1 flex flex-col items-center justify-center px-8 py-8">
@@ -23,20 +41,41 @@
                 Masukkan kata sandi baru Anda, dan login kembali
             </p>
 
+            {{-- Error --}}
+            @if ($errors->any())
+                <div class="w-full mb-4 p-3 rounded-lg bg-red-50 border border-red-200 text-xs text-red-600 text-center">
+                    {{ $errors->first() }}
+                </div>
+            @endif
+
             <form method="POST" action="{{ route('ppdb.reset-password.post') }}" class="w-full space-y-4"
-                  x-data="{ showPass: false, showConfirm: false }">
+                  x-data="{
+                      showPass: false,
+                      showConfirm: false,
+                      passVal: '',
+                      confirmVal: ''
+                  }">
                 @csrf
 
                 {{-- Password Baru --}}
                 <div>
                     <label class="block text-xs font-medium text-[#2B2A28] mb-1">Masukkan Kata Sandi</label>
                     <div class="relative">
-                        <input :type="showPass ? 'text' : 'password'" name="password"
-                               class="w-full px-3 py-2.5 pr-10 rounded bg-[#EEF2F7] border-0
-                                      focus:outline-none focus:ring-2 focus:ring-[#27C2DE] focus:bg-white
-                                      text-sm transition-all">
-                        <button type="button" @click="showPass = !showPass"
-                                class="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-[#27C2DE]">
+                        <input
+                            :type="showPass ? 'text' : 'password'"
+                            name="password"
+                            x-model="passVal"
+                            class="w-full px-3 py-2.5 pr-10 rounded bg-[#EEF2F7] border-0
+                                   focus:outline-none focus:ring-2 focus:ring-[#27C2DE] focus:bg-white
+                                   text-sm transition-all">
+
+                        {{-- Tombol mata: hanya muncul jika ada isian --}}
+                        <button
+                            x-show="passVal.length > 0"
+                            x-cloak
+                            type="button"
+                            @click="showPass = !showPass"
+                            class="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-[#27C2DE]">
                             <svg x-show="!showPass" class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
@@ -46,21 +85,27 @@
                             </svg>
                         </button>
                     </div>
-                    @error('password')
-                        <p class="text-xs text-red-500 mt-1">{{ $message }}</p>
-                    @enderror
                 </div>
 
                 {{-- Konfirmasi Password --}}
                 <div>
                     <label class="block text-xs font-medium text-[#2B2A28] mb-1">Konfirmasi Kata Sandi</label>
                     <div class="relative">
-                        <input :type="showConfirm ? 'text' : 'password'" name="password_confirmation"
-                               class="w-full px-3 py-2.5 pr-10 rounded bg-[#EEF2F7] border-0
-                                      focus:outline-none focus:ring-2 focus:ring-[#27C2DE] focus:bg-white
-                                      text-sm transition-all">
-                        <button type="button" @click="showConfirm = !showConfirm"
-                                class="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-[#27C2DE]">
+                        <input
+                            :type="showConfirm ? 'text' : 'password'"
+                            name="password_confirmation"
+                            x-model="confirmVal"
+                            class="w-full px-3 py-2.5 pr-10 rounded bg-[#EEF2F7] border-0
+                                   focus:outline-none focus:ring-2 focus:ring-[#27C2DE] focus:bg-white
+                                   text-sm transition-all">
+
+                        {{-- Tombol mata: hanya muncul jika ada isian --}}
+                        <button
+                            x-show="confirmVal.length > 0"
+                            x-cloak
+                            type="button"
+                            @click="showConfirm = !showConfirm"
+                            class="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-[#27C2DE]">
                             <svg x-show="!showConfirm" class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
@@ -70,9 +115,6 @@
                             </svg>
                         </button>
                     </div>
-                    @error('password_confirmation')
-                        <p class="text-xs text-red-500 mt-1">{{ $message }}</p>
-                    @enderror
                 </div>
 
                 {{-- Rules --}}
@@ -106,9 +148,31 @@
             <img src="{{ asset('ppdb/siswalogin.svg') }}" alt="Siswa"
                  class="w-full h-auto object-contain rounded-2xl">
         </div>
+
+        {{-- ===== POPUP BERHASIL ===== --}}
+        <div x-show="showSuccess" x-cloak
+             class="fixed inset-0 z-50 flex items-center justify-center"
+             style="background:rgba(0,0,0,0.4);">
+            <div class="relative w-full max-w-sm"
+                 x-transition:enter="transition ease-out duration-200"
+                 x-transition:enter-start="opacity-0 scale-95"
+                 x-transition:enter-end="opacity-100 scale-100">
+                <img src="{{ asset('ppdb/lupasandi.png') }}" alt="" class="w-full">
+                <div class="absolute bottom-0 left-0 right-0 pb-4 px-8 text-center">
+                    <p class="text-[13px] font-bold text-[#27C2DE] mb-1">Data Berhasil disimpan</p>
+                    <p class="text-[11px] text-slate-500 mb-5">
+                        Silahkan Login Kembali Menggunakan Kata Sandi Baru Anda
+                    </p>
+                    <a href="{{ route('ppdb.login') }}"
+                       class="inline-block px-10 py-2.5 rounded-xl text-white text-[13px] font-semibold transition-all"
+                       style="background:#27C2DE;">
+                        Lanjutkan
+                    </a>
+                </div>
+            </div>
+        </div>
+
     </div>
 
-    <script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
-    <style>[x-cloak] { display: none !important; }</style>
 </body>
 </html>

@@ -76,11 +76,7 @@ $jadwals = [
 <div class="bg-white px-6 py-4 ">
     <div class="max-w-7xl mx-auto">
         <div class="relative items-center">
-
-            {{-- SVG background --}}
             <img src="{{ asset('ppdb/Breadscrup.svg') }}" class="h-10" alt="">
-
-            {{-- Teks ditimpa di atas SVG --}}
             <div class="absolute inset-0 flex items-center">
                 <a href="{{ route('beranda') }}"
                    class="text-sm text-slate-500 hover:text-[#00758A] transition-colors px-5">
@@ -102,13 +98,9 @@ $jadwals = [
 <section class="bg-white pt-4 px-6 md:px-12">
     <div class="max-w-7xl mx-auto">
         <div class="hero-card relative rounded-3xl overflow-hidden" style="min-height: 320px;">
-
-            {{-- SVG penuh --}}
             <img src="{{ asset($jalur['banner']) }}"
                  alt="{{ $jalur['judul'] }}"
                  class="w-full h-full object-fill absolute inset-0">
-
-            {{-- Teks ditimpa di atas SVG --}}
             <div class="hero-text relative z-10 flex flex-col justify-center px-10 py-12 h-full" style="min-height: 320px;">
                 <h1 class="text-3xl md:text-4xl font-extrabold text-white">
                     {{ $jalur['judul'] }}
@@ -116,15 +108,16 @@ $jadwals = [
                 <p class="mt-4 text-sm md:text-base leading-7 text-white/90 max-w-lg">
                     {{ $jalur['deskripsi'] }}
                 </p>
-            <a href="{{ route('ppdb.pilih_jalur', $slug) }}"
-    class="mt-6 inline-block bg-white text-[#00758A] font-semibold px-8 py-2.5 rounded-full transition-all text-sm w-fit hover:bg-slate-100">
-        Daftar Sekarang
-</a>
+                {{-- Tombol buka popup konfirmasi --}}
+                <button onclick="document.getElementById('popup-jalur').classList.add('active')"
+                        class="mt-6 inline-block bg-white text-[#00758A] font-semibold px-8 py-2.5 rounded-full transition-all text-sm w-fit hover:bg-slate-100">
+                    Daftar Sekarang
+                </button>
             </div>
-
         </div>
     </div>
 </section>
+
 {{-- Persyaratan --}}
 <section class="bg-[#FFFFFF] py-16">
     <div class="max-w-7xl mx-auto px-6 md:px-12">
@@ -212,20 +205,39 @@ $jadwals = [
     </div>
 </section>
 
+{{-- ===== POPUP KONFIRMASI JALUR ===== --}}
+<div id="popup-jalur"
+     onclick="if(event.target===this) this.classList.remove('active')"
+     style="display:none; position:fixed; inset:0; z-index:9999; background:rgba(0,0,0,0.45); backdrop-filter:blur(2px); align-items:center; justify-content:center;">
+    <div class="relative w-full" style="max-width:420px; margin:0 16px;">
+        <img src="{{ asset('ppdb/pilihjalur.png') }}" alt="" class="w-full">
+        <div class="absolute bottom-0 left-0 right-0 pb-8 px-8 text-center">
+            <h2 style="font-size:16px; font-weight:700; color:#2B2A28; margin-bottom:20px;">
+                Kamu yakin pilih <span style="color:#27C2DE;">{{ $jalur['judul'] }}</span> ini?
+            </h2>
+            <a href="{{ route('ppdb.pilih_jalur', $slug) }}"
+               class="inline-block px-10 py-2.5 rounded-full text-white font-semibold text-[14px] transition-all"
+               style="background:#27C2DE;">
+                Lanjutkan Pendaftaran
+            </a>
+        </div>
+    </div>
+</div>
+
 <style>
+    #popup-jalur.active { display: flex !important; }
+
+    @keyframes popupIn {
+        from { opacity: 0; transform: scale(0.95) translateY(10px); }
+        to   { opacity: 1; transform: scale(1) translateY(0); }
+    }
+
     .hero-text {
         opacity: 0;
         transform: translateX(-30px);
         transition: opacity 700ms ease 200ms, transform 700ms ease 200ms;
     }
     .hero-text.visible { opacity: 1; transform: translateX(0); }
-
-    .hero-img {
-        opacity: 0;
-        transform: translateX(30px);
-        transition: opacity 700ms ease 400ms, transform 700ms ease 400ms;
-    }
-    .hero-img.visible { opacity: 1; transform: translateX(0); }
 
     .syarat-card {
         opacity: 0;
@@ -243,13 +255,20 @@ $jadwals = [
 </style>
 
 <script>
+    // Tutup popup dengan ESC
+    document.addEventListener('keydown', e => {
+        if (e.key === 'Escape') {
+            document.getElementById('popup-jalur').classList.remove('active');
+        }
+    });
+
     const observer = new IntersectionObserver((entries) => {
         entries.forEach(entry => {
             entry.target.classList.toggle('visible', entry.isIntersecting);
         });
     }, { threshold: 0.15 });
 
-    document.querySelectorAll('.hero-text, .hero-img, .syarat-card, .jadwal-col').forEach((el, i) => {
+    document.querySelectorAll('.hero-text, .syarat-card, .jadwal-col').forEach((el, i) => {
         if (el.classList.contains('jadwal-col')) {
             el.style.transitionDelay = (i * 150) + 'ms';
         }

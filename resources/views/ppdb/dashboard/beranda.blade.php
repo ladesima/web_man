@@ -41,10 +41,10 @@
                             Untuk siswa dengan prestasi akademik atau non akademik
                         </p>
                         <div class="border-t border-slate-100 mt-6">
-                            <a href="{{ route('siswa.pendaftaran', 'prestasi') }}"
+                            <a href="{{ route('ppdb.jalur', 'prestasi') }}"
                                class="inline-flex items-center gap-1.5 py-4 font-semibold text-sm group"
                                style="color: #16A9D1;">
-                                Pilih Jalur <span class="group-hover:translate-x-1 transition-transform">→</span>
+                                Baca Selengkapnya <span class="group-hover:translate-x-1 transition-transform">→</span>
                             </a>
                         </div>
                     </div>
@@ -62,10 +62,10 @@
                             Jalur pendaftaran umum bagi calon siswa yang ingin melanjutkan pendidikan di MAN Jeneponto.
                         </p>
                         <div class="border-t border-slate-100 mt-6">
-                            <a href="{{ route('siswa.pendaftaran', 'reguler') }}"
+                            <a href="{{ route('ppdb.jalur', 'reguler') }}"
                                class="inline-flex items-center gap-1.5 py-4 font-semibold text-sm group"
                                style="color: #16A9D1;">
-                                Pilih Jalur <span class="group-hover:translate-x-1 transition-transform">→</span>
+                                Baca Selengkapnya <span class="group-hover:translate-x-1 transition-transform">→</span>
                             </a>
                         </div>
                     </div>
@@ -83,10 +83,10 @@
                             Untuk calon siswa dari keluarga kurang mampu atau yang memiliki kondisi khusus sesuai ketentuan
                         </p>
                         <div class="border-t border-slate-100 mt-6">
-                            <a href="{{ route('siswa.pendaftaran', 'afirmasi') }}"
+                            <a href="{{ route('ppdb.jalur', 'afirmasi') }}"
                                class="inline-flex items-center gap-1.5 py-4 font-semibold text-sm group"
                                style="color: #16A9D1;">
-                                Pilih Jalur <span class="group-hover:translate-x-1 transition-transform">→</span>
+                                Baca Selengkapnya <span class="group-hover:translate-x-1 transition-transform">→</span>
                             </a>
                         </div>
                     </div>

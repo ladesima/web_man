@@ -66,15 +66,19 @@ Route::post('/siswa/pendaftaran/{jalur}', [
 
 /*
 |--------------------------------------------------------------------------
-| PILIH JALUR (FIX MULTI JALUR)
+| PILIH JALUR
+| - Belum login  → simpan jalur di session → ke registrasi
+| - Sudah login  → simpan jalur di session → langsung ke isi formulir
 |--------------------------------------------------------------------------
 */
 Route::get('/ppdb/pilih/{jalur}', function ($jalur) {
 
+    $allowed = ['prestasi', 'reguler', 'afirmasi'];
+    if (!in_array($jalur, $allowed)) abort(404);
+
     $user = auth('ppdb')->user();
 
     if ($user) {
-
         $pendaftaran = \App\Models\Pendaftaran::where('user_id', $user->id)
             ->where('status', '!=', 'tidak_lulus')
             ->latest()
@@ -84,10 +88,13 @@ Route::get('/ppdb/pilih/{jalur}', function ($jalur) {
             return redirect()->route('ppdb.dashboard')
                 ->with('error', 'Anda masih memiliki pendaftaran aktif');
         }
+
+        session(['jalur_daftar' => $jalur]);
+        session()->save();
+        return redirect()->route('siswa.pendaftaran', $jalur);
     }
 
     session(['jalur_daftar' => $jalur]);
-
     return redirect()->route('ppdb.daftar');
 
 })->name('ppdb.pilih_jalur');
@@ -186,11 +193,11 @@ Route::prefix('ppdb')->group(function () {
     Route::view('/daftar', 'ppdb.auth.registrasi')->name('ppdb.daftar');
     Route::view('/daftar/step2', 'ppdb.auth.registrasi2')->name('ppdb.daftar.step2');
 
-    // ===== LUPA PASSWORD (BARU) =====
+    // ===== LUPA PASSWORD =====
     Route::view('/lupa-password', 'ppdb.auth.lupa-password')->name('ppdb.lupa-password');
     Route::post('/lupa-password', [AuthPpdbController::class, 'lupaPassword'])->name('ppdb.lupa-password.post');
 
-   Route::get('/verify-otp', fn() => view('ppdb.auth.otp'))->name('ppdb.verify-otp');
+    Route::get('/verify-otp', fn() => view('ppdb.auth.otp'))->name('ppdb.verify-otp');
     Route::post('/verify-otp', [AuthPpdbController::class, 'verifyOtp'])->name('ppdb.verify-otp.post');
 
     Route::get('/reset-password', fn() => view('ppdb.auth.reset-password'))->name('ppdb.reset-password');
@@ -210,7 +217,18 @@ Route::prefix('ppdb')->group(function () {
 
 /*
 |--------------------------------------------------------------------------
-| SISWA (PROTECTED)
+| SISWA - PENDAFTARAN (TANPA ppdb.step — boleh akses meski belum ada data)
+|--------------------------------------------------------------------------
+*/
+Route::get('/siswa/pendaftaran/{jalur}', function ($jalur) {
+    $allowed = ['prestasi', 'reguler', 'afirmasi'];
+    if (!in_array($jalur, $allowed)) abort(404);
+    return view('ppdb.pendaftaran.isi-formulir', compact('jalur'));
+})->middleware(['auth:ppdb'])->name('siswa.pendaftaran');
+
+/*
+|--------------------------------------------------------------------------
+| SISWA (PROTECTED — dengan ppdb.step)
 |--------------------------------------------------------------------------
 */
 Route::prefix('siswa')
@@ -232,23 +250,16 @@ Route::prefix('siswa')
         }
 
         switch ($pendaftaran->status) {
-
             case 'perbaikan':
                 return redirect()->route('siswa.pendaftaran', $pendaftaran->jalur);
-
             case 'lulus':
                 return redirect()->route('siswa.pengumuman', $pendaftaran->jalur);
-
             case 'tidak_lulus':
                 return redirect()->route('ppdb.dashboard');
         }
 
         return redirect()->route('ppdb.dashboard');
     });
-
-    Route::get('/pendaftaran/{jalur}', function ($jalur) {
-        return view('ppdb.pendaftaran.isi-formulir', compact('jalur'));
-    })->name('siswa.pendaftaran');
 
     Route::get('/upload-berkas/{jalur}', function ($jalur) {
         return view('ppdb.berkas.index', compact('jalur'));
@@ -318,10 +329,10 @@ Route::prefix('admin')->middleware(['auth'])->group(function () {
         ->name('admin.master.activate');
 
     Route::get('/master-ppdb/{id}', [MasterPpdbController::class, 'detail'])
-    ->name('admin.master.detail');
+        ->name('admin.master.detail');
 
     Route::post('/jalur/store', [MasterPpdbController::class, 'storeJalur'])
-    ->name('admin.jalur.store');
+        ->name('admin.jalur.store');
     Route::put('/jalur/{id}', [MasterPpdbController::class, 'updateJalur'])->name('admin.jalur.update');
     Route::delete('/jalur/{id}', [MasterPpdbController::class, 'deleteJalur'])->name('admin.jalur.delete');
 
@@ -337,16 +348,11 @@ Route::prefix('admin')->middleware(['auth'])->group(function () {
     Route::delete('/syarat/{id}', [PpdbSyaratController::class, 'destroy'])->name('admin.syarat.delete');
 
     Route::view('/operasional/verifikasi', 'admin.ppdb.operasional.verifikasi-berkas')->name('admin.operasional.verifikasi');
-    Route::view('/operasional/pengumuman', 'admin.ppdb.operasional.pengumuman')
-    ->name('admin.operasional.pengumuman');
-    Route::view('/operasional/faq', 'admin.ppdb.operasional.faq')
-    ->name('admin.operasional.faq');
-    Route::view('/manajemen/akun', 'admin.ppdb.manajemen.akun-panitia')
-    ->name('admin.manajemen.akun');
-    Route::view('/manajemen/riwayat', 'admin.ppdb.manajemen.riwayat')
-    ->name('admin.manajemen.riwayat');
+    Route::view('/operasional/pengumuman', 'admin.ppdb.operasional.pengumuman')->name('admin.operasional.pengumuman');
+    Route::view('/operasional/faq', 'admin.ppdb.operasional.faq')->name('admin.operasional.faq');
+    Route::view('/manajemen/akun', 'admin.ppdb.manajemen.akun-panitia')->name('admin.manajemen.akun');
+    Route::view('/manajemen/riwayat', 'admin.ppdb.manajemen.riwayat')->name('admin.manajemen.riwayat');
 
-    // 🔥 CONTROLLER VERIFIKASI
     Route::get('/verifikasi', [\App\Http\Controllers\Admin\VerifikasiController::class, 'index'])->name('admin.verifikasi');
     Route::get('/verifikasi/{id}', [\App\Http\Controllers\Admin\VerifikasiController::class, 'show'])->name('admin.verifikasi.detail');
     Route::post('/verifikasi/lulus/{id}', [\App\Http\Controllers\Admin\VerifikasiController::class, 'lulus'])->name('admin.verifikasi.lulus');
