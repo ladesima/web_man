@@ -185,7 +185,17 @@ Route::prefix('ppdb')->group(function () {
 
     Route::view('/daftar', 'ppdb.auth.registrasi')->name('ppdb.daftar');
     Route::view('/daftar/step2', 'ppdb.auth.registrasi2')->name('ppdb.daftar.step2');
+
+    // ===== LUPA PASSWORD (BARU) =====
     Route::view('/lupa-password', 'ppdb.auth.lupa-password')->name('ppdb.lupa-password');
+    Route::post('/lupa-password', [AuthPpdbController::class, 'lupaPassword'])->name('ppdb.lupa-password.post');
+
+   Route::get('/verify-otp', fn() => view('ppdb.auth.otp'))->name('ppdb.verify-otp');
+    Route::post('/verify-otp', [AuthPpdbController::class, 'verifyOtp'])->name('ppdb.verify-otp.post');
+
+    Route::get('/reset-password', fn() => view('ppdb.auth.reset-password'))->name('ppdb.reset-password');
+    Route::post('/reset-password', [AuthPpdbController::class, 'resetPassword'])->name('ppdb.reset-password.post');
+    // ===== END LUPA PASSWORD =====
 
     Route::post('/register', [
         AuthPpdbController::class,
@@ -314,11 +324,10 @@ Route::prefix('admin')->middleware(['auth'])->group(function () {
     ->name('admin.jalur.store');
     Route::put('/jalur/{id}', [MasterPpdbController::class, 'updateJalur'])->name('admin.jalur.update');
     Route::delete('/jalur/{id}', [MasterPpdbController::class, 'deleteJalur'])->name('admin.jalur.delete');
-    
+
     Route::post('/tahapan', [TahapanController::class, 'store'])->name('admin.tahapan.store');
     Route::put('/tahapan/{id}', [TahapanController::class, 'update'])->name('admin.tahapan.update');
     Route::delete('/tahapan/{id}', [TahapanController::class, 'destroy'])->name('admin.tahapan.delete');
-
 
     Route::get('/master-ppdb/{tahun}/tambah-syarat', fn($tahun) =>
         view('admin.ppdb.master.tambah-syarat', compact('tahun'))
@@ -336,8 +345,6 @@ Route::prefix('admin')->middleware(['auth'])->group(function () {
     ->name('admin.manajemen.akun');
     Route::view('/manajemen/riwayat', 'admin.ppdb.manajemen.riwayat')
     ->name('admin.manajemen.riwayat');
-
-
 
     // 🔥 CONTROLLER VERIFIKASI
     Route::get('/verifikasi', [\App\Http\Controllers\Admin\VerifikasiController::class, 'index'])->name('admin.verifikasi');
