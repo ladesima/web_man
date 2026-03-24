@@ -13,7 +13,7 @@
 
 @php
     $isDashboard      = request()->routeIs('admin.dashboard');
-    $isDataPendaftar  = request()->routeIs('admin.pendaftar*'); 
+    $isDataPendaftar  = request()->routeIs('admin.data-pendaftar*'); 
     $isMaster         = request()->routeIs('admin.master*');
     $isOperasional    = request()->routeIs('admin.operasional*');
     $isManajemen      = request()->routeIs('admin.manajemen*');
