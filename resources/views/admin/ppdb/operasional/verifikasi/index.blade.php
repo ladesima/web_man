@@ -33,7 +33,7 @@
     <div class="grid grid-cols-4 gap-3 mb-5">
         @php
         $stats = [
-            ['label' => 'Menunggu Verifikasi', 'icon' => 'menunggu.png',        'from' => '#FAFEFF', 'to' => '#59DEFF', 'color' => '#0099B8'],
+            ['label' => 'Menunggu Verifikasi', 'icon' => 'totalpendaftar.png',        'from' => '#FAFEFF', 'to' => '#59DEFF', 'color' => '#0099B8'],
             ['label' => 'Perlu Perbaikan',      'icon' => 'perluperbaikan.png',  'from' => '#FAFEFF', 'to' => '#7AB2FF', 'color' => '#2563EB'],
             ['label' => 'Berkas Valid',          'icon' => 'berkasvalid.png',     'from' => '#FAFEFF', 'to' => '#88FFC4', 'color' => '#15803D'],
             ['label' => 'Berkas Ditolak',        'icon' => 'berkasditolak.png',   'from' => '#FAFEFF', 'to' => '#FF9696', 'color' => '#DC2626'],

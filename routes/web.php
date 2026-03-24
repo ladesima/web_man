@@ -353,12 +353,27 @@ Route::prefix('admin')->middleware(['auth'])->group(function () {
     Route::put('/syarat/{id}', [PpdbSyaratController::class, 'update'])->name('admin.syarat.update');
     Route::delete('/syarat/{id}', [PpdbSyaratController::class, 'destroy'])->name('admin.syarat.delete');
 
-    Route::view('/operasional/verifikasi', 'admin.ppdb.operasional.verifikasi-berkas')->name('admin.operasional.verifikasi');
-        // ===== TAMBAHKAN DI SINI =====
-    Route::view('/operasional/verifikasi/{id}',          'admin.ppdb.operasional.verifikasi-detail') ->name('admin.operasional.verifikasi.detail');
-    Route::view('/operasional/verifikasi/{id}/validasi', 'admin.ppdb.operasional.verifikasi-validasi')->name('admin.operasional.verifikasi.validasi');
-    // ===== END TAMBAHAN =====
-    Route::view('/operasional/pengumuman', 'admin.ppdb.operasional.pengumuman')->name('admin.operasional.pengumuman');
+    // ===== VERIFIKASI =====
+    Route::view('/operasional/verifikasi', 'admin.ppdb.operasional.verifikasi.index')
+        ->name('admin.operasional.verifikasi');
+    Route::view('/operasional/verifikasi/{id}', 'admin.ppdb.operasional.verifikasi.detail')
+        ->name('admin.operasional.verifikasi.detail');
+    Route::view('/operasional/verifikasi/{id}/validasi', 'admin.ppdb.operasional.verifikasi.validasi')
+        ->name('admin.operasional.verifikasi.validasi');
+    
+    // ===== PENGUMUMAN =====
+    Route::view('/operasional/pengumuman', 'admin.ppdb.operasional.pengumuman.index')
+        ->name('admin.operasional.pengumuman');
+
+    Route::view('/operasional/pengumuman/review', 'admin.ppdb.operasional.pengumuman.review')
+        ->name('admin.operasional.pengumuman.review');
+
+    Route::view('/operasional/pengumuman/tambah', 'admin.ppdb.operasional.pengumuman.tambah')
+        ->name('admin.operasional.pengumuman.tambah');
+
+    Route::view('/operasional/pengumuman/{id}/pesan', 'admin.ppdb.operasional.pengumuman.detail-pesan')
+        ->name('admin.operasional.pengumuman.pesan');
+        
     Route::view('/operasional/faq', 'admin.ppdb.operasional.faq')->name('admin.operasional.faq');
     Route::view('/manajemen/akun', 'admin.ppdb.manajemen.akun-panitia')->name('admin.manajemen.akun');
     Route::view('/manajemen/riwayat', 'admin.ppdb.manajemen.riwayat')->name('admin.manajemen.riwayat');
