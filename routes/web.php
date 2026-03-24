@@ -340,6 +340,12 @@ Route::prefix('admin')->middleware(['auth'])->group(function () {
     Route::put('/tahapan/{id}', [TahapanController::class, 'update'])->name('admin.tahapan.update');
     Route::delete('/tahapan/{id}', [TahapanController::class, 'destroy'])->name('admin.tahapan.delete');
 
+    Route::get('/data-pendaftar', function () {
+    $pendaftaran = []; // kosong saja dulu
+
+    return view('admin.ppdb.data-pendaftar.index', compact('pendaftaran'));
+})->name('admin.data-pendaftar');
+
     Route::get('/master-ppdb/{tahun}/tambah-syarat', fn($tahun) =>
         view('admin.ppdb.master.tambah-syarat', compact('tahun'))
     )->name('admin.master.tambah-syarat');

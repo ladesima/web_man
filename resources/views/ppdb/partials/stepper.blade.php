@@ -28,13 +28,14 @@ $steps = [
             <div class="relative w-full flex items-center justify-center" style="height: 56px;">
 
                 {{-- Garis kiri --}}
-                @if($i > 0)
-                <div class="absolute z-0"
-                     style="right: 50%; left: 0; top: 50%; transform: translateY(-50%); height: 2px;
-                            background: {{ $isDone ? '#27C2DE' : 'transparent' }};
-                            border-top: {{ $isDone ? 'none' : '2px dashed #27C2DE' }};">
-                </div>
-                @endif
+                {{-- Garis kiri --}}
+@if($i > 0)
+<div class="absolute z-0"
+     style="right: 50%; left: 0; top: 50%; transform: translateY(-50%); height: 2px;
+            background: {{ ($isDone || $isActive) ? '#27C2DE' : 'transparent' }};
+            border-top: {{ ($isDone || $isActive) ? 'none' : '2px dashed #27C2DE' }};">
+</div>
+@endif
 
                 {{-- Icon --}}
                 <div class="relative z-10 w-12 h-12 flex items-center justify-center rounded-full"
@@ -63,17 +64,17 @@ $steps = [
             </div>
 
             {{-- Label --}}
+           {{-- Label --}}
             <p class="text-center font-semibold leading-tight mt-1"
-               style="font-size: clamp(9px, 1vw, 11px);
-                      color: {{ $isActive || $isDone ? '#27C2DE' : '#94a3b8' }};">
+            style="font-size: clamp(9px, 1vw, 11px);
+                    color: #000000;">
                 {{ $step['label'] }}
             </p>
-
             {{-- Badge --}}
             <span class="px-2 py-0.5 rounded-full font-medium mt-0.5"
-                  style="font-size: clamp(8px, 0.8vw, 10px);
-                         background: {{ $isDone ? '#DCFCE7' : ($isActive ? '#E0F7FC' : '#EEF2F7') }};
-                         color: {{ $isDone ? '#16a34a' : ($isActive ? '#0891b2' : '#94a3b8') }};">
+                style="font-size: clamp(8px, 0.8vw, 10px);
+                        background: {{ $isDone ? '#00C42A' : ($isActive ? '#ED9039' : '#E2E2E2') }};
+                        color: {{ $isDone || $isActive ? '#FFFFFF' : '#2B2A28' }};">
                 {{ $isDone ? 'Selesai' : ($isActive ? 'Proses' : 'Belum') }}
             </span>
 

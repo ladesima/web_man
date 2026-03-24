@@ -26,7 +26,7 @@
             <script>alert("Berkas belum lengkap atau tidak sesuai!");</script>
         @endif
 
-        <form action="{{ route('siswa.upload.berkas.post', $jalur) }}" method="POST" enctype="multipart/form-data">
+        <form id="form-berkas" action="{{ route('siswa.upload.berkas.post', $jalur) }}" method="POST" enctype="multipart/form-data">
             @csrf
 
             <div class="grid grid-cols-1 md:grid-cols-3 gap-5">
@@ -80,7 +80,9 @@
             </div>
 
             <div class="flex justify-center mt-10">
-                <button type="submit" id="btn-submit"
+                {{-- Tombol membuka modal, bukan langsung submit --}}
+                <button type="button" id="btn-submit"
+                        onclick="bukaModa()"
                         class="px-12 py-2.5 rounded-full text-white font-semibold text-sm bg-[#0088A0] hover:bg-[#006980] transition opacity-50 cursor-not-allowed"
                         disabled>
                     Lanjutkan
@@ -90,6 +92,45 @@
         </form>
     </div>
 
+</div>
+
+{{-- ============================================================ --}}
+{{-- MODAL KONFIRMASI                                            --}}
+{{-- ============================================================ --}}
+<div id="modal-konfirmasi"
+     class="hidden fixed inset-0 z-50 flex items-center justify-center"
+     style="background:rgba(0,0,0,0.35);">
+
+    <div id="modal-box" class="relative w-full max-w-sm">
+
+        {{-- Gambar sebagai background popup --}}
+        <img src="{{ asset('ppdb/lanjutproses.png') }}" alt="" class="w-full">
+
+        {{-- Konten overlay di atas gambar --}}
+        <div class="absolute bottom-0 left-0 right-0 pb-5 px-8 text-center" style="top:60%;">
+            <h3 class="text-[13px] font-bold text-[#2B2A28] mb-1">
+                Yakin ingin melanjutkan Proses?
+            </h3>
+            <p class="text-[11px] text-slate-400 mb-3 leading-relaxed">
+                Semua data yang anda masukkan tidak dapat diubah,<br>
+                pastikan semua datanya benar.
+            </p>
+            <div class="flex gap-3 justify-center">
+                <button type="button"
+                        onclick="tutupModal()"
+                        class="px-5 py-1.5 rounded-xl border border-slate-300 text-[12px] font-semibold text-slate-600 hover:bg-slate-50 transition-all">
+                    Batal
+                </button>
+                <button type="button"
+                        onclick="document.getElementById('form-berkas').submit()"
+                        class="px-5 py-1.5 rounded-xl text-white text-[12px] font-semibold transition-all"
+                        style="background:#0088A0;">
+                    Lanjutkan
+                </button>
+            </div>
+        </div>
+
+    </div>
 </div>
 
 <script>
@@ -115,16 +156,12 @@
             const fileName = this.files[0]?.name;
 
             if (fileName) {
-                // sembunyikan state idle, tampilkan state done
                 document.getElementById(`idle-${name}`).classList.add('hidden');
                 const done = document.getElementById(`done-${name}`);
                 done.classList.remove('hidden');
                 done.classList.add('flex');
-
-                // tampilkan nama file
                 document.getElementById(`name-${name}`).textContent = fileName;
 
-                // ubah border box jadi solid biru
                 const box = document.getElementById(`box-${name}`);
                 box.style.border = '2px solid #0088A0';
                 box.style.background = '#E8FAFB';
@@ -135,6 +172,22 @@
     });
 
     checkFiles();
+
+    /* ── Modal ── */
+    function bukaModa() {
+        document.getElementById('modal-konfirmasi').classList.remove('hidden');
+        document.body.style.overflow = 'hidden';
+    }
+
+    function tutupModal() {
+        document.getElementById('modal-konfirmasi').classList.add('hidden');
+        document.body.style.overflow = '';
+    }
+
+    // Tutup modal jika klik di luar kotak
+    document.getElementById('modal-konfirmasi').addEventListener('click', function(e) {
+        if (e.target === this) tutupModal();
+    });
 </script>
 
 @endsection

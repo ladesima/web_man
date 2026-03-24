@@ -12,10 +12,11 @@
 <body class="bg-[#F2F8FF] text-slate-900">
 
 @php
-    $isDashboard   = request()->routeIs('admin.dashboard');
-    $isMaster      = request()->routeIs('admin.master*');
-    $isOperasional = request()->routeIs('admin.operasional*');
-    $isManajemen   = request()->routeIs('admin.manajemen*');
+    $isDashboard      = request()->routeIs('admin.dashboard');
+    $isDataPendaftar  = request()->routeIs('admin.pendaftar*'); 
+    $isMaster         = request()->routeIs('admin.master*');
+    $isOperasional    = request()->routeIs('admin.operasional*');
+    $isManajemen      = request()->routeIs('admin.manajemen*');
 @endphp
 
 <div x-data="{
@@ -25,7 +26,6 @@
 }" class="h-screen overflow-hidden flex">
 
     {{-- ===================== SIDEBAR ===================== --}}
-    {{-- FIX: bg #FAFEFF, z-10 agar shadow tidak tertutup main, shadow ke kanan --}}
     <aside class="relative z-10 flex flex-col transition-all duration-300 ease-in-out overflow-hidden flex-shrink-0"
            :class="sidebarOpen ? 'w-[200px]' : 'w-[56px]'"
            style="background:#FAFEFF; box-shadow: 2px 0px 8px rgba(0,0,0,0.15);">
@@ -35,7 +35,7 @@
             <img src="{{ asset('ppdb/man.svg') }}" alt="MAN Jeneponto"
                  class="w-9 h-9 object-contain block">
             <div x-show="sidebarOpen" x-cloak class="text-center mt-1.5">
-                <p class="font-bold text-[14px]" style="color:#2B2A28; leading-tight">MAN JENEPONTO</p>
+                <p class="font-bold text-[14px]" style="color:#2B2A28;">MAN JENEPONTO</p>
                 <p class="text-[9px] leading-tight" style="color:#2B2A28;">MADRASAH MAJU BERMUTU MENDUNIA</p>
             </div>
         </div>
@@ -56,7 +56,6 @@
                 </div>
             </a>
             @else
-            {{-- FIX: justify-center saat collapsed agar icon di tengah --}}
             <a href="{{ route('admin.dashboard') }}"
                class="block h-[44px] flex items-center gap-2.5 rounded-[10px] text-[#464646] hover:bg-[#EEF9FC] hover:text-[#27C2DE] transition-all font-semibold text-[13px]"
                :class="sidebarOpen ? 'mx-3 px-3' : 'mx-2 justify-center'">
@@ -64,6 +63,28 @@
                 <span x-show="sidebarOpen" x-cloak class="whitespace-nowrap">Dashboard</span>
             </a>
             @endif
+
+            {{-- ===== TAMBAHAN: Data Pendaftar ===== --}}
+            @if($isDataPendaftar)
+            <a href="{{ route('admin.data-pendaftar') }}" class="block relative h-[44px]"
+               :class="sidebarOpen ? 'ml-3 mr-0' : 'mx-2'">
+                <div x-show="sidebarOpen" x-cloak class="absolute -left-3 top-0 w-[6px] h-[40px] rounded-r-xl bg-[#27C2DE]"></div>
+                <div class="w-full h-full flex items-center gap-2.5"
+                     :class="sidebarOpen ? 'rounded-l-[10px] px-3' : 'rounded-[10px] justify-center'"
+                     style="background: linear-gradient(90deg, #15B2CE 0%, #00758A 100%);">
+                    <img src="{{ asset('ppdb/admin/datapendaftar.png') }}" alt="" class="w-[18px] h-[18px] object-contain brightness-0 invert shrink-0">
+                    <span x-show="sidebarOpen" x-cloak class="text-white font-semibold text-[13px] whitespace-nowrap">Data Pendaftar</span>
+                </div>
+            </a>
+            @else
+            <a href="{{ route('admin.data-pendaftar') }}"
+               class="block h-[44px] flex items-center gap-2.5 rounded-[10px] text-[#464646] hover:bg-[#EEF9FC] hover:text-[#27C2DE] transition-all font-semibold text-[13px]"
+               :class="sidebarOpen ? 'mx-3 px-3' : 'mx-2 justify-center'">
+                <img src="{{ asset('ppdb/admin/datapendaftar.png') }}" alt="" class="w-[18px] h-[18px] object-contain shrink-0">
+                <span x-show="sidebarOpen" x-cloak class="whitespace-nowrap">Data Pendaftar</span>
+            </a>
+            @endif
+            {{-- ===== END TAMBAHAN ===== --}}
 
             {{-- Master PPDB --}}
             @if($isMaster)
@@ -86,13 +107,12 @@
             </a>
             @endif
 
-            {{-- Operasional (dengan submenu) --}}
+            {{-- Operasional --}}
             <div>
                 @if($isOperasional)
                 <div class="block relative h-[44px]"
                      :class="sidebarOpen ? 'ml-3 mr-0' : 'mx-2'">
                     <div x-show="sidebarOpen" x-cloak class="absolute -left-3 top-0 w-[6px] h-[44px] rounded-r-xl bg-[#27C2DE]"></div>
-                    {{-- FIX: pl-3 pr-4 agar chevron tidak dempet di tepi kanan --}}
                     <button @click="operasionalOpen = !operasionalOpen"
                             class="w-full h-full flex items-center gap-2.5"
                             :class="sidebarOpen ? 'rounded-l-[10px] pl-3 pr-4' : 'rounded-[10px] justify-center'"
@@ -105,7 +125,6 @@
                     </button>
                 </div>
                 @else
-                {{-- FIX: pl-3 pr-4, justify-center saat collapsed --}}
                 <button @click="operasionalOpen = !operasionalOpen"
                         class="h-[44px] flex items-center gap-2.5 rounded-[10px] text-[#464646] hover:bg-[#EEF9FC] hover:text-[#27C2DE] transition-all font-semibold text-[13px]"
                         :class="sidebarOpen ? 'mx-3 pl-3 pr-4 w-[calc(100%-24px)]' : 'mx-2 justify-center w-[calc(100%-16px)]'">
@@ -117,7 +136,6 @@
                 </button>
                 @endif
 
-                {{-- Submenu Operasional --}}
                 <div x-show="operasionalOpen && sidebarOpen" x-cloak class="mt-1 ml-7">
                     @php
                         $subMenus = [
@@ -148,13 +166,12 @@
                 </div>
             </div>
 
-            {{-- Manajemen Sistem (dengan submenu) --}}
+            {{-- Manajemen Sistem --}}
             <div>
                 @if($isManajemen)
                 <div class="block relative h-[44px]"
                      :class="sidebarOpen ? 'ml-3 mr-0' : 'mx-2'">
                     <div x-show="sidebarOpen" x-cloak class="absolute -left-3 top-0 w-[6px] h-[44px] rounded-r-xl bg-[#27C2DE]"></div>
-                    {{-- FIX: pl-3 pr-4 agar chevron tidak dempet di tepi kanan --}}
                     <button @click="manajemenOpen = !manajemenOpen"
                             class="w-full h-full flex items-center gap-2.5"
                             :class="sidebarOpen ? 'rounded-l-[10px] pl-3 pr-4' : 'rounded-[10px] justify-center'"
@@ -178,7 +195,6 @@
                 </button>
                 @endif
 
-                {{-- Submenu Manajemen --}}
                 <div x-show="manajemenOpen && sidebarOpen" x-cloak class="mt-1 ml-7">
                     @php
                         $manSubMenus = [
@@ -231,7 +247,6 @@
     <main class="flex-1 flex flex-col overflow-hidden min-w-0">
 
         {{-- TOPBAR --}}
-        {{-- FIX: bg #FAFEFF, z-10, shadow ke bawah, hapus border-b --}}
         <header class="relative z-10 h-[64px] px-6 flex items-center justify-between flex-shrink-0"
                 style="background:#FAFEFF; box-shadow: 0px 4px 6px rgba(101,101,101,0.2);">
 
@@ -247,10 +262,12 @@
                 </button>
 
                 <div>
-                    {{-- FIX: warna teks #006E87 --}}
                     @if(request()->routeIs('admin.dashboard'))
                         <h1 class="text-[17px] font-bold text-[#006E87]">Welcome back, {{ auth()->user()->name ?? 'Admin' }}</h1>
                         <p class="text-[11px] text-[#2B2A28]">Tetap semangat dan jangan lupa ibadah</p>
+                    @elseif(request()->routeIs('admin.data-pendaftar*'))  
+                        <h1 class="text-[17px] font-bold text-[#006E87]">Data Pendaftar</h1>
+                        <p class="text-[11px] text-[#2B2A28]">Daftar seluruh calon siswa yang telah mendaftar</p>
                     @elseif(request()->routeIs('admin.master*'))
                         <h1 class="text-[17px] font-bold text-[#006E87]">Master PPDB</h1>
                         <p class="text-[11px] text-[#2B2A28]">Kelola semua periode penerimaan siswa baru disini</p>
@@ -277,7 +294,6 @@
             </div>
 
             <div class="flex items-center gap-3">
-                {{-- FIX: hapus div wrapper, langsung img notifikasi --}}
                 <img src="{{ asset('ppdb/admin/notifikasi.png') }}" alt="Notifikasi" class="w-[35px] h-[35px] object-contain cursor-pointer shrink-0">
 
                 <div class="relative" x-data="{ open: false }">

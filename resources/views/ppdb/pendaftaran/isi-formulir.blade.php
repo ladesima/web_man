@@ -48,7 +48,7 @@
             </div>
         @endif
 
-        <form action="{{ route('siswa.pendaftaran.post', $jalur) }}" method="POST" enctype="multipart/form-data">
+        <form id="form-pendaftaran" action="{{ route('siswa.pendaftaran.post', $jalur) }}" method="POST" enctype="multipart/form-data">
             @csrf
 
             {{-- Input foto disembunyikan dalam form --}}
@@ -71,7 +71,7 @@
                     <div>
                         <label class="block text-sm mb-1.5">Tempat, Tanggal Lahir</label>
                         <input type="text" name="ttl" value="{{ old('ttl') }}"
-                               class="w-full px-4 py-2.5 rounded text-sm outline-none bg-[#EEF2F7]
+                               class="w-full px-4 py-2.5 rounded-[10px] text-sm outline-none bg-[#F5F7FF] border border-[#DFEAF2]
                                @error('ttl') border border-red-500 @enderror">
                         @error('ttl')
                             <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
@@ -91,7 +91,7 @@
                     <div>
                         <label class="block text-sm mb-1.5">Asal Sekolah</label>
                         <input type="text" name="asal_sekolah" value="{{ old('asal_sekolah') }}"
-                               class="w-full px-4 py-2.5 rounded text-sm outline-none bg-[#EEF2F7]
+                               class="w-full px-4 py-2.5 rounded-[10px] text-sm outline-none bg-[#F5F7FF] border border-[#DFEAF2]
                                @error('asal_sekolah') border border-red-500 @enderror">
                         @error('asal_sekolah')
                             <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
@@ -102,7 +102,7 @@
                     <div>
                         <label class="block text-sm mb-1.5">Alamat</label>
                         <input type="text" name="alamat" value="{{ old('alamat') }}"
-                               class="w-full px-4 py-2.5 rounded text-sm outline-none bg-[#EEF2F7]
+                               class="w-full px-4 py-2.5 rounded-[10px] text-sm outline-none bg-[#F5F7FF] border border-[#DFEAF2]
                                @error('alamat') border border-red-500 @enderror">
                         @error('alamat')
                             <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
@@ -117,7 +117,7 @@
                     <div>
                         <label class="block text-sm mb-1.5">Nama Orang Tua/Wali</label>
                         <input type="text" name="nama_ortu" value="{{ old('nama_ortu') }}"
-                               class="w-full px-4 py-2.5 rounded text-sm outline-none bg-[#EEF2F7]
+                               class="w-full px-4 py-2.5 rounded-[10px] text-sm outline-none bg-[#F5F7FF] border border-[#DFEAF2]
                                @error('nama_ortu') border border-red-500 @enderror">
                         @error('nama_ortu')
                             <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
@@ -128,7 +128,7 @@
                     <div>
                         <label class="block text-sm mb-1.5">Pekerjaan Orang Tua</label>
                         <input type="text" name="pekerjaan_ortu" value="{{ old('pekerjaan_ortu') }}"
-                               class="w-full px-4 py-2.5 rounded text-sm outline-none bg-[#EEF2F7]
+                               class="w-full px-4 py-2.5 rounded-[10px] text-sm outline-none bg-[#F5F7FF] border border-[#DFEAF2]
                                @error('pekerjaan_ortu') border border-red-500 @enderror">
                         @error('pekerjaan_ortu')
                             <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
@@ -139,7 +139,7 @@
                     <div>
                         <label class="block text-sm mb-1.5">Penghasilan Orang Tua</label>
                         <input type="text" name="penghasilan_ortu" value="{{ old('penghasilan_ortu') }}"
-                               class="w-full px-4 py-2.5 rounded text-sm outline-none bg-[#EEF2F7]
+                               class="w-full px-4 py-2.5 rounded-[10px] text-sm outline-none bg-[#F5F7FF] border border-[#DFEAF2]
                                @error('penghasilan_ortu') border border-red-500 @enderror">
                         @error('penghasilan_ortu')
                             <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
@@ -150,7 +150,7 @@
                     <div>
                         <label class="block text-sm mb-1.5">Alamat Orang Tua</label>
                         <input type="text" name="alamat_ortu" value="{{ old('alamat_ortu') }}"
-                               class="w-full px-4 py-2.5 rounded text-sm outline-none bg-[#EEF2F7]
+                               class="w-full px-4 py-2.5 rounded-[10px] text-sm outline-none bg-[#F5F7FF] border border-[#DFEAF2]
                                @error('alamat_ortu') border border-red-500 @enderror">
                         @error('alamat_ortu')
                             <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
@@ -161,7 +161,7 @@
                     <div>
                         <label class="block text-sm mb-1.5">Jumlah Bersaudara</label>
                         <input type="number" name="jumlah_saudara" value="{{ old('jumlah_saudara') }}"
-                               class="w-full px-4 py-2.5 rounded text-sm outline-none bg-[#EEF2F7]
+                               class="w-full px-4 py-2.5 rounded-[10px] text-sm outline-none bg-[#F5F7FF] border border-[#DFEAF2]
                                @error('jumlah_saudara') border border-red-500 @enderror">
                         @error('jumlah_saudara')
                             <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
@@ -173,7 +173,9 @@
             </div>
 
             <div class="flex justify-center mt-10">
-                <button type="submit"
+                {{-- Tombol Lanjutkan — membuka modal, BUKAN langsung submit --}}
+                <button type="button"
+                        onclick="bukaModa()"
                         class="px-12 py-2.5 rounded-full text-white font-semibold text-sm bg-[#27C2DE] hover:bg-[#00B1D1] transition">
                     Lanjutkan
                 </button>
@@ -184,8 +186,62 @@
 
 </div>
 
+{{-- ============================================================ --}}
+{{-- MODAL KONFIRMASI                                            --}}
+{{-- ============================================================ --}}
+<div id="modal-konfirmasi"
+     class="hidden fixed inset-0 z-50 flex items-center justify-center"
+     style="background:rgba(0,0,0,0.35);">
+
+    <div id="modal-box" class="relative w-full max-w-sm">
+
+        {{-- Gambar sebagai background popup --}}
+        <img src="{{ asset('ppdb/lanjutproses.png') }}" alt="" class="w-full">
+
+        {{-- Konten overlay di atas gambar --}}
+        <div class="absolute bottom-0 left-0 right-0 pb-6 px-8 text-center" style="top:60%;">
+            <h3 class="text-[13px] font-bold text-[#2B2A28] mb-1">
+                Yakin ingin melanjutkan Proses?
+            </h3>
+            <p class="text-[11px] text-slate-400 mb-3 leading-relaxed">
+                Semua data yang anda masukkan tidak dapat diubah,<br>
+                pastikan semua datanya benar.
+            </p>
+            <div class="flex gap-4 justify-center">
+                <button type="button"
+                        onclick="tutupModal()"
+                        class="px-5 py-1.5 rounded-xl border border-slate-300 text-[12px] font-semibold text-slate-600 hover:bg-slate-50 transition-all">
+                    Batal
+                </button>
+                <button type="button"
+                        onclick="document.getElementById('form-pendaftaran').submit()"
+                        class="px-5 py-1.5 rounded-xl text-white text-[12px] font-semibold transition-all"
+                        style="background:#27C2DE;">
+                    Lanjutkan
+                </button>
+            </div>
+        </div>
+
+    </div>
+</div>
+
 @push('scripts')
 <script>
+    /* ── Modal ── */
+    function bukaModa() {
+        document.getElementById('modal-konfirmasi').classList.remove('hidden');
+        document.body.style.overflow = 'hidden';
+    }
+
+    function tutupModal() {
+        document.getElementById('modal-konfirmasi').classList.add('hidden');
+        document.body.style.overflow = '';
+    }
+
+    // Tutup modal jika klik di luar kotak
+    document.getElementById('modal-konfirmasi').addEventListener('click', function(e) {
+        if (e.target === this) tutupModal();
+    });
     function previewFoto(input) {
         if (input.files && input.files[0]) {
             const reader = new FileReader();
@@ -201,6 +257,8 @@
             formInput.files = dataTransfer.files;
         }
     }
+
+
 </script>
 @endpush
 
