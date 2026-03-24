@@ -18,15 +18,17 @@
 
     <div class="relative z-10 w-full text-center px-4 py-28 md:py-36">
         <h1 class="hero-title text-2xl md:text-4xl font-extrabold text-white leading-snug drop-shadow">
-            PPDBM Tahun Ajaran 2026/2027 telah dibuka
-        </h1>
-        <p class="hero-sub text-lg md:text-3xl font-semibold text-white drop-shadow">
-            Saat ini pendaftaran sedang berlangsung untuk
-        </p>
-        <p class="hero-jalur mt-1 text-2xl md:text-4xl font-extrabold drop-shadow"
-           style="color: #DBE124;">
-            Jalur Reguler Gel I
-        </p>
+    PPDBM Tahun Ajaran {{ $ppdb->tahun_ajaran ?? 'Belum dibuka' }}
+</h1>
+
+<p class="hero-sub text-lg md:text-3xl font-semibold text-white drop-shadow">
+    Saat ini pendaftaran sedang berlangsung untuk
+</p>
+
+<p class="hero-jalur mt-1 text-2xl md:text-4xl font-extrabold drop-shadow"
+   style="color: #DBE124;">
+    {{ optional($ppdb->jalurs->where('is_active', 1)->first())->jalur ?? 'Jalur belum tersedia' }}
+</p>
         <div class="hero-btn mt-8">
             <a href="/ppdb/daftar"
                class="inline-block bg-[#3ED0F3] hover:bg-[#26C6F3] text-white font-semibold px-10 py-3 rounded-full shadow-lg transition-all text-base">
@@ -309,7 +311,7 @@
 </script>
 
 {{-- ================================================================
-     SECTION 4 : JADWAL
+     SECTION 4 : JADWAL (FINAL CLEAN)
 ================================================================ --}}
 <section id="jadwal" class="bg-white py-20" style="scroll-margin-top: 50px;">
     <div class="max-w-6xl mx-auto px-6 md:px-10">
@@ -317,122 +319,101 @@
         {{-- Heading --}}
         <div class="text-center mb-12">
             <h2 class="text-3xl md:text-4xl font-extrabold"
-                style="color: #2B2A28; text-shadow: 0px 4px 4px rgba(0,0,0,0.25);">Jadwal</h2>
-            <p class="mt-2 text-[15px]"
-               style="color: #575551; text-shadow: 0px 4px 4px rgba(0,0,0,0.25);">
+                style="color: #2B2A28;">
+                Jadwal
+            </h2>
+            <p class="mt-2 text-[15px]" style="color: #575551;">
                 Jangan sampai lupa daftar sesuai jadwal yang telah kami tentukan
             </p>
         </div>
 
-        @php
-        $jadwals = [
-            'Regular' => [
-                ['icon' => 'daftar.svg',              'tanggal' => '24 April - 15 Mei 2026', 'label' => 'Pendaftaran'],
-                ['icon' => 'seleksiadministrasi.svg', 'tanggal' => '15 Mei - 20 Mei 2026',   'label' => 'Seleksi Administrasi'],
-                ['icon' => 'pengumuman.svg',           'tanggal' => '20 Mei 2026',             'label' => 'Pengumuman'],
-                ['icon' => 'daftarulang.svg',          'tanggal' => '21 Mei - 28 Mei 2026',   'label' => 'Daftar Ulang'],
-            ],
-            'Prestasi' => [
-                ['icon' => 'daftar.svg',              'tanggal' => '24 April - 15 Mei 2026', 'label' => 'Pendaftaran'],
-                ['icon' => 'seleksiadministrasi.svg', 'tanggal' => '15 Mei - 20 Mei 2026',   'label' => 'Seleksi Administrasi'],
-                ['icon' => 'pengumuman.svg',           'tanggal' => '20 Mei 2026',             'label' => 'Pengumuman'],
-                ['icon' => 'daftarulang.svg',          'tanggal' => '21 Mei - 28 Mei 2026',   'label' => 'Daftar Ulang'],
-            ],
-            'Afirmasi' => [
-                ['icon' => 'daftar.svg',              'tanggal' => '24 April - 15 Mei 2026', 'label' => 'Pendaftaran'],
-                ['icon' => 'seleksiadministrasi.svg', 'tanggal' => '15 Mei - 20 Mei 2026',   'label' => 'Seleksi Administrasi'],
-                ['icon' => 'pengumuman.svg',           'tanggal' => '20 Mei 2026',             'label' => 'Pengumuman'],
-                ['icon' => 'daftarulang.svg',          'tanggal' => '21 Mei - 28 Mei 2026',   'label' => 'Daftar Ulang'],
-            ],
-        ];
-        @endphp
-
+        {{-- GRID 3 KOLOM --}}
         <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-            @foreach($jadwals as $judul => $items)
+
+            @foreach($ppdb->jalurs->unique('jalur') as $jalur)
+
             <div class="jadwal-col">
-                {{-- Judul kolom --}}
-                <h3 class="text-center font-bold text-lg mb-4"
-                    style="
-                        background: linear-gradient(180deg, #00B1D1, #00758A);
-                        -webkit-background-clip: text;
-                        -webkit-text-fill-color: transparent;
-                        background-clip: text;
-                        filter: drop-shadow(0px 4px 4px rgba(101,101,101,0.25));
-                    ">
-                    {{ $judul }}
-                </h3>
 
-                {{-- Box jadwal --}}
-                <div class="border-2 border-[#27C2DE] rounded-3xl p-5 bg-white">
-                    <div class="space-y-0">
-                        @foreach($items as $index => $item)
-                        <div class="flex gap-3">
+                {{-- JUDUL --}}
+    <h3 class="text-center font-bold text-lg mb-4 capitalize text-[#00B1D1]">
+        {{ $jalur->jalur }}
+    </h3>
 
-                            {{-- Kiri: icon + garis --}}
-                            <div class="flex flex-col items-center flex-shrink-0">
-                                {{-- Icon tanpa bg --}}
-                                <div class="w-8 h-8 flex items-center justify-center flex-shrink-0">
-                                    <img src="{{ asset('ppdb/' . $item['icon']) }}"
-                                        alt="{{ $item['label'] }}"
-                                        class="w-7 h-7 object-contain">
-                                </div>
-                                {{-- Garis penghubung --}}
-                                @if(!$loop->last)
-                                <div class="w-[2px] flex-1 my-1"
-                                    style="background: repeating-linear-gradient(to bottom, #27C2DE 0px, #27C2DE 5px, transparent 5px, transparent 10px); min-height: 24px;">
-                                </div>
-                                @endif
-                            </div>
+    {{-- BOX --}}
+    <div class="border-2 border-[#27C2DE] rounded-3xl p-6 bg-white">
 
-                            {{-- Kanan: info --}}
-                            <div class="pb-4">
-                                <p class="text-[11px] font-semibold leading-tight"
-                                   style="color: #00B1D1;">
-                                    {{ $item['tanggal'] }}
-                                </p>
-                                <p class="text-sm font-bold mt-0.5" style="color: #2B2A28;">
-                                    {{ $item['label'] }}
-                                </p>
-                            </div>
+        @forelse($jalur->tahapans as $index => $tahap)
 
-                        </div>
-                        @endforeach
-                    </div>
-                </div>
+        <div class="flex items-start gap-3 relative pb-4">
+
+            {{-- ICON --}}
+            <div class="w-6 h-6 mt-1 z-10">
+                <img src="{{ asset('ppdb/daftar.svg') }}" class="w-5 h-5">
             </div>
-            @endforeach
+
+            {{-- GARIS VERTIKAL --}}
+            @if(!$loop->last)
+            <div class="absolute left-[10px] top-6 bottom-0 w-[2px] bg-[#27C2DE]/30"></div>
+            @endif
+
+            {{-- TEXT --}}
+            <div>
+                <p class="text-[11px] font-semibold text-[#00B1D1]">
+                    {{ \Carbon\Carbon::parse($tahap->tanggal_mulai)->format('d M') }}
+                    -
+                    {{ \Carbon\Carbon::parse($tahap->tanggal_selesai)->format('d M Y') }}
+                </p>
+
+                <p class="text-sm font-bold text-[#2B2A28]">
+                    {{ $tahap->nama_tahapan }}
+                </p>
+            </div>
+
         </div>
+
+        @empty
+            <p class="text-center text-gray-400 text-sm">
+                Jadwal belum tersedia
+            </p>
+        @endforelse
+
+    </div>
+
+</div>
+
+@endforeach
+
+</div>
 
     </div>
 </section>
 
+{{-- ANIMASI --}}
 <style>
-    .jadwal-col {
-        opacity: 0;
-        transform: translateY(40px);
-        transition: opacity 600ms ease, transform 600ms ease;
-    }
-    .jadwal-col.visible {
-        opacity: 1;
-        transform: translateY(0);
-    }
+.jadwal-col {
+    opacity: 0;
+    transform: translateY(40px);
+    transition: all 0.6s ease;
+}
+.jadwal-col.visible {
+    opacity: 1;
+    transform: translateY(0);
+}
 </style>
 
 <script>
-    const jadwalObserver = new IntersectionObserver((entries) => {
-        entries.forEach(entry => {
-            if (entry.isIntersecting) {
-                entry.target.classList.add('visible');
-            } else {
-                entry.target.classList.remove('visible');
-            }
-        });
-    }, { threshold: 0.15 });
-
-    document.querySelectorAll('.jadwal-col').forEach((el, i) => {
-        el.style.transitionDelay = (i * 150) + 'ms';
-        jadwalObserver.observe(el);
+const jadwalObserver = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+        if (entry.isIntersecting) {
+            entry.target.classList.add('visible');
+        }
     });
+}, { threshold: 0.15 });
+
+document.querySelectorAll('.jadwal-col').forEach((el, i) => {
+    el.style.transitionDelay = (i * 150) + 'ms';
+    jadwalObserver.observe(el);
+});
 </script>
 
 {{-- ================================================================

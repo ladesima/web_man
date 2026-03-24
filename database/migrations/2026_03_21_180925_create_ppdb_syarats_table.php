@@ -7,34 +7,44 @@ use Illuminate\Support\Facades\Schema;
 return new class extends Migration
 {
     /**
-     * Run the migrations.
+     * RUN MIGRATION
      */
     public function up(): void
     {
         Schema::create('ppdb_syarats', function (Blueprint $table) {
-    $table->id();
+            $table->id();
 
-    // 🔥 WAJIB SAMA DENGAN TABLE MASTER
-    $table->unsignedBigInteger('master_id');
+            // 🔥 RELASI KE MASTER PPDB
+            $table->unsignedBigInteger('master_id');
 
-    $table->string('nama');
-    $table->string('tipe');
-    $table->string('format')->nullable();
-    $table->string('ukuran')->nullable();
-    $table->enum('kebutuhan', ['wajib','opsional']);
+            // 🔥 DATA SYARAT
+            $table->string('nama'); 
+            // contoh: "Kartu Keluarga", "Ijazah", dll
 
-    $table->timestamps();
+            $table->enum('tipe', ['text', 'file']);
+            // text = input biasa
+            // file = upload file
 
-    // 🔥 FOREIGN KEY
-    $table->foreign('master_id')
-          ->references('id')
-          ->on('master_ppdb')
-          ->onDelete('cascade');
-});
+            $table->string('format')->nullable();
+            // contoh: pdf, jpg, png
+
+            $table->string('ukuran')->nullable();
+            // contoh: 2MB, 5MB
+
+            $table->enum('kebutuhan', ['wajib', 'opsional'])->default('wajib');
+
+            $table->timestamps();
+
+            // 🔥 FOREIGN KEY
+            $table->foreign('master_id')
+                ->references('id')
+                ->on('master_ppdb')
+                ->onDelete('cascade');
+        });
     }
 
     /**
-     * Reverse the migrations.
+     * ROLLBACK
      */
     public function down(): void
     {
