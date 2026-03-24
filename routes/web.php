@@ -354,6 +354,10 @@ Route::prefix('admin')->middleware(['auth'])->group(function () {
     Route::delete('/syarat/{id}', [PpdbSyaratController::class, 'destroy'])->name('admin.syarat.delete');
 
     Route::view('/operasional/verifikasi', 'admin.ppdb.operasional.verifikasi-berkas')->name('admin.operasional.verifikasi');
+        // ===== TAMBAHKAN DI SINI =====
+    Route::view('/operasional/verifikasi/{id}',          'admin.ppdb.operasional.verifikasi-detail') ->name('admin.operasional.verifikasi.detail');
+    Route::view('/operasional/verifikasi/{id}/validasi', 'admin.ppdb.operasional.verifikasi-validasi')->name('admin.operasional.verifikasi.validasi');
+    // ===== END TAMBAHAN =====
     Route::view('/operasional/pengumuman', 'admin.ppdb.operasional.pengumuman')->name('admin.operasional.pengumuman');
     Route::view('/operasional/faq', 'admin.ppdb.operasional.faq')->name('admin.operasional.faq');
     Route::view('/manajemen/akun', 'admin.ppdb.manajemen.akun-panitia')->name('admin.manajemen.akun');
