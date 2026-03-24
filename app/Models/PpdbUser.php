@@ -16,7 +16,10 @@ class PpdbUser extends Authenticatable implements MustVerifyEmail
         'nisn',
         'nama',
         'email',
-        'password'
+        'password',
+        'foto',
+        'otp',
+        'otp_expired_at'
     ];
 
     protected $hidden = [

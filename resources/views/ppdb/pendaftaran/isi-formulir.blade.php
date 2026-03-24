@@ -17,10 +17,12 @@
             <div class="relative w-24 h-24">
                 {{-- Foto preview --}}
                 <img id="foto-preview"
-                     src="{{ asset('ppdb/profil.png') }}"
-                     alt="Foto Profil"
-                     class="w-24 h-24 rounded-full object-cover border-4 border-white"
-                     style="box-shadow: 0 2px 12px rgba(39,194,222,0.3);">
+     src="{{ auth('ppdb')->user()->foto 
+        ? asset('storage/' . auth('ppdb')->user()->foto) 
+        : asset('ppdb/profil.png') }}"
+     alt="Foto Profil"
+     class="w-24 h-24 rounded-full object-cover border-4 border-white"
+     style="box-shadow: 0 2px 12px rgba(39,194,222,0.3);">
 
                 {{-- Tombol kamera --}}
                 <button type="button"
@@ -243,20 +245,16 @@
         if (e.target === this) tutupModal();
     });
     function previewFoto(input) {
-        if (input.files && input.files[0]) {
-            const reader = new FileReader();
-            reader.onload = function(e) {
-                document.getElementById('foto-preview').src = e.target.result;
-            };
-            reader.readAsDataURL(input.files[0]);
+    if (input.files && input.files[0]) {
+        const reader = new FileReader();
 
-            // Transfer file ke input dalam form
-            const formInput = document.getElementById('foto-input-form');
-            const dataTransfer = new DataTransfer();
-            dataTransfer.items.add(input.files[0]);
-            formInput.files = dataTransfer.files;
-        }
+        reader.onload = function(e) {
+            document.getElementById('foto-preview').src = e.target.result;
+        };
+
+        reader.readAsDataURL(input.files[0]);
     }
+}
 
 
 </script>

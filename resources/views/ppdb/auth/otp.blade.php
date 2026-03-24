@@ -35,37 +35,24 @@
             @endif
 
             <form method="POST" action="{{ route('ppdb.verify-otp.post') }}" class="w-full space-y-6">
-                @csrf
+    @csrf
 
-                {{-- OTP 4 kotak --}}
-                <div class="flex justify-center gap-3">
-                    @for($i = 0; $i < 4; $i++)
-                    <input type="text" name="otp[]" maxlength="1"
-                           class="w-14 h-14 text-center text-xl font-bold rounded-xl bg-[#EEF2F7] border-0
-                                  focus:outline-none focus:ring-2 focus:ring-[#27C2DE] focus:bg-white
-                                  transition-all otp-input"
-                           inputmode="numeric" autocomplete="off">
-                    @endfor
-                </div>
+    <div class="flex justify-center gap-3">
+        @for($i = 0; $i < 4; $i++)
+        <input type="text" name="otp[]" maxlength="1"
+               class="w-14 h-14 text-center text-xl font-bold rounded-xl bg-[#EEF2F7]
+                      focus:ring-2 focus:ring-[#27C2DE] otp-input"
+               inputmode="numeric" autocomplete="off">
+        @endfor
+    </div>
 
-                <button type="submit"
-                        class="w-full py-2.5 rounded font-semibold text-white text-sm transition-all shadow-md"
-                        style="background-color: #91E9F9;"
-                        onmouseover="this.style.backgroundColor='#27C2DE'"
-                        onmouseout="this.style.backgroundColor='#91E9F9'">
-                    Kirim
-                </button>
-
-                {{-- Countdown resend --}}
-                <p class="text-center text-xs text-slate-400">
-                    Tidak menerima kode?
-                    <button type="button" id="resendBtn" disabled
-                            onclick="resendOtp()"
-                            class="text-[#27C2DE] font-semibold hover:text-[#00758A] transition-colors disabled:opacity-40 disabled:cursor-not-allowed">
-                        Kirim ulang (<span id="countdown">120</span>s)
-                    </button>
-                </p>
-            </form>
+    <button type="submit"
+            id="submitBtn"
+            class="w-full py-2.5 rounded font-semibold text-white text-sm shadow-md"
+            style="background-color: #91E9F9;">
+        Kirim
+    </button>
+</form>
         </div>
 
         {{-- Image Section --}}
@@ -74,61 +61,63 @@
                  class="w-full h-auto object-contain rounded-2xl">
         </div>
     </div>
+<script>
+    const otpInputs = document.querySelectorAll('.otp-input');
+    const form = document.querySelector('form');
 
-    <script>
-        // Auto focus next OTP input
-        const otpInputs = document.querySelectorAll('.otp-input');
-        otpInputs.forEach((input, index) => {
-            input.addEventListener('input', () => {
-                input.value = input.value.replace(/[^0-9]/g, '');
-                if (input.value.length === 1 && index < otpInputs.length - 1) {
-                    otpInputs[index + 1].focus();
-                }
-            });
-            input.addEventListener('keydown', (e) => {
-                if (e.key === 'Backspace' && !input.value && index > 0) {
-                    otpInputs[index - 1].focus();
-                }
-            });
+    // 🔥 auto focus pertama
+    otpInputs[0].focus();
+
+    otpInputs.forEach((input, index) => {
+
+        input.addEventListener('input', () => {
+            input.value = input.value.replace(/[^0-9]/g, '');
+
+            if (input.value && index < otpInputs.length - 1) {
+                otpInputs[index + 1].focus();
+            }
+
+            // 🔥 auto submit kalau sudah 4 digit
+            if (index === otpInputs.length - 1 && input.value) {
+                setTimeout(() => form.submit(), 300);
+            }
         });
 
-        // Countdown resend
-        let seconds = 120;
-        const countdownEl = document.getElementById('countdown');
-        const resendBtn = document.getElementById('resendBtn');
-        const timer = setInterval(() => {
-            seconds--;
-            countdownEl.textContent = seconds;
-            if (seconds <= 0) {
-                clearInterval(timer);
-                resendBtn.disabled = false;
-                resendBtn.innerHTML = 'Kirim ulang';
+        input.addEventListener('keydown', (e) => {
+            if (e.key === 'Backspace' && !input.value && index > 0) {
+                otpInputs[index - 1].focus();
             }
-        }, 1000);
+        });
+    });
 
-        // Resend OTP
-        function resendOtp() {
-            fetch('{{ route("ppdb.lupa-password.post") }}', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-CSRF-TOKEN': '{{ csrf_token() }}'
-                },
-                body: JSON.stringify({ email: '{{ session("ppdb_reset_email") }}' })
-            }).then(() => {
-                seconds = 120;
-                resendBtn.disabled = true;
-                const newTimer = setInterval(() => {
-                    seconds--;
-                    resendBtn.innerHTML = `Kirim ulang (<span id="countdown">${seconds}</span>s)`;
-                    if (seconds <= 0) {
-                        clearInterval(newTimer);
-                        resendBtn.disabled = false;
-                        resendBtn.innerHTML = 'Kirim ulang';
-                    }
-                }, 1000);
-            });
+    /*
+    |--------------------------------------------------
+    | COUNTDOWN RESEND
+    |--------------------------------------------------
+    */
+    let seconds = 120;
+    const countdownEl = document.getElementById('countdown');
+    const resendBtn = document.getElementById('resendBtn');
+
+    const timer = setInterval(() => {
+        seconds--;
+        countdownEl.textContent = seconds;
+
+        if (seconds <= 0) {
+            clearInterval(timer);
+            resendBtn.disabled = false;
+            resendBtn.innerText = 'Kirim ulang';
         }
-    </script>
+    }, 1000);
+
+    /*
+    |--------------------------------------------------
+    | RESEND OTP (FIXED)
+    |--------------------------------------------------
+    */
+    function resendOtp() {
+        window.location.href = "{{ route('ppdb.lupa-password') }}";
+    }
+</script>
 </body>
 </html>

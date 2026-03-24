@@ -17,44 +17,51 @@ class UploadBerkasController extends Controller
     */
     public function index($jalur)
     {
-        // 🔐 ambil user dari guard (FIX)
         $user = Auth::guard('ppdb')->user();
 
         if (!$user) {
             return redirect()->route('ppdb.login');
         }
 
-        // 🔐 ambil data pendaftaran
         $pendaftaran = Pendaftaran::where('user_id', $user->id)
-            ->where('jalur', $jalur)
+            ->latest()
             ->first();
 
-        // ❌ BELUM ISI FORM
+        /*
+        |------------------------------------------------------------------
+        | ❌ BELUM ISI FORM
+        |------------------------------------------------------------------
+        */
         if (!$pendaftaran) {
             return redirect()->route('siswa.pendaftaran', $jalur)
                 ->with('error', 'Silakan isi formulir terlebih dahulu');
         }
 
         /*
-        |--------------------------------------------------------------------------
-        | FLOW PROTECTION
-        |--------------------------------------------------------------------------
+        |------------------------------------------------------------------
+        | 🔒 VALIDASI JALUR
+        |------------------------------------------------------------------
         */
-
-        // 🔥 SUDAH UPLOAD → KE VERIFIKASI
-        if ($pendaftaran->status === 'berkas_selesai') {
-            return redirect()->route('siswa.verifikasi', $jalur);
+        if ($pendaftaran->jalur !== $jalur) {
+            return redirect()->route(
+                'siswa.upload.berkas',
+                $pendaftaran->jalur
+            );
         }
 
-        // 🔥 SUDAH VERIFIKASI
-        if ($pendaftaran->status === 'verifikasi') {
-            return redirect()->route('siswa.verifikasi', $jalur);
+        /*
+        |------------------------------------------------------------------
+        | 🔥 SET LAST STEP (JIKA BELUM ADA)
+        |------------------------------------------------------------------
+        */
+        if (empty($pendaftaran->last_step)) {
+            $pendaftaran->update([
+                'last_step' => 'berkas'
+            ]);
         }
 
-        // 🔥 SUDAH PENGUMUMAN
-        if ($pendaftaran->status === 'pengumuman') {
-            return redirect()->route('siswa.pengumuman', $jalur);
-        }
+        // ❗ TIDAK PERLU FLOW PROTECTION DI SINI
+        // karena sudah ditangani middleware
 
         return view('ppdb.berkas.index', compact('jalur', 'pendaftaran'));
     }
@@ -67,34 +74,53 @@ class UploadBerkasController extends Controller
     */
     public function store(Request $request, $jalur)
     {
-        // 🔐 ambil user dari guard (FIX BESAR)
         $user = Auth::guard('ppdb')->user();
 
         if (!$user) {
             return redirect()->route('ppdb.login');
         }
 
-        // 🔐 ambil data pendaftaran
         $pendaftaran = Pendaftaran::where('user_id', $user->id)
-            ->where('jalur', $jalur)
+            ->latest()
             ->first();
 
+        /*
+        |------------------------------------------------------------------
+        | ❌ BELUM ISI FORM
+        |------------------------------------------------------------------
+        */
         if (!$pendaftaran) {
             return redirect()->route('siswa.pendaftaran', $jalur)
                 ->with('error', 'Isi formulir terlebih dahulu');
         }
 
         /*
-        |--------------------------------------------------------------------------
-        | LOCK SYSTEM (TIDAK BISA EDIT)
-        |--------------------------------------------------------------------------
+        |------------------------------------------------------------------
+        | 🔒 VALIDASI JALUR
+        |------------------------------------------------------------------
+        */
+        if ($pendaftaran->jalur !== $jalur) {
+            return redirect()->route(
+                'siswa.upload.berkas',
+                $pendaftaran->jalur
+            );
+        }
+
+        /*
+        |------------------------------------------------------------------
+        | 🔒 LOCK SYSTEM
+        |------------------------------------------------------------------
         */
         if ($pendaftaran->status !== 'form_selesai' && !$pendaftaran->is_revisi) {
             return redirect()->route('siswa.verifikasi', $jalur)
                 ->with('error', 'Berkas sudah dikunci');
         }
 
-        // ✅ VALIDASI
+        /*
+        |------------------------------------------------------------------
+        | VALIDASI FILE
+        |------------------------------------------------------------------
+        */
         $request->validate([
             'akta' => 'required|file|mimes:jpg,jpeg,png,pdf|max:5120',
             'kk' => 'required|file|mimes:jpg,jpeg,png,pdf|max:5120',
@@ -119,15 +145,12 @@ class UploadBerkasController extends Controller
 
             if ($request->hasFile($input)) {
 
-                // 🔥 HAPUS FILE LAMA (JIKA ADA)
                 if (!empty($pendaftaran->$column)) {
                     Storage::disk('public')->delete($pendaftaran->$column);
                 }
 
                 $file = $request->file($input);
-
                 $filename = time() . '_' . $file->getClientOriginalName();
-
                 $path = $file->storeAs('berkas_ppdb', $filename, 'public');
 
                 $data[$column] = $path;
@@ -135,9 +158,9 @@ class UploadBerkasController extends Controller
         }
 
         /*
-        |--------------------------------------------------------------------------
-        | UPDATE DATA
-        |--------------------------------------------------------------------------
+        |------------------------------------------------------------------
+        | 🔥 UPDATE STATUS + LAST STEP
+        |------------------------------------------------------------------
         */
         $pendaftaran->update(array_merge($data, [
             'status' => 'berkas_selesai',

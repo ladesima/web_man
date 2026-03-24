@@ -24,7 +24,11 @@
                 dan Kami akan mengirimkan kode pemulihan<br>
                 untuk melanjutkan proses reset Kata Sandi
             </p>
-
+            @if(session('success'))
+    <div class="mb-4 text-sm text-green-600 bg-green-100 px-3 py-2 rounded">
+        {{ session('success') }}
+    </div>
+@endif
             <form method="POST" action="{{ route('ppdb.lupa-password.post') }}" class="w-full space-y-4">
                 @csrf
 
@@ -40,13 +44,13 @@
                 </div>
 
                 <button type="submit"
-                        class="w-full py-2.5 rounded font-semibold text-white text-sm transition-all shadow-md"
-                        style="background-color: #91E9F9;"
-                        onmouseover="this.style.backgroundColor='#27C2DE'"
-                        onmouseout="this.style.backgroundColor='#91E9F9'">
-                    Kirim
-                </button>
-
+        id="submitBtn"
+        class="w-full py-2.5 rounded font-semibold text-white text-sm transition-all shadow-md"
+        style="background-color: #91E9F9;"
+        onmouseover="this.style.backgroundColor='#27C2DE'"
+        onmouseout="this.style.backgroundColor='#91E9F9'">
+    Kirim
+</button>
                 <p class="text-center text-xs text-slate-400">
                     Ingat kata sandi?
                     <a href="{{ route('ppdb.login') }}" class="text-[#27C2DE] font-semibold hover:text-[#00758A] transition-colors">
@@ -62,6 +66,14 @@
                  class="w-full h-auto object-contain rounded-2xl">
         </div>
     </div>
+<script>
+    const form = document.querySelector('form');
+    const btn = document.getElementById('submitBtn');
 
+    form.addEventListener('submit', function() {
+        btn.disabled = true;
+        btn.innerText = 'Mengirim...';
+    });
+</script>
 </body>
 </html>
