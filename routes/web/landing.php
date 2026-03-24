@@ -1,13 +1,13 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\Ppdb\LandingPpdbController;
 
 /*
 |--------------------------------------------------------------------------
-| Load Modular Routes
+| LANDING
 |--------------------------------------------------------------------------
 */
 
-foreach (glob(__DIR__ . '/web/*.php') as $file) {
-    require $file;
-}
+Route::get('/', [LandingPpdbController::class, 'landing'])
+    ->name('beranda');

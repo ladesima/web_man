@@ -1,13 +1,14 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\Ppdb\PendaftaranController;
 
 /*
 |--------------------------------------------------------------------------
-| Load Modular Routes
+| PENDAFTARAN (FORM)
 |--------------------------------------------------------------------------
 */
-
-foreach (glob(__DIR__ . '/web/*.php') as $file) {
-    require $file;
-}
+Route::post('/siswa/pendaftaran/{jalur}', [
+    PendaftaranController::class,
+    'store'
+])->name('siswa.pendaftaran.post');

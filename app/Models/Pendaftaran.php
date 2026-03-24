@@ -1,7 +1,9 @@
 <?php
 namespace App\Models;
 
+
 use Illuminate\Database\Eloquent\Model;
+use App\Models\DetailPendaftaran;
 
 class Pendaftaran extends Model
 {
@@ -29,4 +31,8 @@ class Pendaftaran extends Model
         'sk_sekolah',
         'last_step'
     ];
+    public function details()
+{
+    return $this->hasMany(DetailPendaftaran::class);
+}
 }

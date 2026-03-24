@@ -4,10 +4,9 @@ use Illuminate\Support\Facades\Route;
 
 /*
 |--------------------------------------------------------------------------
-| Load Modular Routes
+| PANITIA
 |--------------------------------------------------------------------------
 */
-
-foreach (glob(__DIR__ . '/web/*.php') as $file) {
-    require $file;
-}
+Route::prefix('panitia')->group(function () {
+    Route::view('/dashboard', 'panitia.dashboard')->name('panitia.dashboard');
+});

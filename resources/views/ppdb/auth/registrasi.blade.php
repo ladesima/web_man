@@ -43,7 +43,7 @@
                         onmouseover="this.style.backgroundColor='#27C2DE'"
                         onmouseout="this.style.backgroundColor='#91E9F9'"
                         onmousedown="this.style.backgroundColor='#27C2DE'">
-                    Mauklkan NISN
+                    Masukkan NISN
                 </button>
 
                 <p class="text-center text-xs text-slate-400">

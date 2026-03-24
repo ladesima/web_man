@@ -667,7 +667,7 @@
 <form method="POST" action="{{ route('admin.tahapan.store') }}">
 @csrf
 
-<input type="hidden" name="jalur_id" x-bind:value="selectedJalurId">
+<input type="hidden" name="jalur_id" :value="selectedJalur?.id">
 
 <div x-show="showTambahJadwal" x-cloak
      class="fixed inset-0 z-50 flex items-center justify-center"

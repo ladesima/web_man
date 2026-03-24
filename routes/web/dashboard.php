@@ -1,13 +1,14 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\Ppdb\LandingPpdbController;
 
 /*
 |--------------------------------------------------------------------------
-| Load Modular Routes
+| DASHBOARD PPDB
 |--------------------------------------------------------------------------
 */
-
-foreach (glob(__DIR__ . '/web/*.php') as $file) {
-    require $file;
-}
+Route::get('/ppdb/dashboard', [
+    LandingPpdbController::class,
+    'index'
+])->middleware(['auth:ppdb'])->name('ppdb.dashboard');

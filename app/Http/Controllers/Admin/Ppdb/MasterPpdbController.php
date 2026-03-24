@@ -5,7 +5,6 @@ namespace App\Http\Controllers\Admin\Ppdb;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 
-// 🔥 MODEL
 use App\Models\MasterPpdb;
 use App\Models\PpdbJalur;
 use App\Models\PpdbTahapan;
@@ -15,19 +14,18 @@ class MasterPpdbController extends Controller
 {
     /*
     |--------------------------------------------------------------------------
-    | LIST DATA (HALAMAN MASTER)
+    | LIST DATA
     |--------------------------------------------------------------------------
     */
     public function index()
     {
-        $data = MasterPpdb::orderBy('tahun_ajaran', 'desc')->get();
-
+        $data = MasterPpdb::latest()->get();
         return view('admin.ppdb.master.index', compact('data'));
     }
 
     /*
     |--------------------------------------------------------------------------
-    | SIMPAN TAHUN AJAR
+    | STORE MASTER
     |--------------------------------------------------------------------------
     */
     public function store(Request $request)
@@ -37,142 +35,136 @@ class MasterPpdbController extends Controller
             'gelombang' => 'required'
         ]);
 
-        // 🔥 jika aktif → nonaktifkan semua
         if ($request->is_active == 1) {
             MasterPpdb::query()->update(['is_active' => false]);
         }
 
         MasterPpdb::create([
             'tahun_ajaran' => $request->tahun_ajaran,
-            'is_active' => $request->is_active ?? 0,
-            'gelombang' => $request->gelombang
+            'gelombang' => $request->gelombang,
+            'is_active' => $request->is_active ?? 0
         ]);
 
-        return back()->with('success', 'Data berhasil disimpan');
+        return redirect()->route('admin.master')
+            ->with('success', 'Data berhasil disimpan');
     }
 
     /*
     |--------------------------------------------------------------------------
-    | AKTIFKAN TAHUN AJAR
+    | ACTIVATE
     |--------------------------------------------------------------------------
     */
     public function activate($id)
     {
-        // 🔥 hanya boleh 1 aktif
         MasterPpdb::query()->update(['is_active' => false]);
 
         MasterPpdb::where('id', $id)->update([
             'is_active' => true
         ]);
 
-        return back()->with('success', 'Tahun ajar berhasil diaktifkan');
+        return redirect()->route('admin.master')
+            ->with('success', 'Tahun ajar berhasil diaktifkan');
     }
 
     /*
     |--------------------------------------------------------------------------
-    | DETAIL MASTER → LIST JALUR
+    | DETAIL
     |--------------------------------------------------------------------------
     */
-   public function detail($id)
-{
-    $master = MasterPpdb::with([
-        'jalurs.tahapans',
-        'syarats' // 🔥 TAMBAH INI
-    ])->findOrFail($id);
+    public function detail($id)
+    {
+        $master = MasterPpdb::with([
+            'jalurs.tahapans',
+            'syarats'
+        ])->findOrFail($id);
 
-    $jalurs = $master->jalurs;
+        $jalurs = $master->jalurs;
 
-    return view('admin.ppdb.master.detail', compact('master', 'jalurs'));
-}
-/*
+        return view('admin.ppdb.master.detail', compact('master', 'jalurs'));
+    }
+
+    /*
+    |--------------------------------------------------------------------------
+    | STORE JALUR
+    |--------------------------------------------------------------------------
+    */
+    public function storeJalur(Request $request)
+    {
+        $request->validate([
+            'master_id' => 'required|exists:master_ppdb,id',
+            'jalur' => 'required',
+            'gelombang' => 'required',
+            'kuota' => 'required|integer'
+        ]);
+
+        $isActive = $request->status == 'aktif';
+
+        if ($isActive) {
+            PpdbJalur::where('master_ppdb_id', $request->master_id)
+                ->where('jalur', $request->jalur)
+                ->update(['is_active' => false]);
+        }
+
+        PpdbJalur::create([
+            'master_ppdb_id' => $request->master_id,
+            'jalur' => $request->jalur,
+            'gelombang' => $request->gelombang,
+            'kuota' => $request->kuota,
+            'tanggal_mulai' => $request->tanggal_mulai,
+            'tanggal_selesai' => $request->tanggal_selesai,
+            'is_active' => $isActive
+        ]);
+
+        return redirect('/admin/master-ppdb/' . $request->master_id)
+            ->with('success', 'Jalur berhasil ditambahkan');
+    }
+
+    /*
     |--------------------------------------------------------------------------
     | UPDATE JALUR
     |--------------------------------------------------------------------------
     */
-public function updateJalur(Request $request, $id)
-{
-    $request->validate([
-        'jalur' => 'required',
-        'gelombang' => 'required',
-        'kuota' => 'required|integer'
-    ]);
+    public function updateJalur(Request $request, $id)
+    {
+        $jalur = PpdbJalur::findOrFail($id);
 
-    $jalur = PpdbJalur::findOrFail($id);
+        $request->validate([
+            'jalur' => 'required',
+            'gelombang' => 'required',
+            'kuota' => 'required|integer'
+        ]);
 
-    $isActive = $request->status == 'aktif';
+        $isActive = $request->status == 'aktif';
 
-    // 🔥 FIX LOGIC
-    if ($isActive) {
-        PpdbJalur::where('master_ppdb_id', $jalur->master_ppdb_id)
-            ->where('jalur', $request->jalur) // ✅ hanya jalur yang sama
-            ->where('id', '!=', $id) // ✅ kecuali dirinya
-            ->update(['is_active' => false]);
+        if ($isActive) {
+            PpdbJalur::where('master_ppdb_id', $jalur->master_ppdb_id)
+                ->where('jalur', $request->jalur)
+                ->where('id', '!=', $id)
+                ->update(['is_active' => false]);
+        }
+
+        $jalur->update([
+            'jalur' => $request->jalur,
+            'gelombang' => $request->gelombang,
+            'kuota' => $request->kuota,
+            'tanggal_mulai' => $request->tanggal_mulai,
+            'tanggal_selesai' => $request->tanggal_selesai,
+            'is_active' => $isActive
+        ]);
+
+        return redirect('/admin/master-ppdb/' . $jalur->master_ppdb_id)
+            ->with('success', 'Jalur berhasil diupdate');
     }
-
-    $jalur->update([
-        'jalur' => $request->jalur,
-        'gelombang' => $request->gelombang,
-        'kuota' => $request->kuota,
-        'tanggal_mulai' => $request->tanggal_mulai,
-        'tanggal_selesai' => $request->tanggal_selesai,
-        'is_active' => $isActive
-    ]);
-
-    return back()->with('success', 'Jalur berhasil diupdate');
-}
 
     /*
     |--------------------------------------------------------------------------
-    | SIMPAN JALUR
-    |--------------------------------------------------------------------------
-    */
-    public function storeJalur(Request $request)
-{
-    $request->validate([
-        'master_id' => 'required',
-        'jalur' => 'required',
-        'gelombang' => 'required',
-        'kuota' => 'required|integer'
-    ]);
-
-    $isActive = $request->status == 'aktif';
-
-    // 🔥 FIX LOGIC
-    if ($isActive) {
-        PpdbJalur::where('master_ppdb_id', $request->master_id)
-            ->where('jalur', $request->jalur) // ✅ hanya jalur yang sama
-            ->update(['is_active' => false]);
-    }
-
-    PpdbJalur::create([
-        'master_ppdb_id' => $request->master_id,
-        'jalur' => $request->jalur,
-        'gelombang' => $request->gelombang,
-        'kuota' => $request->kuota,
-
-        'tanggal_mulai' => $request->tanggal_mulai 
-            ? \Carbon\Carbon::parse($request->tanggal_mulai)->format('Y-m-d')
-            : null,
-
-        'tanggal_selesai' => $request->tanggal_selesai 
-            ? \Carbon\Carbon::parse($request->tanggal_selesai)->format('Y-m-d')
-            : null,
-
-        'is_active' => $isActive
-    ]);
-
-    return back()->with('success', 'Jalur berhasil ditambahkan');
-}
-
-    /*
-    |--------------------------------------------------------------------------
-    | SIMPAN TAHAPAN (JADWAL)
+    | STORE TAHAPAN (FIX BUG 404)
     |--------------------------------------------------------------------------
     */
     public function storeTahapan(Request $request)
     {
         $request->validate([
-            'jalur_id' => 'required',
+            'jalur_id' => 'required|exists:ppdb_jalurs,id',
             'nama_tahapan' => 'required',
             'tanggal_mulai' => 'required|date',
             'tanggal_selesai' => 'required|date'
@@ -185,30 +177,42 @@ public function updateJalur(Request $request, $id)
             'tanggal_selesai' => $request->tanggal_selesai,
         ]);
 
-        return back()->with('success', 'Tahapan berhasil ditambahkan');
+        // 🔥 AMBIL MASTER ID DENGAN AMAN
+        $jalur = PpdbJalur::findOrFail($request->jalur_id);
+
+        return redirect('/admin/master-ppdb/' . $jalur->master_ppdb_id)
+            ->with('success', 'Tahapan berhasil ditambahkan');
     }
 
     /*
     |--------------------------------------------------------------------------
-    | HAPUS JALUR
+    | DELETE JALUR
     |--------------------------------------------------------------------------
     */
     public function deleteJalur($id)
     {
-        PpdbJalur::findOrFail($id)->delete();
+        $jalur = PpdbJalur::findOrFail($id);
+        $masterId = $jalur->master_ppdb_id;
 
-        return back()->with('success', 'Jalur berhasil dihapus');
+        $jalur->delete();
+
+        return redirect('/admin/master-ppdb/' . $masterId)
+            ->with('success', 'Jalur berhasil dihapus');
     }
 
     /*
     |--------------------------------------------------------------------------
-    | HAPUS TAHAPAN
+    | DELETE TAHAPAN
     |--------------------------------------------------------------------------
     */
     public function deleteTahapan($id)
     {
-        PpdbTahapan::findOrFail($id)->delete();
+        $tahapan = PpdbTahapan::findOrFail($id);
+        $jalur = PpdbJalur::findOrFail($tahapan->jalur_id);
 
-        return back()->with('success', 'Tahapan berhasil dihapus');
+        $tahapan->delete();
+
+        return redirect('/admin/master-ppdb/' . $jalur->master_ppdb_id)
+            ->with('success', 'Tahapan berhasil dihapus');
     }
 }

@@ -47,62 +47,49 @@ class AuthPpdbController extends Controller
     |--------------------------------------------------------------------------
     */
     public function login(Request $request)
-    {
-        // ✅ VALIDASI
-        $request->validate([
-            'nisn' => 'required|digits:10',
-            'password' => 'required'
+{
+    // ✅ VALIDASI
+    $request->validate([
+        'nisn' => 'required|digits:10',
+        'password' => 'required'
+    ]);
+
+    // 🔍 CEK USER
+    $user = PpdbUser::where('nisn', $request->nisn)->first();
+
+    if (!$user || !Hash::check($request->password, $user->password)) {
+        return back()->withErrors([
+            'nisn' => 'NISN atau password salah'
         ]);
+    }
 
-        // 🔍 CEK USER
-        $user = PpdbUser::where('nisn', $request->nisn)->first();
+    // ❗ CEK VERIFIKASI EMAIL
+    if (!$user->hasVerifiedEmail()) {
+        return back()->withErrors([
+            'email' => 'Silakan verifikasi email terlebih dahulu'
+        ]);
+    }
 
-        if (!$user || !Hash::check($request->password, $user->password)) {
-            return back()->withErrors([
-                'nisn' => 'NISN atau password salah'
-            ]);
-        }
+    // 🔐 LOGIN
+    Auth::guard('ppdb')->login($user);
+    $request->session()->regenerate();
 
-        // ❗ CEK VERIFIKASI EMAIL
-        if (!$user->hasVerifiedEmail()) {
-            return back()->withErrors([
-                'email' => 'Silakan verifikasi email terlebih dahulu'
-            ]);
-        }
+    /*
+    |--------------------------------------------------------------------------
+    | AMBIL DATA PENDAFTARAN
+    |--------------------------------------------------------------------------
+    */
+    $pendaftaran = Pendaftaran::where('user_id', $user->id)
+        ->latest()
+        ->first();
 
-        // 🔐 LOGIN
-        Auth::guard('ppdb')->login($user);
-        $request->session()->regenerate();
+    /*
+    |--------------------------------------------------------------------------
+    | 🔥 PRIORITAS 1: SUDAH PERNAH DAFTAR → LAST STEP
+    |--------------------------------------------------------------------------
+    */
+    if ($pendaftaran) {
 
-        /*
-        |--------------------------------------------------------------------------
-        | CEK DATA PENDAFTARAN
-        |--------------------------------------------------------------------------
-        */
-        $pendaftaran = Pendaftaran::where('user_id', $user->id)->latest()->first();
-
-        /*
-        |--------------------------------------------------------------------------
-        | JIKA BELUM PERNAH DAFTAR
-        |--------------------------------------------------------------------------
-        */
-        if (!$pendaftaran) {
-
-            $jalur = session('jalur_daftar');
-
-            if ($jalur) {
-                session()->forget('jalur_daftar');
-                return redirect()->route('siswa.pendaftaran', $jalur);
-            }
-
-            return redirect()->route('ppdb.dashboard');
-        }
-
-        /*
-        |--------------------------------------------------------------------------
-        | PRIORITAS LAST STEP (PALING PENTING)
-        |--------------------------------------------------------------------------
-        */
         if (!empty($pendaftaran->last_step)) {
 
             switch ($pendaftaran->last_step) {
@@ -123,7 +110,7 @@ class AuthPpdbController extends Controller
 
         /*
         |--------------------------------------------------------------------------
-        | FALLBACK BERDASARKAN STATUS
+        | FALLBACK STATUS
         |--------------------------------------------------------------------------
         */
         switch ($pendaftaran->status) {
@@ -151,6 +138,26 @@ class AuthPpdbController extends Controller
                 return redirect()->route('ppdb.dashboard');
         }
     }
+
+    /*
+    |--------------------------------------------------------------------------
+    | 🔥 PRIORITAS 2: BELUM PERNAH DAFTAR → CEK JALUR
+    |--------------------------------------------------------------------------
+    */
+    $jalur = session('jalur_daftar');
+
+    if ($jalur) {
+        session()->forget('jalur_daftar');
+        return redirect()->route('siswa.pendaftaran', $jalur);
+    }
+
+    /*
+    |--------------------------------------------------------------------------
+    | 🔥 PRIORITAS 3: DEFAULT
+    |--------------------------------------------------------------------------
+    */
+    return redirect()->route('ppdb.dashboard');
+}
 
     /*
     |--------------------------------------------------------------------------
