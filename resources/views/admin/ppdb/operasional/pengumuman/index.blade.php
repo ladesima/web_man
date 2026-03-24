@@ -54,13 +54,13 @@
         Home
     </button>
 
-    <button @click="tab = 'review'"
-            :style="tab === 'review'
-                ? 'background:#C4F4FD; color:#00758A; font-weight:700; border: 1px solid #C4F4FD; border-radius:10px;'
-                : 'background:transparent; color:#94A3B8; font-weight:400; border: 1px solid #E2E8F0; border-radius:10px;'"
-            class="px-5 py-1.5 text-[13px] transition-all">
-        Riview Email
-    </button>
+    <a href="{{ route('admin.operasional.pengumuman.review') }}"
+    :style="window.location.pathname.includes('review')
+            ? 'background:#C4F4FD; color:#00758A; font-weight:700; border: 1px solid #C4F4FD; border-radius:10px;'
+            : 'background:transparent; color:#94A3B8; font-weight:400; border: 1px solid #E2E8F0; border-radius:10px;'"
+    class="px-5 py-1.5 text-[13px] transition-all">
+        Review Email
+    </a>
 </div>
 
         {{-- Action Buttons --}}
