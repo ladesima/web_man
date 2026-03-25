@@ -131,37 +131,55 @@
     </div>
 </template>
 
-{{-- SCRIPT --}}
 <script>
-    const pertanyaan = document.getElementById('pertanyaan');
-    const jawaban = document.getElementById('jawaban');
-    const status = document.getElementById('status');
-    const kategori = document.getElementById('kategori');
-    const urutan = document.getElementById('urutan');
-    const btn = document.getElementById('btnSubmit');
+const fields = [
+    document.getElementById('pertanyaan'),
+    document.getElementById('jawaban'),
+    document.getElementById('status'),
+    document.getElementById('kategori'),
+    document.getElementById('urutan')
+];
 
-    function isValid() {
-        return (
-            pertanyaan.value.trim() !== '' &&
-            jawaban.value.trim() !== '' &&
-            status.value !== '' &&
-            kategori.value !== '' &&
-            urutan.value !== ''
-        );
+const btn       = document.getElementById('btnSubmit');
+const errorText = document.getElementById('errorText');
+
+const COLOR_INVALID = '#91E9F9';
+const COLOR_VALID   = '#27C2DE'; // warna jika data lengkap
+const COLOR_HOVER   = '#27C2DE'; // warna hover selalu sama
+
+function isValid() {
+    return fields.every(el => el.value.trim() !== '');
+}
+
+function updateBaseColor() {
+    btn.style.backgroundColor = isValid() ? COLOR_VALID : COLOR_INVALID;
+    if (isValid()) errorText.classList.add('hidden');
+}
+
+// Hover selalu #27C2DE
+btn.addEventListener('mouseenter', () => {
+    btn.style.backgroundColor = COLOR_HOVER;
+});
+
+btn.addEventListener('mouseleave', () => {
+    updateBaseColor();
+});
+
+// Update otomatis saat field berubah
+fields.forEach(el => {
+    el.addEventListener('input',  updateBaseColor);
+    el.addEventListener('change', updateBaseColor);
+});
+
+// Klik tombol
+btn.addEventListener('click', () => {
+    if (!isValid()) {
+        errorText.classList.remove('hidden');
+    } else {
+        errorText.classList.add('hidden');
+        document.querySelector('[x-data]').__x.$data.showPopup = true;
     }
-
-    function updateButton() {
-        if (isValid()) {
-            btn.style.backgroundColor = '#006E87';
-        } else {
-            btn.style.backgroundColor = '#91E9F9';
-        }
-    }
-
-    document.querySelectorAll('#faqForm textarea, #faqForm select').forEach(el => {
-        el.addEventListener('input', updateButton);
-        el.addEventListener('change', updateButton);
-    });
+});
 </script>
 
 </div>

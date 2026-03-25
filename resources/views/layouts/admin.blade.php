@@ -17,12 +17,15 @@
     $isMaster         = request()->routeIs('admin.master*');
     $isOperasional    = request()->routeIs('admin.operasional*');
     $isManajemen      = request()->routeIs('admin.manajemen*');
+    $isMediaGambar    = request()->routeIs('admin.manajemen.media-gambar*');
 @endphp
 
+{{-- TAMBAHKAN showLogout ke x-data --}}
 <div x-data="{
     sidebarOpen: true,
     operasionalOpen: {{ $isOperasional ? 'true' : 'false' }},
-    manajemenOpen: {{ $isManajemen ? 'true' : 'false' }}
+    manajemenOpen: {{ $isManajemen ? 'true' : 'false' }},
+    showLogout: false
 }" class="h-screen overflow-hidden flex">
 
     {{-- ===================== SIDEBAR ===================== --}}
@@ -64,7 +67,7 @@
             </a>
             @endif
 
-            {{-- ===== TAMBAHAN: Data Pendaftar ===== --}}
+            {{-- Data Pendaftar --}}
             @if($isDataPendaftar)
             <a href="{{ route('admin.data-pendaftar') }}" class="block relative h-[44px]"
                :class="sidebarOpen ? 'ml-3 mr-0' : 'mx-2'">
@@ -84,7 +87,6 @@
                 <span x-show="sidebarOpen" x-cloak class="whitespace-nowrap">Data Pendaftar</span>
             </a>
             @endif
-            {{-- ===== END TAMBAHAN ===== --}}
 
             {{-- Master PPDB --}}
             @if($isMaster)
@@ -198,9 +200,10 @@
                 <div x-show="manajemenOpen && sidebarOpen" x-cloak class="mt-1 ml-7">
                     @php
                         $manSubMenus = [
-                            ['route' => 'admin.manajemen.akun',    'label' => 'Akun Panitia',      'index' => 0],
-                            ['route' => 'admin.manajemen.riwayat', 'label' => 'Riwayat Aktivitas', 'index' => 1],
-                        ];
+                        ['route' => 'admin.manajemen.akun',          'label' => 'Akun Panitia',      'index' => 0],
+                        ['route' => 'admin.manajemen.riwayat',        'label' => 'Riwayat Aktivitas', 'index' => 1],
+                        ['route' => 'admin.manajemen.media-gambar',   'label' => 'Media Gambar',      'index' => 2],
+                    ];
                         $manActiveIndex = -1;
                         foreach($manSubMenus as $sm) {
                             if(request()->routeIs($sm['route'])) $manActiveIndex = $sm['index'];
@@ -227,17 +230,16 @@
             {{-- Divider --}}
             <div class="pt-3 pb-2 px-3"><div class="h-px bg-slate-100"></div></div>
 
-            {{-- Keluar --}}
+            {{-- KELUAR (SIDEBAR) --}}
             <div :class="sidebarOpen ? 'mx-3' : 'mx-2'">
-                <form method="POST" action="{{ route('logout') }}">
-                    @csrf
-                    <button type="submit"
-                            class="w-full h-[44px] flex items-center gap-2.5 rounded-[10px] text-[#464646] hover:bg-red-50 hover:text-red-500 transition-all font-semibold text-[12px]"
-                            :class="sidebarOpen ? 'px-3' : 'justify-center'">
-                        <img src="{{ asset('ppdb/admin/keluar.png') }}" alt="" class="w-[18px] h-[18px] object-contain shrink-0">
-                        <span x-show="sidebarOpen" x-cloak class="whitespace-nowrap">Keluar</span>
-                    </button>
-                </form>
+                {{-- Tombol logout pemicu popup --}}
+                <button type="button"
+                        @click="showLogout = true"
+                        class="w-full h-[44px] flex items-center gap-2.5 rounded-[10px] text-[#464646] hover:bg-red-50 hover:text-red-500 transition-all font-semibold text-[12px]"
+                        :class="sidebarOpen ? 'px-3' : 'justify-center'">
+                    <img src="{{ asset('ppdb/admin/keluar.png') }}" alt="" class="w-[18px] h-[18px] object-contain shrink-0">
+                    <span x-show="sidebarOpen" x-cloak class="whitespace-nowrap">Keluar</span>
+                </button>
             </div>
 
         </nav>
@@ -286,6 +288,9 @@
                     @elseif(request()->routeIs('admin.manajemen.riwayat'))
                         <h1 class="text-[17px] font-bold text-[#006E87]">Riwayat Aktivitas</h1>
                         <p class="text-[11px] text-[#2B2A28]">Pantau aktivitas panitia</p>
+                    @elseif(request()->routeIs('admin.manajemen.media-gambar*'))
+                        <h1 class="text-[17px] font-bold text-[#006E87]">Media Gambar</h1>
+                        <p class="text-[11px] text-[#2B2A28]">Kelola media gambar tampilan sistem</p>
                     @else
                         <h1 class="text-[17px] font-bold text-[#006E87]">@yield('title', 'Dashboard')</h1>
                         <p class="text-[11px] text-[#006E87] opacity-60">Admin MAN Jeneponto</p>
@@ -317,10 +322,12 @@
                         <a href="#" class="block px-4 py-3 text-[12px] text-slate-700 hover:bg-slate-50 transition-all">Profil Saya</a>
                         <a href="#" class="block px-4 py-3 text-[12px] text-slate-700 hover:bg-slate-50 transition-all">Ubah Password</a>
                         <div class="border-t border-slate-100"></div>
-                        <form method="POST" action="{{ route('logout') }}">
-                            @csrf
-                            <button type="submit" class="w-full text-left px-4 py-3 text-[12px] text-red-500 hover:bg-red-50 transition-all">Logout</button>
-                        </form>
+                        {{-- Tombol logout dropdown pemicu popup --}}
+                        <button type="button"
+                                @click="showLogout = true"
+                                class="w-full text-left px-4 py-3 text-[12px] text-red-500 hover:bg-red-50 transition-all">
+                            Logout
+                        </button>
                     </div>
                 </div>
             </div>
@@ -331,6 +338,47 @@
         </section>
 
     </main>
+
+    {{-- ===================== POPUP KONFIRMASI LOGOUT ===================== --}}
+    {{-- Form logout tersembunyi yang akan disubmit setelah konfirmasi --}}
+    <form id="logout-form" method="POST" action="{{ route('logout') }}" style="display: none;">
+        @csrf
+    </form>
+
+    <template x-teleport="body">
+        <div x-show="showLogout" x-cloak
+             class="fixed inset-0 z-50 flex items-center justify-center"
+             style="background:rgba(0,0,0,0.35);">
+            <div @click.outside="showLogout = false"
+                 class="relative w-full max-w-sm" x-transition>
+                {{-- Gambar popup (gunakan gambar yang sesuai, misalnya 'logout.png' atau tetap 'delate.png') --}}
+                <img src="{{ asset('ppdb/admin/operasional/logout.png') }}" class="w-full" alt="">
+                <div class="absolute bottom-0 left-0 right-0 pb-8 px-8 text-center">
+                    <h3 class="text-[15px] font-bold mb-2">
+                        Apakah anda yakin ingin keluar?
+                    </h3>
+                    <p class="text-[12px] text-slate-400 mb-5">
+                        Anda akan keluar dari sistem
+                    </p>
+                    <div class="flex gap-3 justify-center">
+                        <button type="button"
+                                @click="showLogout = false"
+                                class="px-6 py-2 rounded-xl border"
+                                style="background:#FBFAF7; border-color:#A5A5A5;">
+                            Batal
+                        </button>
+                        <button type="button"
+                                @click="document.getElementById('logout-form').submit();"
+                                class="px-6 py-2 rounded-xl text-white"
+                                style="background:#EF4444;">
+                            Keluar
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </template>
+
 </div>
 
 @stack('scripts')
