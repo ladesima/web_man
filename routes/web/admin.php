@@ -48,9 +48,14 @@ Route::prefix('admin')->middleware(['auth'])->group(function () {
     Route::view('/operasional/pengumuman/tambah', 'admin.ppdb.operasional.pengumuman.tambah')->name('admin.operasional.pengumuman.tambah');
     Route::view('/operasional/pengumuman/{id}/pesan', 'admin.ppdb.operasional.pengumuman.detail-pesan')->name('admin.operasional.pengumuman.pesan');
 
-    Route::view('/operasional/faq', 'admin.ppdb.operasional.faq')->name('admin.operasional.faq');
+    Route::view('/operasional/faq', 'admin.ppdb.operasional.faq')
+        ->name('admin.operasional.faq');
+
+    Route::view('/operasional/faq/tambah', 'admin.ppdb.operasional.faq-tambah')
+        ->name('admin.operasional.faq.tambah');
+
     Route::view('/manajemen/akun', 'admin.ppdb.manajemen.akun-panitia')->name('admin.manajemen.akun');
-    Route::view('/manajemen/riwayat', 'admin.ppdb.manajemen.riwayat')->name('admin.manajemen.riwayat');
+    Route::view('/manajemen/riwayat', 'admin.ppdb.manajemen.riwayat-aktivitas')->name('admin.manajemen.riwayat');
 
     Route::get('/verifikasi', [\App\Http\Controllers\Admin\VerifikasiController::class, 'index'])->name('admin.verifikasi');
     Route::get('/verifikasi/{id}', [\App\Http\Controllers\Admin\VerifikasiController::class, 'show'])->name('admin.verifikasi.detail');
