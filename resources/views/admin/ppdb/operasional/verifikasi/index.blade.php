@@ -9,58 +9,118 @@
 .custom-check:checked::after { content:""; position:absolute; left:5px; top:2px; width:7px; height:11px; border:2px solid #27C2DE; border-top:none; border-left:none; transform:rotate(45deg); }
 </style>
 
-<div x-data="{
+<div x-data='{
     showSeleksi: false,
     checkedCount: 0,
     checkAll: false,
-    rows: [
-        { id: 1, nama: 'Rudy',            no: '121731871', jalur: 'Prestasi', status: 'berkas_valid',    catatan: '-' },
-        { id: 2, nama: 'Muhammad Naufal', no: '121731871', jalur: 'Prestasi', status: 'perlu_perbaikan', catatan: 'Fotonya Harus HD' },
-        { id: 3, nama: 'Amaar',           no: '121731871', jalur: 'Prestasi', status: 'berkas_valid',    catatan: '-' },
-        { id: 4, nama: 'Lisa',            no: '121731871', jalur: 'Prestasi', status: 'perlu_perbaikan', catatan: 'File Ijazah tertukar' },
-    ],
+
+    rows: @json($pendaftar ?? []),
+
+    // 🔥 FILTER STATE
+    search: "",
+    filterJalur: "",
+    filterStatus: "",
+    filterCard: "",
+
+    // 🔥 FILTER LOGIC (CORE)
+    get filteredRows() {
+        return this.rows.filter(row => {
+
+            let matchSearch =
+                row.nama.toLowerCase().includes(this.search.toLowerCase()) ||
+                row.no.toString().includes(this.search);
+
+            let matchJalur =
+                this.filterJalur === "" ||
+                row.jalur.toLowerCase() === this.filterJalur.toLowerCase();
+
+            let matchStatus =
+                this.filterStatus === "" ||
+                row.status === this.filterStatus;
+
+            let matchCard =
+    this.filterCard === "" ||
+    row.status === this.filterCard;
+
+            return matchSearch && matchJalur && matchStatus && matchCard;
+        });
+    },
+
     toggleAll() {
         this.checkAll = !this.checkAll;
-        this.rows.forEach(r => r.checked = this.checkAll);
+        this.filteredRows.forEach(r => r.checked = this.checkAll);
         this.updateCount();
     },
+
     updateCount() {
         this.checkedCount = this.rows.filter(r => r.checked).length;
+    },
+
+    // 🔥 FILTER BY CARD
+    filterByCard(type) {
+
+    // kalau klik card yang sama → reset
+    if (this.filterCard === type) {
+        this.filterCard = "";
+    } else {
+        // klik card baru → aktifkan filter
+        this.filterCard = type;
     }
-}">
+},
+        resetFilter() {
+    this.search = "";
+    this.filterJalur = "";
+    this.filterStatus = "";
+    this.filterCard = "";
+}
+}'>
 
     {{-- ===== STAT CARDS (4 kolom) ===== --}}
     <div class="grid grid-cols-4 gap-3 mb-5">
         @php
-        $stats = [
-            ['label' => 'Menunggu Verifikasi', 'icon' => 'totalpendaftar.png',        'from' => '#FAFEFF', 'to' => '#59DEFF', 'color' => '#0099B8'],
-            ['label' => 'Perlu Perbaikan',      'icon' => 'perluperbaikan.png',  'from' => '#FAFEFF', 'to' => '#7AB2FF', 'color' => '#2563EB'],
-            ['label' => 'Berkas Valid',          'icon' => 'berkasvalid.png',     'from' => '#FAFEFF', 'to' => '#88FFC4', 'color' => '#15803D'],
-            ['label' => 'Berkas Ditolak',        'icon' => 'berkasditolak.png',   'from' => '#FAFEFF', 'to' => '#FF9696', 'color' => '#DC2626'],
-        ];
-        @endphp
-        @foreach($stats as $s)
-        <div class="relative rounded-2xl px-4 py-4 overflow-hidden cursor-pointer transition-all duration-200"
-             style="background: linear-gradient(to bottom left, {{ $s['from'] }} 0%, {{ $s['to'] }} 100%);
-                    border: 0.66px solid #F3F3F3;
-                    box-shadow: 0px 2.62px 2.62px 0px rgba(161,209,251,0.25);
-                    filter: saturate(0.45) brightness(1.08);"
-             onmouseenter="this.style.filter='saturate(1) brightness(1)'; this.style.boxShadow='0px 6px 14px rgba(0,0,0,0.10)'"
-             onmouseleave="this.style.filter='saturate(0.45) brightness(1.08)'; this.style.boxShadow='0px 2.62px 2.62px 0px rgba(161,209,251,0.25)'">
-            <div class="flex items-start justify-between mb-2">
-                <p class="text-[11px] font-semibold" style="color:{{ $s['color'] }}">{{ $s['label'] }}</p>
-                <img src="{{ asset('ppdb/admin/operasional/' . $s['icon']) }}" alt="" class="w-7 h-7 object-contain">
-            </div>
-            <p class="text-[26px] font-bold text-[#2B2A28]">1298</p>
-        </div>
-        @endforeach
+$stats = [
+    ['key'=>'menunggu','label'=>'Menunggu Verifikasi','icon'=>'totalpendaftar.png','from'=>'#FAFEFF','to'=>'#59DEFF','color'=>'#0099B8'],
+    ['key'=>'perlu_perbaikan','label'=>'Perlu Perbaikan','icon'=>'perluperbaikan.png','from'=>'#FAFEFF','to'=>'#7AB2FF','color'=>'#2563EB'],
+    ['key'=>'berkas_valid','label'=>'Berkas Valid','icon'=>'berkasvalid.png','from'=>'#FAFEFF','to'=>'#88FFC4','color'=>'#15803D'],
+    ['key'=>'berkas_ditolak','label'=>'Berkas Ditolak','icon'=>'berkasditolak.png','from'=>'#FAFEFF','to'=>'#FF9696','color'=>'#DC2626'],
+];
+@endphp
+
+@foreach($stats as $s)
+<div 
+    @click="filterByCard('{{ $s['key'] }}')"
+    class="relative rounded-2xl px-4 py-4 overflow-hidden cursor-pointer transition-all duration-200"
+    
+    :class="filterCard === '{{ $s['key'] }}' ? 'ring-2 ring-black/20 scale-[1.03]' : ''"
+
+    style="background: linear-gradient(to bottom left, {{ $s['from'] }} 0%, {{ $s['to'] }} 100%);
+           border: 0.66px solid #F3F3F3;
+           box-shadow: 0px 2.62px 2.62px 0px rgba(161,209,251,0.25);
+           filter: saturate(0.45) brightness(1.08);"
+
+    onmouseenter="this.style.filter='saturate(1) brightness(1)'; this.style.boxShadow='0px 6px 14px rgba(0,0,0,0.10)'"
+    onmouseleave="this.style.filter='saturate(0.45) brightness(1.08)'; this.style.boxShadow='0px 2.62px 2.62px 0px rgba(161,209,251,0.25)'"
+>
+
+    <div class="flex items-start justify-between mb-2">
+        <p class="text-[11px] font-semibold" style="color:{{ $s['color'] }}">
+            {{ $s['label'] }}
+        </p>
+        <img src="{{ asset('ppdb/admin/operasional/' . $s['icon']) }}" class="w-7 h-7">
+    </div>
+
+    <p class="text-[26px] font-bold text-[#2B2A28]">
+      {{ $counts[$s['key']] ?? 0 }}
+    </p>
+</div>
+@endforeach
     </div>
 
     {{-- ===== SEARCH & FILTER ===== --}}
     <div class="flex gap-3 mb-4 items-center w-full">
         {{-- Search --}}
         <div class="relative flex-[2]">
-            <input type="text" placeholder="Cari"
+            <input type="text" placeholder="Cari" x-model="search"
                    class="w-full pl-9 pr-4 py-2.5 text-[12px] border border-slate-200 bg-white focus:outline-none focus:ring-2 focus:ring-[#27C2DE]"
                    style="border-radius: 8px;">
             <svg class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -70,7 +130,7 @@
         {{-- Filter Jalur --}}
         <div class="relative flex-1">
             <select class="appearance-none w-full pl-4 pr-8 py-2.5 text-[12px] border border-slate-200 bg-white text-slate-600 focus:outline-none"
-                    style="border-radius: 8px;">
+                    style="border-radius: 8px;" x-model="filterJalur">
                 <option>Jalur</option>
                 <option>Reguler</option>
                 <option>Prestasi</option>
@@ -95,17 +155,22 @@
         {{-- Filter Status --}}
         <div class="relative flex-1">
             <select class="appearance-none w-full pl-4 pr-8 py-2.5 text-[12px] border border-slate-200 bg-white text-slate-600 focus:outline-none"
-                    style="border-radius: 8px;">
-                <option>Status</option>
-                <option>Menunggu</option>
-                <option>Perlu Perbaikan</option>
-                <option>Berkas Valid</option>
-                <option>Berkas Ditolak</option>
+                    style="border-radius: 8px;" x-model="filterStatus">
+                <option value="">Status</option>
+    <option value="menunggu">Menunggu</option>
+    <option value="perlu_perbaikan">Perlu Perbaikan</option>
+    <option value="berkas_valid">Berkas Valid</option>
+    <option value="berkas_ditolak">Berkas Ditolak</option>
             </select>
             <svg class="pointer-events-none absolute right-2 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
             </svg>
         </div>
+        <button 
+    @click="resetFilter()"
+    class="px-4 py-2 text-[12px] font-semibold rounded-lg border border-slate-300 hover:bg-slate-100 transition-all">
+    Reset
+</button>
     </div>
 
     {{-- ===== TABEL ===== --}}
@@ -126,7 +191,7 @@
                 </tr>
             </thead>
             <tbody class="divide-y divide-slate-100">
-                <template x-for="(row, i) in rows" :key="row.id">
+                <template x-for="(row, i) in filteredRows" :key="row.id">
                     <tr class="hover:bg-slate-50 transition-all">
                         <td class="py-3 px-4">
                             <input type="checkbox" x-model="row.checked" @change="updateCount()" class="custom-check">
@@ -154,11 +219,11 @@
                         </td>
                         <td class="text-center py-3 px-4 text-[12px] text-slate-500" x-text="row.catatan"></td>
                         <td class="text-center py-3 px-4">
-                            <a :href="'/admin/operasional/verifikasi/' + row.id"
-                               class="inline-flex items-center px-4 py-1.5 rounded-lg text-white text-[12px] font-semibold transition-all hover:opacity-90 active:scale-95"
-                               style="background: linear-gradient(90deg, #15B2CE 0%, #00758A 100%);">
-                                Detail
-                            </a>
+                           <a :href="`/admin/operasional/verifikasi/${row.id}`"
+   class="inline-flex items-center px-4 py-1.5 rounded-lg text-white text-[12px] font-semibold transition-all hover:opacity-90 active:scale-95"
+   style="background: linear-gradient(90deg, #15B2CE 0%, #00758A 100%);">
+    Detail
+</a>
                         </td>
                     </tr>
                 </template>

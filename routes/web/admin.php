@@ -5,6 +5,23 @@ use App\Http\Controllers\Admin\Ppdb\MasterPpdbController;
 use App\Http\Controllers\Admin\Ppdb\TahapanController;
 use App\Http\Controllers\Admin\Ppdb\PpdbSyaratController;
 use App\Http\Controllers\Auth\AdminAuthController;
+use App\Http\Controllers\Admin\VerifikasiController;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Response;
+
+Route::get('/preview-dokumen', function (Illuminate\Http\Request $request) {
+
+    $file = $request->file;
+
+    $path = storage_path('app/public/' . $file);
+
+    if (!file_exists($path)) {
+        abort(404, 'File tidak ditemukan');
+    }
+
+    return response()->file($path);
+
+})->name('preview.dokumen');
 
 Route::prefix('admin')->middleware(['auth'])->group(function () {
 
@@ -38,10 +55,22 @@ Route::prefix('admin')->middleware(['auth'])->group(function () {
     Route::delete('/syarat/{id}', [PpdbSyaratController::class, 'destroy'])->name('admin.syarat.delete');
 
     // VERIFIKASI
-    Route::view('/operasional/verifikasi', 'admin.ppdb.operasional.verifikasi.index')->name('admin.operasional.verifikasi');
-    Route::view('/operasional/verifikasi/{id}', 'admin.ppdb.operasional.verifikasi.detail')->name('admin.operasional.verifikasi.detail');
-    Route::view('/operasional/verifikasi/{id}/validasi', 'admin.ppdb.operasional.verifikasi.validasi')->name('admin.operasional.verifikasi.validasi');
+    // Route::view('/operasional/verifikasi', 'admin.ppdb.operasional.verifikasi.index')->name('admin.operasional.verifikasi');
+    // Route::view('/operasional/verifikasi/{id}', 'admin.ppdb.operasional.verifikasi.detail')->name('admin.operasional.verifikasi.detail');
+    // Route::view('/operasional/verifikasi/{id}/validasi', 'admin.ppdb.operasional.verifikasi.validasi')->name('admin.operasional.verifikasi.validasi');
 
+     // MEDIA GAMBAR
+    Route::view('/manajemen/media-gambar', 'admin.ppdb.manajemen.media-gambar.index')
+->name('admin.manajemen.media-gambar');
+    Route::view('/manajemen/media-gambar/sistem-informasi', 'admin.ppdb.manajemen.media-gambar.sistem-informasi')
+        ->name('admin.manajemen.media-gambar.sistem-informasi');
+    Route::view('/manajemen/media-gambar/siswa', 'admin.ppdb.manajemen.media-gambar.siswa')
+        ->name('admin.manajemen.media-gambar.siswa');
+    Route::view('/manajemen/media-gambar/admin', 'admin.ppdb.manajemen.media-gambar.admin')
+        ->name('admin.manajemen.media-gambar.admin');
+    Route::view('/manajemen/media-gambar/panitia', 'admin.ppdb.manajemen.media-gambar.panitia')
+        ->name('admin.manajemen.media-gambar.panitia');
+        
     // PENGUMUMAN
     Route::view('/operasional/pengumuman', 'admin.ppdb.operasional.pengumuman.index')->name('admin.operasional.pengumuman');
     Route::view('/operasional/pengumuman/review', 'admin.ppdb.operasional.pengumuman.review')->name('admin.operasional.pengumuman.review');
@@ -52,12 +81,17 @@ Route::prefix('admin')->middleware(['auth'])->group(function () {
     Route::view('/manajemen/akun', 'admin.ppdb.manajemen.akun-panitia')->name('admin.manajemen.akun');
     Route::view('/manajemen/riwayat', 'admin.ppdb.manajemen.riwayat')->name('admin.manajemen.riwayat');
 
-    Route::get('/verifikasi', [\App\Http\Controllers\Admin\VerifikasiController::class, 'index'])->name('admin.verifikasi');
-    Route::get('/verifikasi/{id}', [\App\Http\Controllers\Admin\VerifikasiController::class, 'show'])->name('admin.verifikasi.detail');
-    Route::post('/verifikasi/lulus/{id}', [\App\Http\Controllers\Admin\VerifikasiController::class, 'lulus'])->name('admin.verifikasi.lulus');
-    Route::post('/verifikasi/tidak-lulus/{id}', [\App\Http\Controllers\Admin\VerifikasiController::class, 'tidakLulus'])->name('admin.verifikasi.tidak_lulus');
-    Route::post('/verifikasi/perbaikan/{id}', [\App\Http\Controllers\Admin\VerifikasiController::class, 'perbaikan'])->name('admin.verifikasi.perbaikan');
+   Route::get('/operasional/verifikasi', [VerifikasiController::class, 'index'])
+    ->name('admin.operasional.verifikasi');
 
+   // DETAIL
+    Route::get('/operasional/verifikasi/{id}', [\App\Http\Controllers\Admin\VerifikasiController::class, 'show'])->name('admin.verifikasi.detail');
+Route::get('/operasional/verifikasi/{id}/validasi', [\App\Http\Controllers\Admin\VerifikasiController::class, 'validasi'])->name('admin.verifikasi.validasi');
+
+    Route::post('/operasional/verifikasi/lulus/{id}', [VerifikasiController::class, 'lulus']);
+    Route::post('/operasional/verifikasi/tidak-lulus/{id}', [VerifikasiController::class, 'tidakLulus']);
+    Route::post('/operasional/verifikasi/perbaikan/{id}', [VerifikasiController::class, 'perbaikan']);
+    Route::post('/operasional/verifikasi/{id}/simpan', [VerifikasiController::class, 'simpanValidasi'])->name('admin.verifikasi.simpan');
 });
 
 // AUTH ADMIN
