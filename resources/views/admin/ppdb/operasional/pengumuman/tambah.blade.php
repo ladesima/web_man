@@ -12,8 +12,8 @@
     padding: 10px 14px;
     font-size: 12px;
     color: #2B2A28;
-    background: #F8FAFC;
-    border: 1px solid #E2E8F0;
+    background: #F5F7FF;
+    border: 1px solid #DFEAF2;
     border-radius: 8px;
     outline: none;
     transition: border 0.2s, box-shadow 0.2s;
@@ -40,8 +40,7 @@
     background: transparent;
     border: none;
 }
-.toolbar-btn:hover { background: #F1F5F9; }
-.toolbar-btn.active { background: #E2E8F0; color: #2B2A28; }
+.toolbar-btn:hover { background: rgba(255,255,255,0.15); }
 #editor-area {
     min-height: 220px;
     padding: 14px;
@@ -49,10 +48,15 @@
     color: #2B2A28;
     outline: none;
     line-height: 1.7;
+    background: #DFEAF2;
 }
 #editor-area:empty:before {
     content: attr(data-placeholder);
     color: #CBD5E1;
+}
+.form-input option {
+    background: white;
+    color: #2B2A28;
 }
 </style>
 
@@ -81,49 +85,54 @@
             <div>
                 <label class="form-label">Dari (Nama Sekolah)</label>
                 <input type="text" class="form-input" value="Panitia, MAN Jeneponto" readonly
-                       style="background:#F1F5F9; color:#94A3B8; cursor:not-allowed;">
+                       style="background:#F5F7FF; color:#94A3B8; cursor:not-allowed; border-color:#DFEAF2;">
             </div>
             <div>
                 <label class="form-label">Email Pengirim (Nama Sekolah)</label>
                 <input type="text" class="form-input" value="PPDB@manjeneponto.sch.id" readonly
-                       style="background:#F1F5F9; color:#94A3B8; cursor:not-allowed;">
+                       style="background:#F5F7FF; color:#94A3B8; cursor:not-allowed; border-color:#DFEAF2;">
             </div>
         </div>
 
         {{-- Penerima --}}
-        <div class="mb-5">
-            <label class="form-label">Penerima</label>
-            <div class="relative">
-                <select class="form-input appearance-none pr-8" style="color:#94A3B8;">
-                    <option value="" disabled selected></option>
-                    <option value="lulus">Lulus</option>
-                    <option value="tidak_lulus">Tidak Lulus</option>
-                    <option value="perbaikan">Perlu Perbaikan</option>
-                    <option value="semua">Semua Peserta</option>
-                </select>
-                <svg class="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400"
-                     fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
-                </svg>
+        <div class="grid grid-cols-2 gap-5 mb-5">
+            <div>
+                <label class="form-label">Penerima</label>
+                <div class="relative">
+                    <select class="form-input appearance-none pr-8"
+                            style="background:#F5F7FF; border-color:#DFEAF2; color:#94A3B8;">
+                        <option value="" disabled selected></option>
+                        <option value="lulus">Lulus</option>
+                        <option value="tidak_lulus">Tidak Lulus</option>
+                        <option value="perbaikan">Perlu Perbaikan</option>
+                        <option value="semua">Semua Peserta</option>
+                    </select>
+                    <svg class="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400"
+                        fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+                    </svg>
+                </div>
             </div>
+            <div></div> {{-- kolom kosong agar sejajar --}}
         </div>
 
         {{-- Subjek/Judul --}}
         <div class="mb-5">
             <label class="form-label">Subjek/Judul</label>
-            <input type="text" class="form-input" placeholder="">
+            <input type="text" class="form-input"
+                   style="background:#F5F7FF; border-color:#DFEAF2;"
+                   placeholder="">
         </div>
 
         {{-- Isi Pesan --}}
         <div class="mb-6">
-            <label class="form-label">Isi Pesan</label>
-            <div style="border: 1px solid #E2E8F0; border-radius: 8px; overflow: hidden;">
+            <label class="form-label" style="color:#827E78;">Isi Pesan</label>
+            <div style="border: 1px solid #DFEAF2; border-radius: 8px; overflow: hidden;">
 
                 {{-- Toolbar --}}
-                <div class="flex items-center gap-1 px-3 py-2"
-                     style="background: #4B5563; border-bottom: 1px solid #6B7280;">
+                <div class="flex items-center justify-center gap-1 px-3 py-2"
+                     style="background: #827E78; border-bottom: 1px solid #9B9792;">
 
-                    {{-- Undo/Redo --}}
                     <button type="button" onclick="document.execCommand('undo')" class="toolbar-btn" style="color:white;">
                         <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                             <path stroke-linecap="round" stroke-linejoin="round" d="M3 10h10a8 8 0 018 8v2M3 10l6 6m-6-6l6-6"/>
@@ -135,21 +144,15 @@
                         </svg>
                     </button>
 
-                    <div style="width:1px; height:16px; background:#6B7280; margin:0 4px;"></div>
-
-                    {{-- Font selector --}}
                     <select onchange="document.execCommand('fontName', false, this.value)"
                             class="text-[11px] px-2 py-1 rounded text-white"
-                            style="background:#6B7280; border:none; outline:none;">
-                        <option value="Helvetica">Helvetica</option>
-                        <option value="Arial">Arial</option>
-                        <option value="Georgia">Georgia</option>
-                        <option value="Times New Roman">Times New Roman</option>
+                            style="background:transparent; border:none; outline:none;">
+                        <option value="Helvetica" style="background:#827E78;">Helvetica</option>
+                        <option value="Arial" style="background:#827E78;">Arial</option>
+                        <option value="Georgia" style="background:#827E78;">Georgia</option>
+                        <option value="Times New Roman" style="background:#827E78;">Times New Roman</option>
                     </select>
 
-                    <div style="width:1px; height:16px; background:#6B7280; margin:0 4px;"></div>
-
-                    {{-- Align --}}
                     <button type="button" onclick="document.execCommand('justifyLeft')" class="toolbar-btn" style="color:white;" title="Kiri">
                         <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                             <path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h10M4 18h14"/>
@@ -171,9 +174,6 @@
                         </svg>
                     </button>
 
-                    <div style="width:1px; height:16px; background:#6B7280; margin:0 4px;"></div>
-
-                    {{-- Bold / Italic / Underline --}}
                     <button type="button" onclick="document.execCommand('bold')" class="toolbar-btn font-bold" style="color:white; font-size:13px;" title="Bold">B</button>
                     <button type="button" onclick="document.execCommand('italic')" class="toolbar-btn italic" style="color:white; font-size:13px;" title="Italic">I</button>
                     <button type="button" onclick="document.execCommand('underline')" class="toolbar-btn underline" style="color:white; font-size:13px;" title="Underline">U</button>
@@ -184,12 +184,10 @@
                      contenteditable="true"
                      data-placeholder="Tulis isi pesan di sini..."
                      @input="updateCount()"
-                     x-on:input="updateCount()"
-                     style="background:#F8FAFC;">
+                     x-on:input="updateCount()">
                 </div>
             </div>
 
-            {{-- Char count --}}
             <p class="text-[11px] text-slate-400 mt-1.5" x-text="charCount + '/10000'">0/10000</p>
         </div>
 
@@ -197,7 +195,7 @@
         <div class="flex justify-center">
             <button type="button"
                     class="px-10 py-2.5 text-white text-[12px] font-semibold hover:opacity-90 transition-all active:scale-95"
-                    style="background:#27C2DE; border-radius:8px;">
+                    style="background:#41D1EA; border-radius:4px;">
                 Simpan
             </button>
         </div>
