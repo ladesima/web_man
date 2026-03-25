@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Ppdb;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Storage;
 
 // 🔥 MODEL
 use App\Models\Pendaftaran;
@@ -26,29 +27,38 @@ class PendaftaranController extends Controller
             return redirect()->route('ppdb.login');
         }
 
-        $pendaftaran = Pendaftaran::where('user_id', $user->id)->first();
+        $pendaftaran = Pendaftaran::where('user_id', $user->id)
+            ->latest()
+            ->first();
 
-        // 🔥 FLOW PROTECTION
-        if ($pendaftaran) {
-
-            if ($pendaftaran->status === 'form_selesai') {
-                return redirect()->route('siswa.upload.berkas', $pendaftaran->jalur);
-            }
-
-            if ($pendaftaran->status === 'berkas_selesai') {
-                return redirect()->route('siswa.verifikasi', $pendaftaran->jalur);
-            }
-
-            if ($pendaftaran->status === 'verifikasi') {
-                return redirect()->route('siswa.verifikasi', $pendaftaran->jalur);
-            }
-
-            if ($pendaftaran->status === 'pengumuman') {
-                return redirect()->route('siswa.pengumuman', $pendaftaran->jalur);
-            }
+        /*
+        |------------------------------------------------------------------
+        | 🔒 VALIDASI JALUR (ANTI MANIPULASI URL)
+        |------------------------------------------------------------------
+        */
+        if ($pendaftaran && $pendaftaran->jalur !== $jalur) {
+            return redirect()->route(
+                'siswa.pendaftaran',
+                $pendaftaran->jalur
+            );
         }
 
-        // 🔥 ambil syarat dari admin
+        /*
+        |------------------------------------------------------------------
+        | 🔥 SET LAST STEP (FIRST ACCESS ONLY)
+        |------------------------------------------------------------------
+        */
+        if ($pendaftaran && empty($pendaftaran->last_step)) {
+            $pendaftaran->update([
+                'last_step' => 'form'
+            ]);
+        }
+
+        /*
+        |------------------------------------------------------------------
+        | 🔥 AMBIL SYARAT DARI ADMIN
+        |------------------------------------------------------------------
+        */
         $ppdb = MasterPpdb::aktifWithRelasi();
         $syarats = $ppdb?->syarats ?? collect();
 
@@ -73,18 +83,36 @@ class PendaftaranController extends Controller
             return redirect()->route('ppdb.login');
         }
 
-        $pendaftaran = Pendaftaran::where('user_id', $user->id)->first();
+        $pendaftaran = Pendaftaran::where('user_id', $user->id)
+            ->latest()
+            ->first();
 
-        // 🔒 LOCK
-        if ($pendaftaran && !$pendaftaran->is_revisi) {
+        /*
+        |------------------------------------------------------------------
+        | 🔒 VALIDASI JALUR (ANTI MANIPULASI URL)
+        |------------------------------------------------------------------
+        */
+        if ($pendaftaran && $pendaftaran->jalur !== $jalur) {
+            return redirect()->route(
+                'siswa.pendaftaran',
+                $pendaftaran->jalur
+            );
+        }
+
+        /*
+        |------------------------------------------------------------------
+        | 🔒 LOCK DATA (JIKA SUDAH FIX & BUKAN REVISI)
+        |------------------------------------------------------------------
+        */
+        if ($pendaftaran && !$pendaftaran->is_revisi && $pendaftaran->status !== 'belum') {
             return redirect()->route('siswa.upload.berkas', $pendaftaran->jalur)
                 ->with('error', 'Data sudah dikunci dan tidak bisa diubah');
         }
 
         /*
-        |--------------------------------------------------------------------------
-        | VALIDASI UTAMA
-        |--------------------------------------------------------------------------
+        |------------------------------------------------------------------
+        | VALIDASI INPUT
+        |------------------------------------------------------------------
         */
         $request->validate([
             'ttl' => 'required',
@@ -94,13 +122,34 @@ class PendaftaranController extends Controller
             'pekerjaan_ortu' => 'required',
             'penghasilan_ortu' => 'required',
             'alamat_ortu' => 'required',
-            'jumlah_saudara' => 'required|integer'
+            'jumlah_saudara' => 'required|integer',
+            'foto' => 'nullable|image|mimes:jpg,jpeg,png|max:2048',
         ]);
 
         /*
-        |--------------------------------------------------------------------------
-        | SIMPAN DATA PENDAFTARAN
-        |--------------------------------------------------------------------------
+        |------------------------------------------------------------------
+        | 🔥 UPLOAD FOTO PROFIL
+        |------------------------------------------------------------------
+        */
+        if ($request->hasFile('foto')) {
+
+            $file = $request->file('foto');
+
+            if ($user->foto) {
+                Storage::disk('public')->delete($user->foto);
+            }
+
+            $path = $file->store('foto_ppdb', 'public');
+
+            $user->update([
+                'foto' => $path
+            ]);
+        }
+
+        /*
+        |------------------------------------------------------------------
+        | 🔥 SIMPAN / UPDATE PENDAFTARAN
+        |------------------------------------------------------------------
         */
         $data = [
             'user_id' => $user->id,
@@ -118,6 +167,7 @@ class PendaftaranController extends Controller
             'alamat_ortu' => $request->alamat_ortu,
             'jumlah_saudara' => $request->jumlah_saudara,
 
+            // 🔥 FLOW CONTROL
             'status' => 'form_selesai',
             'last_step' => 'berkas'
         ];
@@ -129,19 +179,17 @@ class PendaftaranController extends Controller
         }
 
         /*
-        |--------------------------------------------------------------------------
+        |------------------------------------------------------------------
         | 🔥 SIMPAN SYARAT DINAMIS
-        |--------------------------------------------------------------------------
+        |------------------------------------------------------------------
         */
         $ppdb = MasterPpdb::aktifWithRelasi();
         $syarats = $ppdb?->syarats ?? [];
 
         foreach ($syarats as $syarat) {
 
-            // 🔥 ambil value dari input
             $value = $request->input('syarat_' . $syarat->id);
 
-            // 🔥 skip kalau kosong
             if (!$value) continue;
 
             DetailPendaftaran::updateOrCreate(
@@ -151,11 +199,16 @@ class PendaftaranController extends Controller
                 ],
                 [
                     'value' => $syarat->tipe === 'teks' ? $value : null,
-                    'file' => null, // upload nanti di step berkas
+                    'file' => null,
                 ]
             );
         }
 
+        /*
+        |------------------------------------------------------------------
+        | 🔁 REDIRECT KE STEP BERIKUTNYA
+        |------------------------------------------------------------------
+        */
         return redirect()->route('siswa.upload.berkas', $jalur)
             ->with('success', 'Data formulir berhasil disimpan');
     }
@@ -163,7 +216,7 @@ class PendaftaranController extends Controller
 
     /*
     |--------------------------------------------------------------------------
-    | FORM (ALT METHOD)
+    | FORM (ALT METHOD - OPTIONAL)
     |--------------------------------------------------------------------------
     */
     public function create($jalur)

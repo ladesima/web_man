@@ -15,6 +15,13 @@ class LandingPpdbController extends Controller
 
         // ✅ Ambil PPDB aktif (pakai helper method)
         $ppdb = MasterPpdb::aktifWithRelasi();
+        $jalurs = collect();
+
+if ($ppdb) {
+    $jalurs = $ppdb->jalurs->sortBy(function ($jalur) {
+        return optional($jalur->tahapans->sortBy('tanggal_mulai')->first())->tanggal_mulai;
+    })->values();
+}
 
         // ✅ Ambil pendaftaran (safe)
         $pendaftaran = null;
@@ -29,6 +36,7 @@ class LandingPpdbController extends Controller
             'user' => $user,
             'ppdb' => $ppdb,
             'pendaftaran' => $pendaftaran,
+            'jalurs' => $jalurs
         ]);
     }
 

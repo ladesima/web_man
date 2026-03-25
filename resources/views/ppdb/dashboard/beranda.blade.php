@@ -99,63 +99,76 @@
         <div class="pb-10">
             <h3 class="text-base font-bold text-[#2B2A28] mb-6">Jadwal Pendaftaran</h3>
 
-            @php
-            $jadwals = [
-                'Prestasi' => [
-                    ['icon' => 'daftar.svg',              'tanggal' => '24 April - 15 Mei 2026', 'label' => 'Pendaftaran'],
-                    ['icon' => 'seleksiadministrasi.svg', 'tanggal' => '15 Mei - 20 Mei 2026',   'label' => 'Seleksi Administrasi'],
-                    ['icon' => 'pengumuman.svg',           'tanggal' => '20 Mei 2026',             'label' => 'Pengumuman'],
-                    ['icon' => 'daftarulang.svg',          'tanggal' => '21 Mei - 28 Mei 2026',   'label' => 'Daftar Ulang'],
-                ],
-                'Regular' => [
-                    ['icon' => 'daftar.svg',              'tanggal' => '24 April - 15 Mei 2026', 'label' => 'Pendaftaran'],
-                    ['icon' => 'seleksiadministrasi.svg', 'tanggal' => '15 Mei - 20 Mei 2026',   'label' => 'Seleksi Administrasi'],
-                    ['icon' => 'pengumuman.svg',           'tanggal' => '20 Mei 2026',             'label' => 'Pengumuman'],
-                    ['icon' => 'daftarulang.svg',          'tanggal' => '21 Mei - 28 Mei 2026',   'label' => 'Daftar Ulang'],
-                ],
-                'Afirmasi' => [
-                    ['icon' => 'daftar.svg',              'tanggal' => '24 April - 15 Mei 2026', 'label' => 'Pendaftaran'],
-                    ['icon' => 'seleksiadministrasi.svg', 'tanggal' => '15 Mei - 20 Mei 2026',   'label' => 'Seleksi Administrasi'],
-                    ['icon' => 'pengumuman.svg',           'tanggal' => '20 Mei 2026',             'label' => 'Pengumuman'],
-                    ['icon' => 'daftarulang.svg',          'tanggal' => '21 Mei - 28 Mei 2026',   'label' => 'Daftar Ulang'],
-                ],
-            ];
-            @endphp
+            
 
             <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-                @foreach($jadwals as $judul => $items)
-                <div class="jadwal-col">
-                    <h3 class="text-center font-bold text-lg mb-4"
-                        style="background: linear-gradient(180deg, #00B1D1, #00758A);
-                               -webkit-background-clip: text;
-                               -webkit-text-fill-color: transparent;
-                               background-clip: text;
-                               filter: drop-shadow(0px 4px 4px rgba(101,101,101,0.25));">
-                        {{ $judul }}
-                    </h3>
-                    <div class="border-2 border-[#27C2DE] rounded-3xl p-5 bg-white">
-                        @foreach($items as $item)
-                        <div class="flex gap-3">
-                            <div class="flex flex-col items-center flex-shrink-0">
-                                <div class="w-8 h-8 flex items-center justify-center">
-                                    <img src="{{ asset('ppdb/' . $item['icon']) }}" alt="{{ $item['label'] }}" class="w-7 h-7 object-contain">
-                                </div>
-                                @if(!$loop->last)
-                                <div class="w-[2px] flex-1 my-1"
-                                     style="background: repeating-linear-gradient(to bottom, #27C2DE 0px, #27C2DE 5px, transparent 5px, transparent 10px); min-height: 24px;">
-                                </div>
-                                @endif
-                            </div>
-                            <div class="pb-4">
-                                <p class="text-[11px] font-semibold leading-tight" style="color: #00B1D1;">{{ $item['tanggal'] }}</p>
-                                <p class="text-sm font-bold mt-0.5" style="color: #2B2A28;">{{ $item['label'] }}</p>
-                            </div>
-                        </div>
-                        @endforeach
-                    </div>
+
+@forelse($jalurs ?? [] as $jalur)
+
+<div class="jadwal-col">
+
+    {{-- JUDUL --}}
+    <h3 class="text-center font-bold text-lg mb-4"
+        style="background: linear-gradient(180deg, #00B1D1, #00758A);
+               -webkit-background-clip: text;
+               -webkit-text-fill-color: transparent;
+               background-clip: text;
+               filter: drop-shadow(0px 4px 4px rgba(101,101,101,0.25));">
+        {{ ucfirst($jalur->jalur) }}
+    </h3>
+
+    {{-- BOX --}}
+    <div class="border-2 border-[#27C2DE] rounded-3xl p-5 bg-white">
+
+        @forelse($jalur->tahapans->sortBy('tanggal_mulai') as $tahap)
+
+        <div class="flex gap-3">
+
+            {{-- ICON --}}
+            <div class="flex flex-col items-center flex-shrink-0">
+                <div class="w-8 h-8 flex items-center justify-center">
+                    <img src="{{ asset('ppdb/daftar.svg') }}" class="w-7 h-7 object-contain">
                 </div>
-                @endforeach
+
+                @if(!$loop->last)
+                <div class="w-[2px] flex-1 my-1"
+                     style="background: repeating-linear-gradient(to bottom, #27C2DE 0px, #27C2DE 5px, transparent 5px, transparent 10px); min-height: 24px;">
+                </div>
+                @endif
             </div>
+
+            {{-- TEXT --}}
+            <div class="pb-4">
+                <p class="text-[11px] font-semibold leading-tight text-[#00B1D1]">
+                    {{ \Carbon\Carbon::parse($tahap->tanggal_mulai)->format('d M Y') }}
+                    -
+                    {{ \Carbon\Carbon::parse($tahap->tanggal_selesai)->format('d M Y') }}
+                </p>
+
+                <p class="text-sm font-bold text-[#2B2A28]">
+                    {{ $tahap->nama_tahapan }}
+                </p>
+            </div>
+
+        </div>
+
+        @empty
+        <p class="text-center text-gray-400 text-sm">
+            Jadwal belum tersedia
+        </p>
+        @endforelse
+
+    </div>
+
+</div>
+
+@empty
+<p class="text-center text-gray-400 col-span-3">
+    Belum ada data jadwal
+</p>
+@endforelse
+
+</div>
         </div>
 
     </div>

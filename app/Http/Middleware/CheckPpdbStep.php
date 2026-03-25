@@ -20,17 +20,18 @@ class CheckPpdbStep
 
         $pendaftaran = Pendaftaran::where('user_id', $user->id)->latest()->first();
 
-        // ❌ belum daftar sama sekali
+        // ❌ belum daftar
         if (!$pendaftaran) {
             return $next($request);
         }
 
         $currentRoute = $request->route()->getName();
+        $currentJalur = $request->route('jalur');
 
         /*
-        |--------------------------------------------------------------------------
-        | PRIORITAS LAST STEP (PALING AKURAT)
-        |--------------------------------------------------------------------------
+        |------------------------------------------------------------------
+        | ✅ PRIORITAS UTAMA: LAST STEP
+        |------------------------------------------------------------------
         */
         if (!empty($pendaftaran->last_step)) {
 
@@ -41,17 +42,28 @@ class CheckPpdbStep
                 'pengumuman' => 'siswa.pengumuman',
             ];
 
-            $targetRoute = $routes[$pendaftaran->last_step] ?? null;
+            // validasi last_step
+            if (array_key_exists($pendaftaran->last_step, $routes)) {
 
-            if ($targetRoute && $currentRoute !== $targetRoute) {
-                return redirect()->route($targetRoute, $pendaftaran->jalur);
+                $targetRoute = $routes[$pendaftaran->last_step];
+
+                // ✅ cek route + parameter jalur
+                if (
+                    $currentRoute !== $targetRoute ||
+                    $currentJalur != $pendaftaran->jalur
+                ) {
+                    return redirect()->route($targetRoute, $pendaftaran->jalur);
+                }
             }
+
+            // ⛔ STOP di sini (jangan lanjut ke fallback)
+            return $next($request);
         }
 
         /*
-        |--------------------------------------------------------------------------
-        | FALLBACK STATUS (JIKA LAST_STEP KOSONG)
-        |--------------------------------------------------------------------------
+        |------------------------------------------------------------------
+        | 🔁 FALLBACK (JIKA last_step kosong)
+        |------------------------------------------------------------------
         */
         switch ($pendaftaran->status) {
 
