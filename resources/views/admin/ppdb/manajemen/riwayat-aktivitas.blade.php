@@ -53,17 +53,11 @@
                         <td class="text-center py-3 px-4">
                             <div class="flex items-center justify-center gap-1.5">
                                 <button @click="openDetail(row)"
-                                        class="w-8 h-8 rounded-lg flex items-center justify-center hover:opacity-80 transition-all"
-                                        >
+                                        class="w-8 h-8 rounded-lg flex items-center justify-center hover:opacity-80 transition-all">
                                     <img src="{{ asset('ppdb/admin/detail.png') }}" alt="" class="w-8 h-8 object-contain">
                                 </button>
-                                <button class="w-8 h-8 rounded-lg flex items-center justify-center hover:opacity-80 transition-all"
-                                        >
-                                    <img src="{{ asset('ppdb/admin/edit.png') }}" alt="" class="w-8 h-8 object-contain">
-                                </button>
                                 <button @click="openHapus(row)"
-                                        class="w-8 h-8 rounded-lg flex items-center justify-center hover:opacity-80 transition-all"
-                                        >
+                                        class="w-8 h-8 rounded-lg flex items-center justify-center hover:opacity-80 transition-all">
                                     <img src="{{ asset('ppdb/admin/hapus.png') }}" alt="" class="w-8 h-8 object-contain">
                                 </button>
                             </div>
@@ -107,28 +101,35 @@
         </div>
     </template>
 
-    {{-- POPUP HAPUS --}}
+    {{-- POPUP HAPUS (diperbarui) --}}
     <template x-teleport="body">
         <div x-show="showHapus" x-cloak
              class="fixed inset-0 z-50 flex items-center justify-center"
-             style="background:rgba(0,0,0,0.45); backdrop-filter:blur(2px);">
+             style="background:rgba(0,0,0,0.35);">
             <div @click.outside="showHapus = false"
-                 class="bg-white rounded-2xl p-7 shadow-2xl w-full max-w-sm text-center" x-transition>
-                <div class="w-12 h-12 rounded-full bg-red-100 flex items-center justify-center mx-auto mb-4">
-                    <img src="{{ asset('ppdb/admin/hapus.png') }}" alt="" class="w-6 h-6 object-contain">
-                </div>
-                <h2 class="text-[15px] font-bold text-[#2B2A28] mb-2">Hapus Riwayat?</h2>
-                <p class="text-[12px] text-slate-400 mb-6">Riwayat aktivitas ini akan dihapus permanen.</p>
-                <div class="flex justify-center gap-3">
-                    <button @click="showHapus = false"
-                            class="px-6 py-2.5 rounded-xl border border-slate-200 text-[12px] font-semibold text-slate-600 hover:bg-slate-50 transition-all">
-                        Batal
-                    </button>
-                    <button @click="showHapus = false"
-                            class="px-8 py-2.5 text-white text-[12px] font-semibold hover:opacity-90 transition-all"
-                            style="background:#EF4444; border-radius:4px;">
-                        Hapus
-                    </button>
+                 class="relative w-full max-w-sm" x-transition>
+                <img src="{{ asset('ppdb/admin/delate.png') }}" class="w-full" alt="">
+                <div class="absolute bottom-0 left-0 right-0 pb-8 px-8 text-center">
+                    <h3 class="text-[15px] font-bold mb-2">
+                        Apa anda yakin ingin menghapus data ini?
+                    </h3>
+                    <p class="text-[12px] text-slate-400 mb-5">
+                        Tindakan ini tidak dapat dibatalkan
+                    </p>
+                    <div class="flex gap-3 justify-center">
+                        <button type="button"
+                                @click="showHapus = false"
+                                class="px-6 py-2 rounded-xl border"
+                                style="background:#FBFAF7; border-color:#A5A5A5;">
+                            Batal
+                        </button>
+                        <button type="button"
+                                @click="showHapus = false"
+                                class="px-6 py-2 rounded-xl text-white"
+                                style="background:#EF4444;">
+                            Ya, Hapus
+                        </button>
+                    </div>
                 </div>
             </div>
         </div>
