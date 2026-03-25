@@ -3,185 +3,299 @@
 
 @section('content')
 
-{{-- Breadcrumb --}}
+{{-- ================= BREADCRUMB ================= --}}
 <div class="relative mb-5" style="width: fit-content;">
-    <img src="{{ asset('ppdb/admin/operasional/validasicrump.png') }}" style="height:40px; width:auto;" alt="">
-    <div class="absolute inset-0 flex items-center" style="margin-top: -4px;">
-        <a href="{{ route('admin.operasional.verifikasi') }}"
-           class="text-[12px] text-slate-500 hover:text-[#00758A] transition-colors"
-           style="padding-left: 30px; padding-right: 20px;">
+    <img src="{{ asset('ppdb/admin/operasional/validasicrump.png') }}" style="height:40px;">
+    <div class="absolute inset-0 flex items-center" style="margin-top:-4px;">
+        <a href="/admin/operasional/verifikasi"
+           class="text-[12px] text-slate-500 hover:text-[#00758A]"
+           style="padding-left:30px; padding-right:20px;">
             Verifikasi Berkas
         </a>
-        <a href="{{ route('admin.operasional.verifikasi.detail', 1) }}"
-           class="text-[12px] text-slate-500 hover:text-[#00758A] transition-colors"
-           style="padding-left: 16px; padding-right: 20px;">
+        <a href="/admin/operasional/verifikasi/{{ $pendaftaran->id }}"
+           class="text-[12px] text-slate-500 hover:text-[#00758A]"
+           style="padding-left:16px; padding-right:20px;">
             Detail
         </a>
         <span class="text-[12px] text-white font-semibold"
-              style="padding-left: 16px; padding-right: 20px;">
+              style="padding-left:16px; padding-right:20px;">
             Validasi
         </span>
     </div>
 </div>
 
-{{-- Profile Card --}}
+{{-- ================= PROFILE ================= --}}
 <div class="bg-white px-6 py-5 mb-4"
-     style="border-radius:12px;
-            border: 1px solid #F3F3F3;
-            box-shadow: 0px 4px 4px 0px rgba(161,209,251,0.25);">
+     style="border-radius:12px; border:1px solid #F3F3F3; box-shadow:0 4px 4px rgba(161,209,251,0.25);">
+
     <div class="flex items-center">
-        {{-- Kiri: Foto + Info --}}
+
         <div class="flex items-center gap-4 flex-1"
-             style="border-right: 1px solid #E6E6E6; padding-right: 24px;">
-            <img src="{{ asset('ppdb/admin/operasional/cadangan.png') }}" alt="foto"
-                 class="w-16 h-16 object-cover border border-slate-200"
+             style="border-right:1px solid #E6E6E6; padding-right:24px;">
+
+            <img src="{{ asset('ppdb/admin/operasional/cadangan.png') }}"
+                 class="w-16 h-16 object-cover border"
                  style="border-radius:12px;"
-                 onerror="this.src='https://ui-avatars.com/api/?name=Muhammad+Naufal&background=27C2DE&color=fff&size=64'">
+                 onerror="this.src='https://ui-avatars.com/api/?name={{ urlencode($pendaftaran->user->nama ?? 'User') }}&background=27C2DE&color=fff'">
+
             <div>
-                <h2 class="text-[16px] font-bold mb-0.5" style="color:#2B2A28;">Muhammad Naufal</h2>
-                <p class="text-[12px] mb-2" style="color:#575551;">NISN : 1234567</p>
+                <h2 class="text-[16px] font-bold">{{ $pendaftaran->user->nama ?? '-' }}</h2>
+                <p class="text-[12px] mb-2">NISN : {{ $pendaftaran->nisn ?? '-' }}</p>
+
                 <div class="flex gap-2">
-                    {{-- Prestasi --}}
-                    <span class="px-3 py-0.5 text-[11px] font-medium"
-                          style="background: rgba(255,154,220,0.20);
-                                 border: 1px solid #F80ECD;
-                                 border-radius: 4px;
-                                 color: #F80ECD;">Prestasi</span>
-                    {{-- Gelombang I --}}
-                    <span class="px-3 py-0.5 text-[11px] font-medium"
-                          style="background: rgba(255,203,154,0.20);
-                                 border: 1px solid #CF6F15;
-                                 border-radius: 4px;
-                                 color: #CF6F15;">Gelombang I</span>
-                    {{-- Perlu Perbaikan --}}
-                    <span class="px-3 py-0.5 text-[11px] font-medium"
-                          style="background: rgba(108,153,217,0.20);
-                                 border: 1px solid #1654AA;
-                                 border-radius: 4px;
-                                 color: #1654AA;">Perlu Perbaikan</span>
+                    <span class="px-3 py-0.5 text-[11px]"
+                          style="background:rgba(255,154,220,0.20); border:1px solid #F80ECD; border-radius:4px;">
+                        {{ ucfirst($pendaftaran->jalur ?? '-') }}
+                    </span>
+
+                    <span class="px-3 py-0.5 text-[11px]"
+                          style="background:rgba(108,153,217,0.20); border:1px solid #1654AA; border-radius:4px;">
+                        {{ ucfirst(str_replace('_',' ',$pendaftaran->status ?? '-')) }}
+                    </span>
                 </div>
             </div>
         </div>
-        {{-- Kanan: No Pendaftaran --}}
-        <div class="text-right" style="padding-left: 24px; flex-shrink: 0;">
-            <p class="text-[12px] mb-1" style="color:#575551;">No Pendaftaran:</p>
-            <p class="text-[22px] font-bold" style="color:#2B2A28;">12123455</p>
+
+        <div class="text-right pl-6">
+            <p class="text-[12px]">No Pendaftaran:</p>
+            <p class="text-[22px] font-bold">{{ $pendaftaran->nisn ?? '-' }}</p>
         </div>
+
     </div>
 </div>
 
-{{-- Data Calon Siswa --}}
+{{-- ================= DATA SISWA ================= --}}
 <div class="bg-white px-6 py-5 mb-4"
-     style="border-radius:16px;
-            border: 1px solid #F3F3F3;
-            box-shadow: 0px 4px 4px 0px rgba(161,209,251,0.25);">
-    <h3 class="text-[13px] font-bold mb-1" style="color:#2B2A28;">Data Calon Siswa</h3>
-    <div class="mb-4" style="border-bottom: 1px solid #E6E6E6;"></div>
-    <div class="grid grid-cols-2 gap-x-8 gap-y-4">
-        @php
-        $fields = [
-            ['label' => 'Tempat, Tanggal Lahir',        'value' => 'Jenepponto, 23 Maret 2017'],
-            ['label' => 'Pekerjaan Orang Tua',           'value' => 'ASN'],
-            ['label' => 'Asal Sekolah',                  'value' => 'SMP 1 Jeneponto'],
-            ['label' => 'Penghasilan Orang Tua / Bulan', 'value' => 'Rp. 10.000.000'],
-            ['label' => 'Alamat',                        'value' => 'Jl. Pendidikan Blok A12'],
-            ['label' => 'Alamat Orang Tua',              'value' => 'Jl. Pendidikan Blok A12'],
-            ['label' => 'Nama Orang Tua',                'value' => 'Halimah'],
-            ['label' => 'Jumlah Bersaudara',             'value' => '2'],
-        ];
-        @endphp
-        @foreach($fields as $f)
+     style="border-radius:16px; border:1px solid #F3F3F3;">
+
+    <h3 class="text-[13px] font-bold mb-1">Data Calon Siswa</h3>
+    <div class="mb-4" style="border-bottom:1px solid #E6E6E6;"></div>
+
+    <div class="grid grid-cols-2 gap-x-8 gap-y-4 text-[12px]">
+
         <div>
-            <p class="text-[11px] mb-0.5" style="color:#575551;">{{ $f['label'] }}</p>
-            <p class="text-[12px]" style="color:#2B2A28; font-weight:500;">{{ $f['value'] }}</p>
+            <p>Tempat, Tanggal Lahir</p>
+            <p class="font-medium">{{ $pendaftaran->ttl ?? '-' }}</p>
         </div>
-        @endforeach
+
+        <div>
+            <p>Pekerjaan Orang Tua</p>
+            <p class="font-medium">{{ $pendaftaran->pekerjaan_ortu ?? '-' }}</p>
+        </div>
+
+        <div>
+            <p>Asal Sekolah</p>
+            <p class="font-medium">{{ $pendaftaran->asal_sekolah ?? '-' }}</p>
+        </div>
+
+        <div>
+            <p>Penghasilan Orang Tua</p>
+            <p class="font-medium">{{ $pendaftaran->penghasilan_ortu ?? '-' }}</p>
+        </div>
+
+        <div>
+            <p>Alamat</p>
+            <p class="font-medium">{{ $pendaftaran->alamat ?? '-' }}</p>
+        </div>
+
+        <div>
+            <p>Alamat Orang Tua</p>
+            <p class="font-medium">{{ $pendaftaran->alamat_ortu ?? '-' }}</p>
+        </div>
+
+        <div>
+            <p>Nama Orang Tua</p>
+            <p class="font-medium">{{ $pendaftaran->nama_ortu ?? '-' }}</p>
+        </div>
+
+        <div>
+            <p>Jumlah Saudara</p>
+            <p class="font-medium">{{ $pendaftaran->jumlah_saudara ?? '-' }}</p>
+        </div>
+
     </div>
 </div>
 
-{{-- Dokumen Unggahan --}}
+{{-- ================= FORM START ================= --}}
+<form method="POST" action="{{ route('admin.verifikasi.simpan', $pendaftaran->id) }}">
+@csrf
+
+{{-- ================= DOKUMEN ================= --}}
 <div class="bg-white px-6 py-5 mb-4"
-     style="border-radius:16px;
-            border: 1px solid #F3F3F3;
-            box-shadow: 0px 4px 4px 0px rgba(161,209,251,0.25);">
-    <h3 class="text-[13px] font-bold mb-1" style="color:#2B2A28;">Dokumen Unggahan</h3>
-    <div class="mb-5" style="border-bottom: 1px solid #E6E6E6;"></div>
+     style="border-radius:16px; border:1px solid #F3F3F3;">
 
-    @php
-    $dokumen = [
-        ['nama' => 'Akta Lahir',           'catatan' => ''],
-        ['nama' => 'Kartu Keluarga',        'catatan' => ''],
-        ['nama' => 'Bukti Verifikasi',      'catatan' => 'fotonya harus HD'],
-        ['nama' => 'Sertifikat Juara',      'catatan' => ''],
-        ['nama' => 'Rapor',                 'catatan' => ''],
-        ['nama' => 'Surat Keterangan Lulus','catatan' => ''],
-    ];
-    @endphp
+@php
+$dokumen = [
+ ['nama'=>'akta_lahir','label'=>'Akta Kelahiran','file'=>$pendaftaran->akta_lahir],
+ ['nama'=>'kartu_keluarga','label'=>'Kartu Keluarga','file'=>$pendaftaran->kartu_keluarga],
+ ['nama'=>'rapor','label'=>'Rapor','file'=>$pendaftaran->rapor],
+ ['nama'=>'verifikasi_pd','label'=>'Verifikasi PD','file'=>$pendaftaran->verifikasi_pd],
+ ['nama'=>'sertifikat_prestasi','label'=>'Sertifikat Prestasi','file'=>$pendaftaran->sertifikat_prestasi],
+ ['nama'=>'sk_sekolah','label'=>'SK Sekolah','file'=>$pendaftaran->sk_sekolah],
+];
+@endphp
 
-    <div class="space-y-6">
-        @foreach($dokumen as $dok)
-        <div>
-            <p class="text-[12px] mb-3" style="color:#2B2A28; font-weight:500;">{{ $dok['nama'] }}</p>
-            <div class="flex gap-4 items-start">
-                {{-- Preview Gambar --}}
-                <div class="relative shrink-0 overflow-hidden border border-slate-200 bg-slate-50"
-                     style="width:144px; height:112px; border-radius:12px;">
-                    <img src="https://via.placeholder.com/144x112/e2f4fd/27C2DE?text=Dokumen"
-                         alt="{{ $dok['nama'] }}"
-                         class="w-full h-full object-cover">
-                    <div class="absolute bottom-1.5 right-1.5 flex gap-1">
-                        <button class="w-[23px] h-[23px] rounded-full flex items-center justify-center"
-                                style="background: rgba(0,0,0,0.50);">
-                            <img src="{{ asset('ppdb/admin/operasional/perkecil.png') }}" alt="perkecil" class="w-3 h-3 object-contain">
-                        </button>
-                        <button class="w-[23px] h-[23px] rounded-full flex items-center justify-center"
-                                style="background: rgba(0,0,0,0.50);">
-                            <img src="{{ asset('ppdb/admin/operasional/perbesar.png') }}" alt="perbesar" class="w-3 h-3 object-contain">
-                        </button>
+@foreach($dokumen as $dok)
+<div class="mb-6">
+
+    <p class="text-[12px] font-medium mb-3">{{ $dok['label'] }}</p>
+
+    <div class="flex items-start gap-6">
+
+        {{-- PREVIEW --}}
+        <div style="width:150px; height:110px;"
+             class="border border-[#E6E6E6] bg-[#F9FAFB] rounded-md overflow-hidden">
+
+            @if($dok['file'])
+
+                @php
+    $ext = strtolower(pathinfo($dok['file'], PATHINFO_EXTENSION));
+
+    $url = route('preview.dokumen', [
+        'file' => $dok['file']
+    ]);
+@endphp
+
+                @if(in_array($ext, ['jpg','jpeg','png','webp']))
+                    <img src="{{ $url }}"
+                         class="w-full h-full object-cover cursor-pointer"
+                         onclick="openPreview('{{ $url }}')">
+
+                @elseif($ext === 'pdf')
+                    <div class="flex items-center justify-center h-full bg-gray-100 cursor-pointer"
+                         onclick="openPreview('{{ $url }}', '{{ $dok['file'] }}')">
+                        <span class="text-xs text-red-500 font-semibold">PDF</span>
                     </div>
-                </div>
+                @endif
 
-                {{-- Aksi Valid/Tidak + Catatan --}}
-                <div class="flex-1">
-                    <div class="flex gap-2 mb-2">
-                        {{-- Valid --}}
-                        <button class="flex items-center justify-center">
-                            <img src="{{ asset('ppdb/admin/operasional/ceklis.png') }}" alt="valid" class="w-6 h-6 object-contain">
-                        </button>
-                        {{-- Tidak Valid --}}
-                        <button class="flex items-center justify-center">
-                            <img src="{{ asset('ppdb/admin/operasional/silang.png') }}" alt="tidak valid" class="w-6 h-6 object-contain">
-                        </button>
-                    </div>
-                    <p class="text-[11px] mb-1" style="color:#575551;">Catatan:</p>
-                    <textarea rows="3"
-                              class="w-full px-3 py-2 text-[12px] border border-slate-200 resize-none focus:outline-none focus:ring-2 focus:ring-[#27C2DE]"
-                              style="border-radius:8px; color:#575551; background:#DFEAF2;"
-                              placeholder="Tulis catatan...">{{ $dok['catatan'] }}</textarea>
-                </div>
+            @endif
+
+        </div>
+
+        {{-- ACTION --}}
+        <div class="flex-1">
+
+            <input type="hidden" name="verifikasi[{{ $dok['nama'] }}][status]" id="status_{{ $dok['nama'] }}">
+
+            <div class="flex items-center gap-2 mb-2">
+
+                <button type="button" onclick="setStatus('{{ $dok['nama'] }}','ok')">
+                    <img src="{{ asset('ppdb/admin/operasional/ceklis.png') }}" class="w-5">
+                </button>
+
+                <button type="button" onclick="setStatus('{{ $dok['nama'] }}','no')">
+                    <img src="{{ asset('ppdb/admin/operasional/silang.png') }}" class="w-5">
+                </button>
+
             </div>
+
+            <textarea
+                name="verifikasi[{{ $dok['nama'] }}][catatan]"
+                id="catatan_{{ $dok['nama'] }}"
+                class="w-full text-[12px] border border-[#E6E6E6] rounded-md px-3 py-2 bg-[#F9FAFB]"
+                placeholder="Catatan"></textarea>
+
         </div>
-        @if(!$loop->last)
-        <div style="border-top: 1px solid #E6E6E6;"></div>
-        @endif
-        @endforeach
+
     </div>
+
+</div>
+@endforeach
+
 </div>
 
-{{-- Action Buttons --}}
+{{-- ================= ACTION ================= --}}
 <div class="flex justify-center gap-3 pb-4">
-    <a href="{{ route('admin.operasional.verifikasi.detail', 1) }}"
-       class="px-6 py-2.5 text-[13px] font-semibold transition-all hover:bg-slate-50"
-       style="border-radius:8px; border: 1px solid #E2E8F0; color:#575551;">
-        Batal
-    </a>
-    <button class="inline-flex items-center gap-2 px-6 py-2.5 text-white text-[13px] font-semibold transition-all hover:opacity-90"
-            style="background: #27C2DE; border-radius:8px;">
-        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
-        </svg>
-        Simpan Verifikasi
-    </button>
+
+<a href="/admin/operasional/verifikasi/{{ $pendaftaran->id }}"
+   class="px-6 py-2 border text-sm">
+    Batal
+</a>
+
+<button type="submit" class="px-6 py-2 bg-cyan-400 text-white rounded-md">
+    Simpan Verifikasi
+</button>
+
 </div>
+
+</form>
+
+{{-- ================= MODAL ================= --}}
+<div id="previewModal"
+     class="fixed inset-0 bg-black/50 hidden items-center justify-center z-50">
+
+    <div class="bg-white rounded-lg w-[80%] h-[85%] relative p-2">
+
+        <button onclick="closePreview()"
+                class="absolute top-2 right-3 text-xl font-bold text-gray-600 z-10">
+            ×
+        </button>
+
+        <img id="previewImage" class="hidden w-full h-full object-contain">
+        <iframe id="previewFrame" class="hidden w-full h-full"></iframe>
+
+    </div>
+</div>
+
+<script>
+function setStatus(field, status) {
+
+    let s = document.getElementById('status_' + field);
+    let c = document.getElementById('catatan_' + field);
+
+    s.value = status;
+
+    if (status === 'no') {
+        c.required = true;
+        c.style.border = '1px solid red';
+    } else {
+        c.required = false;
+        c.style.border = '';
+        c.value = '';
+    }
+}
+
+function openPreview(url, fileName) {
+
+    let img = document.getElementById('previewImage');
+    let frame = document.getElementById('previewFrame');
+
+    // reset
+    img.classList.add('hidden');
+    frame.classList.add('hidden');
+
+    img.src = '';
+    frame.src = '';
+
+    // ambil extension dari nama file (bukan URL)
+    let ext = fileName.split('.').pop().toLowerCase();
+
+    // DETECT TYPE
+    if (['jpg','jpeg','png','webp'].includes(ext)) {
+
+        img.src = url;
+        img.classList.remove('hidden');
+
+    } else if (ext === 'pdf') {
+
+        frame.src = url; // 🔥 ini fix utama
+        frame.classList.remove('hidden');
+
+    } else {
+
+        frame.src = url;
+        frame.classList.remove('hidden');
+    }
+
+    document.getElementById('previewModal').classList.remove('hidden');
+    document.getElementById('previewModal').classList.add('flex');
+}
+
+function closePreview() {
+    document.getElementById('previewModal').classList.add('hidden');
+    document.getElementById('previewImage').src = '';
+    document.getElementById('previewFrame').src = '';
+}
+</script>
 
 @endsection

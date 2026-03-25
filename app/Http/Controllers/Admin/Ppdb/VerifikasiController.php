@@ -15,9 +15,34 @@ class VerifikasiController extends Controller
     */
     public function index()
     {
+        dd('MASUK CONTROLLER VERIFIKASI');
         $data = Pendaftaran::latest()->get();
+// mapping ke format frontend (AlpineJS)
+    $pendaftar = $data->map(function ($item) {
+    return [
+        'id' => $item->id,
+        'nama' => $item->user->nama ?? '-',
+        'no' => $item->nisn,
+        'jalur' => ucfirst($item->jalur),
 
-        return view('admin.ppdb.operasional.verifikasi-berkas', compact('data'));
+        // 🔥 MAPPING STATUS DI SINI
+        'status' => match ($item->status) {
+            'belum' => 'menunggu',
+            'form_selesai' => 'menunggu',
+            'berkas_selesai' => 'siap_seleksi',
+            'perbaikan' => 'perlu_perbaikan',
+            'lulus' => 'berkas_valid',
+            'tidak_lulus' => 'berkas_ditolak',
+            default => 'menunggu',
+        },
+
+        'catatan' => $item->catatan_revisi ?? '-',
+    ];
+});
+
+    return view('admin.ppdb.operasional.verifikasi.index', [
+    'pendaftar' => $pendaftar
+]);
     }
 
     /*
