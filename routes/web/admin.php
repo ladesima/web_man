@@ -85,17 +85,7 @@ Route::prefix('admin')->middleware(['auth'])->group(function () {
 
     Route::view('/manajemen/akun', 'admin.ppdb.manajemen.akun-panitia')->name('admin.manajemen.akun');
     Route::view('/manajemen/riwayat', 'admin.ppdb.manajemen.riwayat-aktivitas')->name('admin.manajemen.riwayat');
-    // MEDIA GAMBAR
-    Route::view('/manajemen/media-gambar', 'admin.ppdb.manajemen.media-gambar.index')
-->name('admin.manajemen.media-gambar');
-    Route::view('/manajemen/media-gambar/sistem-informasi', 'admin.ppdb.manajemen.media-gambar.sistem-informasi')
-        ->name('admin.manajemen.media-gambar.sistem-informasi');
-    Route::view('/manajemen/media-gambar/siswa', 'admin.ppdb.manajemen.media-gambar.siswa')
-        ->name('admin.manajemen.media-gambar.siswa');
-    Route::view('/manajemen/media-gambar/admin', 'admin.ppdb.manajemen.media-gambar.admin')
-        ->name('admin.manajemen.media-gambar.admin');
-    Route::view('/manajemen/media-gambar/panitia', 'admin.ppdb.manajemen.media-gambar.panitia')
-        ->name('admin.manajemen.media-gambar.panitia');
+   
 
    Route::get('/operasional/verifikasi', [VerifikasiController::class, 'index'])
     ->name('admin.operasional.verifikasi');
