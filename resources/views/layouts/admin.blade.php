@@ -275,10 +275,10 @@
                         <p class="text-[11px] text-[#2B2A28]">Kelola semua periode penerimaan siswa baru disini</p>
                     @elseif(request()->routeIs('admin.operasional.verifikasi'))
                         <h1 class="text-[17px] font-bold text-[#006E87]">Verifikasi Berkas</h1>
-                        <p class="text-[11px] text-[#2B2A28]">Setiap data sudah siap untuk anda kelolah</p>
+                        <p class="text-[11px] text-[#2B2A28]">Setiap data sudah siap untuk anda kelola</p>
                     @elseif(request()->routeIs('admin.operasional.pengumuman'))
                         <h1 class="text-[17px] font-bold text-[#006E87]">Pengumuman</h1>
-                        <p class="text-[11px] text-[#2B2A28]">Setiap data sudah siap untuk anda kelolah</p>
+                        <p class="text-[11px] text-[#2B2A28]">Setiap data sudah siap untuk anda kelola</p>
                     @elseif(request()->routeIs('admin.operasional.faq'))
                         <h1 class="text-[17px] font-bold text-[#006E87]">FAQ & Bantuan</h1>
                         <p class="text-[11px] text-[#2B2A28]">Kelola pertanyaan dan bantuan</p>

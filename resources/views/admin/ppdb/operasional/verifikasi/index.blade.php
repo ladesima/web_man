@@ -222,6 +222,7 @@ $stats = [
                            <a :href="`/admin/operasional/verifikasi/${row.id}`"
    class="inline-flex items-center px-4 py-1.5 rounded-lg text-white text-[12px] font-semibold transition-all hover:opacity-90 active:scale-95"
    style="background: linear-gradient(90deg, #15B2CE 0%, #00758A 100%);">
+    <img src="{{ asset('ppdb/admin/ditail.png') }}" alt="detail" class="w-4 h-4 object-contain">
     Detail
 </a>
                         </td>

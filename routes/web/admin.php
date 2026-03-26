@@ -6,6 +6,8 @@ use App\Http\Controllers\Admin\Ppdb\TahapanController;
 use App\Http\Controllers\Admin\Ppdb\PpdbSyaratController;
 use App\Http\Controllers\Auth\AdminAuthController;
 use App\Http\Controllers\Admin\VerifikasiController;
+use App\Http\Controllers\Admin\Ppdb\DataPendaftarController;
+use App\Http\Controllers\Admin\DashboardAdminController;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Response;
 
@@ -25,7 +27,8 @@ Route::get('/preview-dokumen', function (Illuminate\Http\Request $request) {
 
 Route::prefix('admin')->middleware(['auth'])->group(function () {
 
-    Route::view('/dashboard', 'admin.dashboard')->name('admin.dashboard');
+    Route::get('/dashboard', [DashboardAdminController::class, 'index'])
+    ->name('admin.dashboard');
 
     Route::get('/master-ppdb', [MasterPpdbController::class, 'index'])->name('admin.master');
     Route::post('/master-ppdb/store', [MasterPpdbController::class, 'store'])->name('admin.master.store');
@@ -45,10 +48,11 @@ Route::prefix('admin')->middleware(['auth'])->group(function () {
     Route::put('/tahapan/{id}', [TahapanController::class, 'update'])->name('admin.tahapan.update');
     Route::delete('/tahapan/{id}', [TahapanController::class, 'destroy'])->name('admin.tahapan.delete');
 
-    Route::get('/data-pendaftar', function () {
-        $pendaftaran = [];
-        return view('admin.ppdb.data-pendaftar.index', compact('pendaftaran'));
-    })->name('admin.data-pendaftar');
+    Route::get('/data-pendaftar', [DataPendaftarController::class, 'index'])
+    ->name('admin.data-pendaftar');
+
+    Route::get('/data-pendaftar/{id}', [DataPendaftarController::class, 'show'])
+    ->name('data-pendaftar.show');
 
     Route::post('/syarat', [PpdbSyaratController::class, 'store'])->name('admin.syarat.store');
     Route::put('/syarat/{id}', [PpdbSyaratController::class, 'update'])->name('admin.syarat.update');

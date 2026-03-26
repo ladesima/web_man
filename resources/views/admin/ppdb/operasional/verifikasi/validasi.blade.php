@@ -120,6 +120,9 @@
 <form method="POST" action="{{ route('admin.verifikasi.simpan', $pendaftaran->id) }}">
 @csrf
 
+@php
+$verifikasi = json_decode($pendaftaran->verifikasi_dokumen ?? '{}', true);
+@endphp
 {{-- ================= DOKUMEN ================= --}}
 <div class="bg-white px-6 py-5 mb-4"
      style="border-radius:16px; border:1px solid #F3F3F3;">
@@ -175,25 +178,34 @@ $dokumen = [
         {{-- ACTION --}}
         <div class="flex-1">
 
-            <input type="hidden" name="verifikasi[{{ $dok['nama'] }}][status]" id="status_{{ $dok['nama'] }}">
+            <input type="hidden"
+       name="verifikasi[{{ $dok['nama'] }}][status]"
+       id="status_{{ $dok['nama'] }}"
+       value="{{ $verifikasi[$dok['nama']]['status'] ?? '' }}">
 
             <div class="flex items-center gap-2 mb-2">
 
-                <button type="button" onclick="setStatus('{{ $dok['nama'] }}','ok')">
-                    <img src="{{ asset('ppdb/admin/operasional/ceklis.png') }}" class="w-5">
-                </button>
+              <button type="button"
+        id="btn_ok_{{ $dok['nama'] }}"
+        onclick="setStatus('{{ $dok['nama'] }}','ok')"
+        class="p-1 rounded transition-all duration-200 ease-in-out">
+    <img src="{{ asset('ppdb/admin/operasional/ceklis.png') }}" class="w-5">
+</button>
 
-                <button type="button" onclick="setStatus('{{ $dok['nama'] }}','no')">
-                    <img src="{{ asset('ppdb/admin/operasional/silang.png') }}" class="w-5">
-                </button>
+<button type="button"
+        id="btn_no_{{ $dok['nama'] }}"
+        onclick="setStatus('{{ $dok['nama'] }}','no')"
+        class="p-1 rounded transition-all duration-200 ease-in-out">
+    <img src="{{ asset('ppdb/admin/operasional/silang.png') }}" class="w-5">
+</button>
 
             </div>
 
             <textarea
-                name="verifikasi[{{ $dok['nama'] }}][catatan]"
-                id="catatan_{{ $dok['nama'] }}"
-                class="w-full text-[12px] border border-[#E6E6E6] rounded-md px-3 py-2 bg-[#F9FAFB]"
-                placeholder="Catatan"></textarea>
+    name="verifikasi[{{ $dok['nama'] }}][catatan]"
+    id="catatan_{{ $dok['nama'] }}"
+    class="w-full text-[12px] border border-[#E6E6E6] rounded-md px-3 py-2 bg-[#F9FAFB]"
+    placeholder="Catatan">{{ $verifikasi[$dok['nama']]['catatan'] ?? '' }}</textarea>
 
         </div>
 
@@ -203,18 +215,29 @@ $dokumen = [
 @endforeach
 
 </div>
-
 {{-- ================= ACTION ================= --}}
 <div class="flex justify-center gap-3 pb-4">
 
-<a href="/admin/operasional/verifikasi/{{ $pendaftaran->id }}"
-   class="px-6 py-2 border text-sm">
-    Batal
-</a>
+    {{-- BATAL --}}
+    <a href="/admin/operasional/verifikasi/{{ $pendaftaran->id }}"
+       class="px-6 py-2.5 text-[13px] font-semibold transition-all hover:bg-slate-50"
+       style="border-radius:8px;
+              border: 1px solid #E2E8F0;
+              color:#575551;">
+        Batal
+    </a>
 
-<button type="submit" class="px-6 py-2 bg-cyan-400 text-white rounded-md">
-    Simpan Verifikasi
-</button>
+    {{-- SIMPAN --}}
+    <button type="submit"
+            class="inline-flex items-center gap-2 px-6 py-2.5 text-white text-[13px] font-semibold transition-all hover:opacity-90"
+            style="background: #27C2DE;
+                   border-radius:8px;">
+
+        {{-- ICON --}}
+         <img src="{{ asset('ppdb/admin/operasional/verifikasiulang.png') }}" alt="" class="w-4 h-4 object-contain">
+
+        Simpan Verifikasi
+    </button>
 
 </div>
 
@@ -243,15 +266,36 @@ function setStatus(field, status) {
     let s = document.getElementById('status_' + field);
     let c = document.getElementById('catatan_' + field);
 
+    let btnOk = document.getElementById('btn_ok_' + field);
+    let btnNo = document.getElementById('btn_no_' + field);
+
     s.value = status;
 
-    if (status === 'no') {
-        c.required = true;
-        c.style.border = '1px solid red';
-    } else {
+    // RESET
+    btnOk.style.transform = 'scale(1)';
+    btnNo.style.transform = 'scale(1)';
+    btnOk.style.opacity = '0.6';
+    btnNo.style.opacity = '0.6';
+
+    if (status === 'ok') {
+
+        // ✅ BESAR + AKTIF
+        btnOk.style.transform = 'scale(1.3)';
+        btnOk.style.opacity = '1';
+
         c.required = false;
-        c.style.border = '';
-        c.value = '';
+        c.style.border = '1px solid #22C55E';
+        c.style.background = '#F0FDF4';
+
+    } else if (status === 'no') {
+
+        // ❌ BESAR + AKTIF
+        btnNo.style.transform = 'scale(1.3)';
+        btnNo.style.opacity = '1';
+
+        c.required = true;
+        c.style.border = '1px solid #EF4444';
+        c.style.background = '#FEF2F2';
     }
 }
 
@@ -296,6 +340,38 @@ function closePreview() {
     document.getElementById('previewImage').src = '';
     document.getElementById('previewFrame').src = '';
 }
+document.addEventListener('DOMContentLoaded', function () {
+
+    const fields = @json(array_column($dokumen, 'nama'));
+
+    fields.forEach(field => {
+
+        let status = document.getElementById('status_' + field).value;
+        let catatan = document.getElementById('catatan_' + field);
+
+        if (status === 'no') {
+            catatan.required = true;
+            catatan.style.border = '1px solid red';
+        }
+
+    });
+
+});
+document.addEventListener('DOMContentLoaded', function () {
+
+    const fields = @json(array_column($dokumen, 'nama'));
+
+    fields.forEach(field => {
+
+        let status = document.getElementById('status_' + field).value;
+
+        if (status) {
+            setStatus(field, status);
+        }
+
+    });
+
+});
 </script>
 
 @endsection

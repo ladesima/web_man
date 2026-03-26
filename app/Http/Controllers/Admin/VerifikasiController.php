@@ -8,28 +8,19 @@ use App\Models\Pendaftaran;
 
 class VerifikasiController extends Controller
 {
-    /*
-    |--------------------------------------------------------------------------
-    | LIST DATA VERIFIKASI (AMBIL DARI TABEL PENDAFTARAN)
-    |--------------------------------------------------------------------------
-    */
     public function index()
     {
-        // 🔥 ambil dari tabel pendaftaran
         $data = Pendaftaran::latest()->get();
 
-        // 🔥 mapping ke format frontend (TIDAK UBAH UI)
         $pendaftar = $data->map(function ($item) {
             return [
                 'id' => $item->id,
-                'nama' => $item->nama_lengkap ?? '-', // 🔥 dari pendaftaran
+                'nama' => $item->nama_lengkap ?? '-',
                 'no' => $item->nisn,
                 'jalur' => ucfirst($item->jalur),
 
-                // 🔥 mapping status ke UI
                 'status' => match ($item->status) {
-                    'belum' => 'menunggu',
-                    'form_selesai' => 'menunggu',
+                    'belum', 'form_selesai' => 'menunggu',
                     'berkas_selesai' => 'siap_seleksi',
                     'perbaikan' => 'perlu_perbaikan',
                     'lulus' => 'berkas_valid',
@@ -42,7 +33,6 @@ class VerifikasiController extends Controller
             ];
         });
 
-        // 🔥 HITUNG CARD (SESUAI STATUS PENDAFTARAN)
         $counts = [
             'menunggu' => $data->whereIn('status', ['belum', 'form_selesai'])->count(),
             'perlu_perbaikan' => $data->where('status', 'perbaikan')->count(),
@@ -50,31 +40,16 @@ class VerifikasiController extends Controller
             'berkas_ditolak' => $data->where('status', 'tidak_lulus')->count(),
         ];
 
-        return view('admin.ppdb.operasional.verifikasi.index', [
-            'pendaftar' => $pendaftar,
-            'counts' => $counts
-        ]);
+        return view('admin.ppdb.operasional.verifikasi.index', compact('pendaftar', 'counts'));
     }
 
-    /*
-    |--------------------------------------------------------------------------
-    | DETAIL PESERTA (AMBIL DARI PENDAFTARAN)
-    |--------------------------------------------------------------------------
-    */
     public function show($id)
     {
         $pendaftaran = Pendaftaran::findOrFail($id);
 
-        return view('admin.ppdb.operasional.verifikasi.detail', [
-            'pendaftaran' => $pendaftaran
-        ]);
+        return view('admin.ppdb.operasional.verifikasi.detail', compact('pendaftaran'));
     }
 
-    /*
-    |--------------------------------------------------------------------------
-    | VALIDASI
-    |--------------------------------------------------------------------------
-    */
     public function validasi($id)
     {
         $pendaftaran = Pendaftaran::findOrFail($id);
@@ -83,106 +58,133 @@ class VerifikasiController extends Controller
     }
 
     /*
-    |--------------------------------------------------------------------------
-    | LULUS
-    |--------------------------------------------------------------------------
+    |--------------------------------------------------------------------------|
+    | 🔥 SIMPAN VALIDASI (FIX CATATAN)
+    |--------------------------------------------------------------------------|
     */
+    public function simpanValidasi(Request $request, $id)
+    {
+        $pendaftaran = Pendaftaran::findOrFail($id);
+
+        $data = $request->verifikasi ?? [];
+
+        $finalStatus = 'lulus';
+        $catatanGlobal = [];
+
+        foreach ($data as $key => $item) {
+
+            $status = $item['status'] ?? null;
+            $catatan = $item['catatan'] ?? null;
+
+            // 🔥 VALIDASI jika ditolak wajib isi catatan
+            if ($status === 'no') {
+
+                if (empty($catatan)) {
+                    return back()->with('error', 'Catatan wajib diisi jika ada dokumen ditolak');
+                }
+
+                $finalStatus = 'perbaikan';
+            }
+
+            // 🔥 KUMPULKAN CATATAN GLOBAL
+            if (!empty($catatan)) {
+                $catatanGlobal[] =
+                    strtoupper(str_replace('_', ' ', $key)) . ' : ' . $catatan;
+            }
+        }
+
+        // 🔥 SIMPAN JSON DETAIL
+        $pendaftaran->verifikasi_dokumen = json_encode($data);
+
+        // 🔥 STATUS OTOMATIS
+        $pendaftaran->status = $finalStatus;
+
+        // 🔥 INI YANG PENTING (SYNC KE DATABASE)
+        $pendaftaran->catatan_revisi = count($catatanGlobal)
+            ? implode(' | ', $catatanGlobal)
+            : null;
+
+        $pendaftaran->last_step = 'verifikasi';
+
+        $pendaftaran->save();
+
+        return redirect()
+            ->route('admin.operasional.verifikasi')
+            ->with('success', 'Verifikasi berhasil disimpan');
+    }
+
     public function lulus($id)
     {
         $pendaftaran = Pendaftaran::findOrFail($id);
 
-        $pendaftaran->status = 'lulus';
-        $pendaftaran->last_step = 'pengumuman';
-        $pendaftaran->is_revisi = false;
-        $pendaftaran->catatan_revisi = null;
-
-        $pendaftaran->save();
+        $pendaftaran->update([
+            'status' => 'lulus',
+            'last_step' => 'pengumuman',
+            'is_revisi' => false,
+            'catatan_revisi' => null
+        ]);
 
         return back()->with('success', 'Peserta dinyatakan LULUS');
     }
 
-    /*
-    |--------------------------------------------------------------------------
-    | TIDAK LULUS
-    |--------------------------------------------------------------------------
-    */
     public function tidakLulus($id)
     {
         $pendaftaran = Pendaftaran::findOrFail($id);
 
-        $pendaftaran->status = 'tidak_lulus';
-        $pendaftaran->last_step = 'pengumuman';
-        $pendaftaran->is_revisi = false;
-
-        $pendaftaran->save();
+        $pendaftaran->update([
+            'status' => 'tidak_lulus',
+            'last_step' => 'pengumuman',
+            'is_revisi' => false
+        ]);
 
         return back()->with('error', 'Peserta dinyatakan TIDAK LULUS');
     }
 
-    /*
-    |--------------------------------------------------------------------------
-    | PERBAIKAN
-    |--------------------------------------------------------------------------
-    */
-    public function perbaikan(Request $request, $id)
-    {
-        $request->validate([
-            'catatan' => 'required|string|max:1000'
-        ]);
-
-        $pendaftaran = Pendaftaran::findOrFail($id);
-
-        $pendaftaran->status = 'perbaikan';
-        $pendaftaran->is_revisi = true;
-        $pendaftaran->catatan_revisi = $request->catatan;
-        $pendaftaran->last_step = 'form';
-
-        $pendaftaran->save();
-
-        return back()->with('warning', 'Peserta diminta melakukan perbaikan');
-    }
-
-    /*
-    |--------------------------------------------------------------------------
-    | RESET
-    |--------------------------------------------------------------------------
-    */
     public function reset($id)
     {
         $pendaftaran = Pendaftaran::findOrFail($id);
 
-        $pendaftaran->status = 'belum';
-        $pendaftaran->last_step = 'form';
-        $pendaftaran->is_revisi = false;
-        $pendaftaran->catatan_revisi = null;
-
-        $pendaftaran->save();
+        $pendaftaran->update([
+            'status' => 'belum',
+            'last_step' => 'form',
+            'is_revisi' => false,
+            'catatan_revisi' => null,
+            'verifikasi_dokumen' => null
+        ]);
 
         return back()->with('info', 'Data berhasil direset');
     }
-    public function simpanValidasi(Request $request, $id)
+    public function simpan(Request $request, $id)
 {
     $pendaftaran = Pendaftaran::findOrFail($id);
 
     $data = $request->verifikasi;
 
-    $finalStatus = 'lulus'; // default
-
+    // VALIDASI: jika ada "no" wajib catatan
     foreach ($data as $key => $item) {
-        if ($item['status'] === 'no') {
-
-            if (empty($item['catatan'])) {
-                return back()->with('error', 'Catatan wajib diisi jika ditolak');
-            }
-
-            $finalStatus = 'perbaikan';
+        if (($item['status'] ?? null) === 'no' && empty($item['catatan'])) {
+            return back()->withErrors([
+                'error' => 'Catatan wajib diisi jika tidak approve'
+            ]);
         }
     }
 
+    // SIMPAN JSON
     $pendaftaran->verifikasi_dokumen = json_encode($data);
-    $pendaftaran->status = $finalStatus;
+
+    // LOGIKA STATUS
+    $allOk = collect($data)->every(fn($d) => ($d['status'] ?? '') === 'ok');
+
+    if ($allOk) {
+        $pendaftaran->status = 'lulus';
+    } else {
+        $pendaftaran->status = 'perbaikan';
+    }
+
     $pendaftaran->save();
 
-    return back()->with('success', 'Verifikasi berhasil disimpan');
+    return redirect()
+        ->route('admin.operasional.verifikasi.show', $id)
+        ->with('success', 'Verifikasi berhasil disimpan');
 }
 }

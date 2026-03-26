@@ -67,47 +67,75 @@
     <a href="{{ route('admin.verifikasi.validasi', $pendaftaran->id) }}"
        class="inline-flex items-center gap-2 px-5 py-2 text-white text-[13px] font-semibold"
        style="background:#27C2DE; border-radius:4px;">
+       <img src="{{ asset('ppdb/admin/operasional/verifikasiulang.png') }}" alt="" class="w-4 h-4 object-contain">
         Verifikasi Ulang
     </a>
 
 </div>
+<div class="bg-white px-6 py-5 mb-4"
+     style="border-radius:12px;
+            border: 1px solid #F3F3F3;
+            box-shadow: 0px 4px 4px 0px rgba(161,209,251,0.25);">
 
-{{-- PROFILE --}}
-<div class="bg-white px-6 py-5 mb-4 rounded-xl shadow-sm">
-    <div class="flex items-center justify-between">
+    <div class="flex items-center">
 
-        <div class="flex items-center gap-4">
+        {{-- KIRI --}}
+        <div class="flex items-center gap-4 flex-1"
+             style="border-right: 1px solid #E6E6E6; padding-right: 24px;">
+
             <img src="{{ asset('ppdb/admin/operasional/cadangan.png') }}"
-                 class="w-16 h-16 rounded-lg border">
+                 class="w-16 h-16 object-cover border border-slate-200"
+                 style="border-radius:12px;">
 
             <div>
-                <h2 class="text-[16px] font-bold">
+                <h2 class="text-[16px] font-bold mb-0.5"
+                    style="color:#2B2A28;">
                     {{ optional($pendaftaran->user)->nama ?? '-' }}
                 </h2>
 
-                <p class="text-[12px] mb-2">
+                <p class="text-[12px] mb-2"
+                   style="color:#575551;">
                     NISN : {{ $pendaftaran->nisn }}
                 </p>
 
                 <div class="flex gap-2">
-                    <span class="px-2 py-0.5 text-[10px] rounded"
-                          style="background: rgba(255,154,220,0.20); border:1px solid #F80ECD; color:#F80ECD;">
+
+                    {{-- JALUR --}}
+                    <span class="px-3 py-0.5 text-[11px] font-medium"
+                          style="background: rgba(255,154,220,0.20);
+                                 border: 1px solid #F80ECD;
+                                 border-radius: 4px;
+                                 color: #F80ECD;">
                         {{ ucfirst($pendaftaran->jalur) }}
                     </span>
 
-                    <span class="px-2 py-0.5 text-[10px] rounded"
-                          style="background: rgba(255,203,154,0.20); border:1px solid #CF6F15; color:#CF6F15;">
+                    {{-- GELOMBANG --}}
+                    <span class="px-3 py-0.5 text-[11px] font-medium"
+                          style="background: rgba(255,203,154,0.20);
+                                 border: 1px solid #CF6F15;
+                                 border-radius: 4px;
+                                 color: #CF6F15;">
                         Gelombang I
                     </span>
+
                 </div>
             </div>
         </div>
 
-        <div class="text-right">
-            <p class="text-[12px] text-gray-500">No Pendaftaran:</p>
-            <p class="text-[20px] font-bold">
+        {{-- KANAN --}}
+        <div class="text-right"
+             style="padding-left: 24px; flex-shrink: 0;">
+
+            <p class="text-[12px] mb-1"
+               style="color:#575551;">
+                No Pendaftaran:
+            </p>
+
+            <p class="text-[22px] font-bold"
+               style="color:#2B2A28;">
                 {{ $pendaftaran->id }}
             </p>
+
         </div>
 
     </div>
@@ -116,123 +144,254 @@
 {{-- GRID --}}
 <div class="grid grid-cols-5 gap-4 mb-4">
 
-    {{-- DATA --}}
-    <div class="col-span-3 bg-white px-6 py-5 rounded-xl shadow-sm">
-        <h3 class="text-[13px] font-bold mb-3">Data Calon Siswa</h3>
+   {{-- DATA CALON SISWA --}}
+<div class="col-span-3 bg-white px-6 py-5"
+     style="border-radius:16px;
+            border: 1px solid #F3F3F3;
+            box-shadow: 0px 4px 4px 0px rgba(161,209,251,0.25);">
 
-        <div class="grid grid-cols-2 gap-y-3 gap-x-6 text-[12px]">
+    {{-- TITLE --}}
+    <h3 class="text-[13px] font-bold mb-1"
+        style="color:#2B2A28;">
+        Data Calon Siswa
+    </h3>
 
-            <div>
-                <p class="text-gray-500">Tempat, Tanggal Lahir</p>
-                <p class="font-medium">{{ $pendaftaran->ttl }}</p>
-            </div>
+    {{-- DIVIDER --}}
+    <div class="mb-4"
+         style="border-bottom: 1px solid #E6E6E6;"></div>
 
-            <div>
-                <p class="text-gray-500">Pekerjaan Orang Tua</p>
-                <p class="font-medium">{{ $pendaftaran->pekerjaan_ortu }}</p>
-            </div>
+    {{-- CONTENT --}}
+    <div class="grid grid-cols-2 gap-x-8 gap-y-4">
 
-            <div>
-                <p class="text-gray-500">Asal Sekolah</p>
-                <p class="font-medium">{{ $pendaftaran->asal_sekolah }}</p>
-            </div>
-
-            <div>
-                <p class="text-gray-500">Penghasilan Orang Tua</p>
-                <p class="font-medium">{{ $pendaftaran->penghasilan_ortu }}</p>
-            </div>
-
-            <div>
-                <p class="text-gray-500">Alamat</p>
-                <p class="font-medium">{{ $pendaftaran->alamat }}</p>
-            </div>
-
-            <div>
-                <p class="text-gray-500">Alamat Orang Tua</p>
-                <p class="font-medium">{{ $pendaftaran->alamat_ortu }}</p>
-            </div>
-
-            <div>
-                <p class="text-gray-500">Nama Orang Tua</p>
-                <p class="font-medium">{{ $pendaftaran->nama_ortu }}</p>
-            </div>
-
-            <div>
-                <p class="text-gray-500">Jumlah Saudara</p>
-                <p class="font-medium">{{ $pendaftaran->jumlah_saudara }}</p>
-            </div>
-
+        <div>
+            <p class="text-[11px] mb-0.5" style="color:#575551;">
+                Tempat, Tanggal Lahir
+            </p>
+            <p class="text-[12px]" style="color:#2B2A28; font-weight:500;">
+                {{ $pendaftaran->ttl }}
+            </p>
         </div>
+
+        <div>
+            <p class="text-[11px] mb-0.5" style="color:#575551;">
+                Pekerjaan Orang Tua
+            </p>
+            <p class="text-[12px]" style="color:#2B2A28; font-weight:500;">
+                {{ $pendaftaran->pekerjaan_ortu }}
+            </p>
+        </div>
+
+        <div>
+            <p class="text-[11px] mb-0.5" style="color:#575551;">
+                Asal Sekolah
+            </p>
+            <p class="text-[12px]" style="color:#2B2A28; font-weight:500;">
+                {{ $pendaftaran->asal_sekolah }}
+            </p>
+        </div>
+
+        <div>
+            <p class="text-[11px] mb-0.5" style="color:#575551;">
+                Penghasilan Orang Tua / Bulan
+            </p>
+            <p class="text-[12px]" style="color:#2B2A28; font-weight:500;">
+                {{ $pendaftaran->penghasilan_ortu }}
+            </p>
+        </div>
+
+        <div>
+            <p class="text-[11px] mb-0.5" style="color:#575551;">
+                Alamat
+            </p>
+            <p class="text-[12px]" style="color:#2B2A28; font-weight:500;">
+                {{ $pendaftaran->alamat }}
+            </p>
+        </div>
+
+        <div>
+            <p class="text-[11px] mb-0.5" style="color:#575551;">
+                Alamat Orang Tua
+            </p>
+            <p class="text-[12px]" style="color:#2B2A28; font-weight:500;">
+                {{ $pendaftaran->alamat_ortu }}
+            </p>
+        </div>
+
+        <div>
+            <p class="text-[11px] mb-0.5" style="color:#575551;">
+                Nama Orang Tua
+            </p>
+            <p class="text-[12px]" style="color:#2B2A28; font-weight:500;">
+                {{ $pendaftaran->nama_ortu }}
+            </p>
+        </div>
+
+        <div>
+            <p class="text-[11px] mb-0.5" style="color:#575551;">
+                Jumlah Bersaudara
+            </p>
+            <p class="text-[12px]" style="color:#2B2A28; font-weight:500;">
+                {{ $pendaftaran->jumlah_saudara }}
+            </p>
+        </div>
+
     </div>
+</div>
 
-    {{-- DOKUMEN --}}
-    <div class="col-span-2 bg-white px-6 py-5 rounded-xl shadow-sm">
-        <h3 class="text-[13px] font-bold mb-3">Dokumen Unggahan</h3>
+{{-- DOKUMEN --}}
+<div class="col-span-2 bg-white px-6 py-5"
+     style="border-radius:16px;
+            border: 1px solid #F3F3F3;
+            box-shadow: 0px 4px 4px 0px rgba(161,209,251,0.25);">
 
-        @php
-        $dokumen = [
-            'Akta Lahir' => $pendaftaran->akta_lahir,
-            'Kartu Keluarga' => $pendaftaran->kartu_keluarga,
-            'Bukti Verifikasi' => $pendaftaran->verifikasi_pd,
-            'SK/Sertifikat Juara' => $pendaftaran->sertifikat_prestasi,
-            'Rapor' => $pendaftaran->rapor,
-            'SKL' => $pendaftaran->sk_sekolah,
-        ];
-        @endphp
+    <h3 class="text-[13px] font-bold mb-1" style="color:#2B2A28;">
+        Dokumen Unggahan
+    </h3>
 
-        <table class="w-full text-[12px]">
-            <thead>
-                <tr class="text-left text-gray-500 border-b">
-                    <th>Dokumen</th>
-                    <th class="text-center">Status</th>
-                    <th class="text-center">Aksi</th>
-                </tr>
-            </thead>
+    <div class="mb-4" style="border-bottom: 1px solid #E6E6E6;"></div>
 
-            <tbody>
+    @php
+    $dokumen = [
+        'Akta Lahir' => $pendaftaran->akta_lahir,
+        'Kartu Keluarga' => $pendaftaran->kartu_keluarga,
+        'Bukti Verifikasi' => $pendaftaran->verifikasi_pd,
+        'SK/Sertifikat Juara' => $pendaftaran->sertifikat_prestasi,
+        'Rapor' => $pendaftaran->rapor,
+        'SKL' => $pendaftaran->sk_sekolah,
+    ];
+    @endphp
+
+    <table class="w-full text-[12px]">
+        <thead>
+            <tr style="background:#F4F4F4;">
+                <th class="text-left py-2 px-3 font-semibold" style="color:#2B2A28;">
+                    Dokumen
+                </th>
+                <th class="text-center py-2 px-3 font-semibold" style="color:#2B2A28;">
+                    Status
+                </th>
+                <th class="text-center py-2 px-3 font-semibold" style="color:#2B2A28;">
+                    Aksi
+                </th>
+            </tr>
+        </thead>
+
+        <tbody class="divide-y divide-slate-100">
+
 @foreach($dokumen as $label => $file)
-<tr class="border-b">
-    <td class="py-2">{{ $label }}</td>
+<tr>
 
-    <td class="text-center">
+    {{-- NAMA DOKUMEN --}}
+    <td class="py-2.5 px-3" style="color:#2B2A28;">
+        {{ $label }}
+    </td>
+
+    {{-- STATUS --}}
+    <td class="py-2.5 px-3 text-center">
         @if($file)
-            <span class="px-2 py-0.5 text-[10px] rounded bg-green-100 text-green-600">
+            <span class="inline-block w-full text-center text-[11px] font-medium py-1"
+                  style="background:#DCFCE7;
+                         color:#16A34A;
+                         border: 1px solid #16A34A;
+                         border-radius: 4px;">
                 Tersedia
             </span>
         @else
-            <span class="px-2 py-0.5 text-[10px] rounded bg-red-100 text-red-600">
+            <span class="inline-block w-full text-center text-[11px] font-medium py-1"
+                  style="background:#FEE2E2;
+                         color:#DC2626;
+                         border: 1px solid #DC2626;
+                         border-radius: 4px;">
                 Tidak Ada
             </span>
         @endif
     </td>
 
-    <td class="text-center">
+    {{-- AKSI --}}
+    <td class="py-2.5 px-3 text-center">
         @if($file)
             @php
                 $url = route('preview.dokumen', ['file' => $file]);
             @endphp
 
             <button onclick="openPreview('{{ $url }}', '{{ $file }}')"
-                    class="px-3 py-1 text-[10px] text-white rounded"
-                    style="background:#27C2DE;">
+                    class="inline-flex items-center justify-center gap-1.5 w-full py-1 text-white text-[11px] font-semibold"
+                    style="background: linear-gradient(135deg, #5EEAD4 0%, #06B6D4 40%, #0284C7 100%);
+                           border-radius: 4px;">
+
+                {{-- ICON --}}
+                <svg xmlns="http://www.w3.org/2000/svg"
+                     class="w-3.5 h-3.5"
+                     viewBox="0 0 24 24"
+                     fill="none"
+                     stroke="currentColor"
+                     stroke-width="2">
+                    <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+                    <circle cx="12" cy="12" r="3"/>
+                </svg>
+
                 Preview
             </button>
         @endif
     </td>
+
 </tr>
 @endforeach
-</tbody>
-        </table>
-    </div>
 
+        </tbody>
+    </table>
+</div>
 </div>
 
 {{-- CATATAN --}}
-<div class="bg-white px-6 py-5 rounded-xl shadow-sm">
-    <h3 class="text-[13px] font-bold mb-2">Catatan Verifikasi</h3>
+<div class="bg-white px-6 py-6 mt-2"
+     style="border-radius:16px;
+            border: 1px solid #F3F3F3;
+            box-shadow: 0px 4px 4px 0px rgba(161,209,251,0.25);">
 
-    <ul class="text-[12px] list-disc pl-4">
-        <li>{{ $pendaftaran->catatan_revisi ?? 'Tidak ada catatan' }}</li>
+    {{-- TITLE --}}
+    <h3 class="text-[14px] font-semibold mb-2"
+        style="color:#2B2A28;">
+        Catatan Verifikasi
+    </h3>
+
+    {{-- DIVIDER --}}
+    <div class="mb-4"
+         style="border-bottom: 1px solid #E6E6E6;"></div>
+
+    @php
+        $verifikasi = json_decode($pendaftaran->verifikasi_dokumen ?? '{}', true);
+    @endphp
+
+    {{-- LIST --}}
+    <ul class="text-[13px] space-y-2 pl-5"
+        style="color:#575551; list-style-type: disc;">
+
+        {{-- DATA DINAMIS --}}
+        @if(!empty($verifikasi))
+            @foreach($verifikasi as $key => $item)
+
+                @if(($item['status'] ?? '') === 'no' && !empty($item['catatan']))
+                    <li class="leading-relaxed">
+                        {{ strtoupper(str_replace('_', ' ', $key)) }}
+                        :
+                        {{ $item['catatan'] }}
+                    </li>
+                @endif
+
+            @endforeach
+        @endif
+
+        {{-- FALLBACK --}}
+        @if(
+            empty($verifikasi) ||
+            collect($verifikasi)->where('status','no')->count() === 0
+        )
+            <li class="leading-relaxed">
+                {{ $pendaftaran->catatan_revisi ?? 'Tidak ada catatan' }}
+            </li>
+        @endif
+
     </ul>
 </div>
 
