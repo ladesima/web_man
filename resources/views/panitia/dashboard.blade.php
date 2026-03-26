@@ -16,7 +16,7 @@
          onmouseout="this.style.background='linear-gradient(to bottom left, rgba(250,254,255,1) 0%, rgba(201,244,255,1) 100%)'">
         <div class="flex items-start justify-between mb-1">
             <p class="text-[12px] font-semibold mb-1" style="color:#2A9FD8;">Total Pendaftar</p>
-            <img src="{{ asset('ppdb/admin/totalpendaftar.png') }}" alt="" class="w-8 h-8 object-contain">
+            <img src="{{ asset('ppdb/panitia/totalpendaftar.png') }}" alt="" class="w-8 h-8 object-contain">
         </div>
         <p class="text-[28px] font-bold text-[#2B2A28] leading-none mb-2">1298</p>
         <span class="text-[10px] font-semibold text-[#2B2A28] px-3 py-[4px] rounded-full"
@@ -25,7 +25,7 @@
         </span>
     </div>
 
-    {{-- 2. Pendaftar Hari Ini --}}
+    {{-- 2. Menunggu Verifikasi --}}
     <div class="stat-card relative rounded-2xl px-4 py-3 transition-all duration-300 cursor-pointer overflow-hidden"
          style="background: linear-gradient(to bottom left, rgba(255,254,250,1) 0%, rgba(255,212,192,1) 100%);
                 border: 1px solid rgba(243,243,243,1);
@@ -33,8 +33,8 @@
          onmouseover="this.style.background='linear-gradient(to bottom left, rgba(255,254,250,1) 0%, rgba(255,150,100,1) 100%)'"
          onmouseout="this.style.background='linear-gradient(to bottom left, rgba(255,254,250,1) 0%, rgba(255,212,192,1) 100%)'">
         <div class="flex items-start justify-between mb-1">
-            <p class="text-[12px] font-semibold" style="color:#E8872A;">Pendaftar Hari ini</p>
-            <img src="{{ asset('ppdb/admin/pendaftarhariini.png') }}" alt="" class="w-8 h-8 object-contain">
+            <p class="text-[12px] font-semibold" style="color:#E8872A;">Menunggu Verifikasi</p>
+            <img src="{{ asset('ppdb/panitia/menungguverifikasi.png') }}" alt="" class="w-8 h-8 object-contain">
         </div>
         <p class="text-[28px] font-bold text-[#2B2A28] leading-none mb-2">234</p>
         <span class="text-[10px] font-semibold text-[#2B2A28] px-3 py-[4px] rounded-full"
@@ -43,34 +43,34 @@
         </span>
     </div>
 
-    {{-- 3. Jalur Aktif --}}
+    {{-- 3. Data Valid --}}
     <div class="stat-card relative rounded-2xl px-4 py-3 transition-all duration-300 cursor-pointer overflow-hidden"
-         style="background: linear-gradient(to bottom left, rgba(250,254,255,1) 0%, rgba(192,215,247,1) 100%);
-                border: 1px solid rgba(243,243,243,1);
+         style="background: linear-gradient(to bottom left, #FAFEFF 0%, #88FFC4 100%);
+                border: 1px solid #F3F3F3;
                 box-shadow: 0px 4px 4px rgba(161,209,251,0.25);"
-         onmouseover="this.style.background='linear-gradient(to bottom left, rgba(250,254,255,1) 0%, rgba(100,160,230,1) 100%)'"
-         onmouseout="this.style.background='linear-gradient(to bottom left, rgba(250,254,255,1) 0%, rgba(192,215,247,1) 100%)'">
+         onmouseover="this.style.background='linear-gradient(to bottom left, #FAFEFF 0%, #2ECC8A 100%)'"
+         onmouseout="this.style.background='linear-gradient(to bottom left, #FAFEFF 0%, #88FFC4 100%)'">
         <div class="flex items-start justify-between mb-1">
-            <p class="text-[12px] font-semibold" style="color:#0AAEC8;">Jalur Aktif</p>
-            <img src="{{ asset('ppdb/admin/jaluraktif.png') }}" alt="" class="w-8 h-8 object-contain">
+            <p class="text-[12px] font-semibold" style="color:#1BAD6A;">Data Valid</p>
+            <img src="{{ asset('ppdb/panitia/datavalid.png') }}" alt="" class="w-8 h-8 object-contain">
         </div>
-        <p class="text-[18px] font-bold text-[#2B2A28] leading-none mb-2">Prestasi - Gel 1</p>
+        <p class="text-[28px] font-bold text-[#2B2A28] leading-none mb-2">23</p>
         <span class="text-[10px] font-semibold text-[#2B2A28] px-3 py-[4px] rounded-full"
               style="background: linear-gradient(90deg, rgba(252,255,203,1) 0%, rgba(229,241,7,1) 100%);">
             12 April - 23 Mei 2026
         </span>
     </div>
 
-    {{-- 4. Perlu Verifikasi --}}
+    {{-- 4. Perlu Perbaikan --}}
     <div class="stat-card relative rounded-2xl px-4 py-3 transition-all duration-300 cursor-pointer overflow-hidden"
-         style="background: linear-gradient(to bottom left, rgba(255,255,255,1) 0%, rgba(255,145,250,1) 100%);
-                border: 1px solid rgba(243,243,243,1);
+         style="background: linear-gradient(to bottom left, #FFFFFF 0%, #7AB2FF 100%);
+                border: 1px solid #F3F3F3;
                 box-shadow: 0px 4px 4px rgba(161,209,251,0.25);"
-         onmouseover="this.style.background='linear-gradient(to bottom left, rgba(255,255,255,1) 0%, rgba(220,60,220,1) 100%)'"
-         onmouseout="this.style.background='linear-gradient(to bottom left, rgba(255,255,255,1) 0%, rgba(255,145,250,1) 100%)'">
+         onmouseover="this.style.background='linear-gradient(to bottom left, #FFFFFF 0%, #3D7FE0 100%)'"
+         onmouseout="this.style.background='linear-gradient(to bottom left, #FFFFFF 0%, #7AB2FF 100%)'">
         <div class="flex items-start justify-between mb-1">
-            <p class="text-[12px] font-semibold" style="color:#D455A8;">Perlu Verifikasi</p>
-            <img src="{{ asset('ppdb/admin/perluverifikasi.png') }}" alt="" class="w-8 h-8 object-contain">
+            <p class="text-[12px] font-semibold" style="color:#2F6FD4;">Perlu Perbaikan</p>
+            <img src="{{ asset('ppdb/panitia/perluperbaikan.png') }}" alt="" class="w-8 h-8 object-contain">
         </div>
         <p class="text-[28px] font-bold text-[#2B2A28] leading-none mb-2">87</p>
         <span class="text-[10px] font-semibold text-[#2B2A28] px-3 py-[4px] rounded-full"
