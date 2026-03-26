@@ -14,14 +14,15 @@
 @php
     $isDashboard     = request()->routeIs('panitia.dashboard');
     $isDataPendaftar = request()->routeIs('panitia.data-pendaftar*');
-    $isVerifikasi    = request()->routeIs('panitia.verifikasi*');
+    $isOperasional   = request()->routeIs('panitia.operasional*');
     $isSeleksi       = request()->routeIs('panitia.seleksi*');
     $isPengumuman    = request()->routeIs('panitia.pengumuman*');
 @endphp
 
 <div x-data="{
     sidebarOpen: true,
-    showLogout: false
+    showLogout: false,
+    operasionalOpen: {{ $isOperasional ? 'true' : 'false' }}
 }" class="h-screen overflow-hidden flex">
 
     {{-- ===================== SIDEBAR ===================== --}}
@@ -84,44 +85,86 @@
             </a>
             @endif
 
-            {{-- Verifikasi Berkas --}}
-            @if($isVerifikasi)
-            <a href="{{ route('panitia.verifikasi') }}" class="block relative h-[44px]"
-               :class="sidebarOpen ? 'ml-3 mr-0' : 'mx-2'">
-                <div x-show="sidebarOpen" x-cloak class="absolute -left-3 top-0 w-[6px] h-[40px] rounded-r-xl bg-[#27C2DE]"></div>
-                <div class="w-full h-full flex items-center gap-2.5"
-                     :class="sidebarOpen ? 'rounded-l-[10px] px-3' : 'rounded-[10px] justify-center'"
-                     style="background: linear-gradient(90deg, #15B2CE 0%, #00758A 100%);">
-                    <img src="{{ asset('ppdb/admin/perluverifikasi.png') }}" alt="" class="w-[18px] h-[18px] object-contain brightness-0 invert shrink-0">
-                    <span x-show="sidebarOpen" x-cloak class="text-white font-semibold text-[13px] whitespace-nowrap">Verifikasi Berkas</span>
+            {{-- Operasional (dropdown) --}}
+            <div>
+                @if($isOperasional)
+                <div class="block relative h-[44px]"
+                     :class="sidebarOpen ? 'ml-3 mr-0' : 'mx-2'">
+                    <div x-show="sidebarOpen" x-cloak class="absolute -left-3 top-0 w-[6px] h-[44px] rounded-r-xl bg-[#27C2DE]"></div>
+                    <button @click="operasionalOpen = !operasionalOpen"
+                            class="w-full h-full flex items-center gap-2.5"
+                            :class="sidebarOpen ? 'rounded-l-[10px] pl-3 pr-4' : 'rounded-[10px] justify-center'"
+                            style="background: linear-gradient(90deg, #15B2CE 0%, #00758A 100%);">
+                        <img src="{{ asset('ppdb/admin/operasional.png') }}" alt="" class="w-[18px] h-[18px] object-contain brightness-0 invert shrink-0">
+                        <span x-show="sidebarOpen" x-cloak class="text-white font-semibold text-[13px] whitespace-nowrap flex-1 text-left">Operasional</span>
+                        <svg x-show="sidebarOpen" x-cloak class="w-3 h-3 text-white transition-transform shrink-0"
+                             :class="operasionalOpen ? 'rotate-180' : ''"
+                             fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+                        </svg>
+                    </button>
                 </div>
-            </a>
-            @else
-            <a href="{{ route('panitia.verifikasi') }}"
-               class="block h-[44px] flex items-center gap-2.5 rounded-[10px] text-[#464646] hover:bg-[#EEF9FC] hover:text-[#27C2DE] transition-all font-semibold text-[13px]"
-               :class="sidebarOpen ? 'mx-3 px-3' : 'mx-2 justify-center'">
-                <img src="{{ asset('ppdb/admin/perluverifikasi.png') }}" alt="" class="w-[18px] h-[18px] object-contain shrink-0">
-                <span x-show="sidebarOpen" x-cloak class="whitespace-nowrap">Verifikasi Berkas</span>
-            </a>
-            @endif
+                @else
+                <button @click="operasionalOpen = !operasionalOpen"
+                        class="h-[44px] flex items-center gap-2.5 rounded-[10px] text-[#464646] hover:bg-[#EEF9FC] hover:text-[#27C2DE] transition-all font-semibold text-[13px]"
+                        :class="sidebarOpen ? 'mx-3 pl-3 pr-4 w-[calc(100%-24px)]' : 'mx-2 justify-center w-[calc(100%-16px)]'">
+                    <img src="{{ asset('ppdb/admin/operasional.png') }}" alt="" class="w-[18px] h-[18px] object-contain shrink-0">
+                    <span x-show="sidebarOpen" x-cloak class="text-[13px] whitespace-nowrap flex-1 text-left">Operasional</span>
+                    <svg x-show="sidebarOpen" x-cloak class="w-3 h-3 transition-transform shrink-0"
+                         :class="operasionalOpen ? 'rotate-180' : ''"
+                         fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+                    </svg>
+                </button>
+                @endif
+
+                <div x-show="operasionalOpen && sidebarOpen" x-cloak class="mt-1 ml-7">
+                    @php
+                        $opSubMenus = [
+                            ['route' => 'panitia.operasional.verifikasi', 'label' => 'Verifikasi Berkas', 'index' => 0],
+                            ['route' => 'panitia.operasional.pengumuman', 'label' => 'Pengumuman',         'index' => 1],
+                            ['route' => 'panitia.operasional.faq',        'label' => 'FAQ & Bantuan',      'index' => 2],
+                        ];
+                        $opActiveIndex = -1;
+                        foreach($opSubMenus as $sm) {
+                            if(request()->routeIs($sm['route'])) $opActiveIndex = $sm['index'];
+                        }
+                    @endphp
+                    @foreach($opSubMenus as $sm)
+                    @php $isOpActive = ($sm['index'] === $opActiveIndex); @endphp
+                    <div class="flex items-stretch">
+                        <div class="w-px shrink-0 mr-3"
+                             style="{{ $sm['index'] <= $opActiveIndex
+                                ? 'background:#27C2DE;'
+                                : 'background: repeating-linear-gradient(to bottom, #CBD5E1 0px, #CBD5E1 4px, transparent 4px, transparent 8px);' }}">
+                        </div>
+                        <a href="{{ route($sm['route']) }}"
+                           class="flex-1 px-3 py-2.5 text-[12px] rounded-l-lg transition-all
+                                  {{ $isOpActive ? 'text-[#27C2DE] font-semibold bg-[#EEF9FC]' : 'text-slate-500 hover:text-[#27C2DE] hover:bg-[#EEF9FC]' }}">
+                            {{ $sm['label'] }}
+                        </a>
+                    </div>
+                    @endforeach
+                </div>
+            </div>
 
             {{-- Seleksi Nilai --}}
             @if($isSeleksi)
             <a href="{{ route('panitia.seleksi') }}" class="block relative h-[44px]"
-               :class="sidebarOpen ? 'ml-3 mr-0' : 'mx-2'">
+            :class="sidebarOpen ? 'ml-3 mr-0' : 'mx-2'">
                 <div x-show="sidebarOpen" x-cloak class="absolute -left-3 top-0 w-[6px] h-[40px] rounded-r-xl bg-[#27C2DE]"></div>
                 <div class="w-full h-full flex items-center gap-2.5"
-                     :class="sidebarOpen ? 'rounded-l-[10px] px-3' : 'rounded-[10px] justify-center'"
-                     style="background: linear-gradient(90deg, #15B2CE 0%, #00758A 100%);">
-                    <img src="{{ asset('ppdb/admin/seleksiadminstarsi.png') }}" alt="" class="w-[18px] h-[18px] object-contain brightness-0 invert shrink-0">
+                    :class="sidebarOpen ? 'rounded-l-[10px] px-3' : 'rounded-[10px] justify-center'"
+                    style="background: linear-gradient(90deg, #15B2CE 0%, #00758A 100%);">
+                    <img src="{{ asset('ppdb/admin/seleksi.png') }}" alt="" class="w-[18px] h-[18px] object-contain brightness-0 invert shrink-0">
                     <span x-show="sidebarOpen" x-cloak class="text-white font-semibold text-[13px] whitespace-nowrap">Seleksi Nilai</span>
                 </div>
             </a>
             @else
             <a href="{{ route('panitia.seleksi') }}"
-               class="block h-[44px] flex items-center gap-2.5 rounded-[10px] text-[#464646] hover:bg-[#EEF9FC] hover:text-[#27C2DE] transition-all font-semibold text-[13px]"
-               :class="sidebarOpen ? 'mx-3 px-3' : 'mx-2 justify-center'">
-                <img src="{{ asset('ppdb/admin/seleksiadminstarsi.png') }}" alt="" class="w-[18px] h-[18px] object-contain shrink-0">
+            class="block h-[44px] flex items-center gap-2.5 rounded-[10px] text-[#464646] hover:bg-[#EEF9FC] hover:text-[#27C2DE] transition-all font-semibold text-[13px]"
+            :class="sidebarOpen ? 'mx-3 px-3' : 'mx-2 justify-center'">
+                <img src="{{ asset('ppdb/admin/seleksi.png') }}" alt="" class="w-[18px] h-[18px] object-contain shrink-0">
                 <span x-show="sidebarOpen" x-cloak class="whitespace-nowrap">Seleksi Nilai</span>
             </a>
             @endif
@@ -129,20 +172,20 @@
             {{-- Pengumuman --}}
             @if($isPengumuman)
             <a href="{{ route('panitia.pengumuman') }}" class="block relative h-[44px]"
-               :class="sidebarOpen ? 'ml-3 mr-0' : 'mx-2'">
+            :class="sidebarOpen ? 'ml-3 mr-0' : 'mx-2'">
                 <div x-show="sidebarOpen" x-cloak class="absolute -left-3 top-0 w-[6px] h-[40px] rounded-r-xl bg-[#27C2DE]"></div>
                 <div class="w-full h-full flex items-center gap-2.5"
-                     :class="sidebarOpen ? 'rounded-l-[10px] px-3' : 'rounded-[10px] justify-center'"
-                     style="background: linear-gradient(90deg, #15B2CE 0%, #00758A 100%);">
-                    <img src="{{ asset('ppdb/admin/pengumuman.png') }}" alt="" class="w-[18px] h-[18px] object-contain brightness-0 invert shrink-0">
+                    :class="sidebarOpen ? 'rounded-l-[10px] px-3' : 'rounded-[10px] justify-center'"
+                    style="background: linear-gradient(90deg, #15B2CE 0%, #00758A 100%);">
+                    <img src="{{ asset('ppdb/admin/pengumuman2.png') }}" alt="" class="w-[18px] h-[18px] object-contain brightness-0 invert shrink-0">
                     <span x-show="sidebarOpen" x-cloak class="text-white font-semibold text-[13px] whitespace-nowrap">Pengumuman</span>
                 </div>
             </a>
             @else
             <a href="{{ route('panitia.pengumuman') }}"
-               class="block h-[44px] flex items-center gap-2.5 rounded-[10px] text-[#464646] hover:bg-[#EEF9FC] hover:text-[#27C2DE] transition-all font-semibold text-[13px]"
-               :class="sidebarOpen ? 'mx-3 px-3' : 'mx-2 justify-center'">
-                <img src="{{ asset('ppdb/admin/pengumuman.png') }}" alt="" class="w-[18px] h-[18px] object-contain shrink-0">
+            class="block h-[44px] flex items-center gap-2.5 rounded-[10px] text-[#464646] hover:bg-[#EEF9FC] hover:text-[#27C2DE] transition-all font-semibold text-[13px]"
+            :class="sidebarOpen ? 'mx-3 px-3' : 'mx-2 justify-center'">
+                <img src="{{ asset('ppdb/admin/pengumuman2.png') }}" alt="" class="w-[18px] h-[18px] object-contain shrink-0">
                 <span x-show="sidebarOpen" x-cloak class="whitespace-nowrap">Pengumuman</span>
             </a>
             @endif
@@ -189,15 +232,21 @@
                     @elseif(request()->routeIs('panitia.data-pendaftar*'))
                         <h1 class="text-[17px] font-bold text-[#006E87]">Data Pendaftar</h1>
                         <p class="text-[11px] text-[#2B2A28]">Daftar seluruh calon siswa yang telah mendaftar</p>
-                    @elseif(request()->routeIs('panitia.verifikasi*'))
+                    @elseif(request()->routeIs('panitia.operasional.verifikasi'))
                         <h1 class="text-[17px] font-bold text-[#006E87]">Verifikasi Berkas</h1>
                         <p class="text-[11px] text-[#2B2A28]">Periksa dan verifikasi kelengkapan berkas pendaftar</p>
+                    @elseif(request()->routeIs('panitia.operasional.pengumuman'))
+                        <h1 class="text-[17px] font-bold text-[#006E87]">Pengumuman</h1>
+                        <p class="text-[11px] text-[#2B2A28]">Kelola pengumuman hasil seleksi</p>
+                    @elseif(request()->routeIs('panitia.operasional.faq'))
+                        <h1 class="text-[17px] font-bold text-[#006E87]">FAQ & Bantuan</h1>
+                        <p class="text-[11px] text-[#2B2A28]">Kelola pertanyaan dan bantuan</p>
                     @elseif(request()->routeIs('panitia.seleksi*'))
                         <h1 class="text-[17px] font-bold text-[#006E87]">Seleksi Nilai</h1>
                         <p class="text-[11px] text-[#2B2A28]">Kelola seleksi nilai calon siswa baru</p>
                     @elseif(request()->routeIs('panitia.pengumuman*'))
                         <h1 class="text-[17px] font-bold text-[#006E87]">Pengumuman</h1>
-                        <p class="text-[11px] text-[#2B2A28]">Kelola pengumuman hasil seleksi</p>
+                        <p class="text-[11px] text-[#2B2A28]">Lihat hasil seleksi peserta yang telah dipublikasikan</p>
                     @else
                         <h1 class="text-[17px] font-bold text-[#006E87]">@yield('title', 'Dashboard')</h1>
                         <p class="text-[11px] text-[#006E87] opacity-60">Panitia PPDB MAN Jeneponto</p>
@@ -218,7 +267,8 @@
                             <div class="font-semibold text-[12px] text-[#353535]">{{ auth()->user()->name ?? 'Panitia' }}</div>
                             <div class="text-[10px] text-[#ABABAB]">Panitia PPDB</div>
                         </div>
-                        <svg class="w-3.5 h-3.5 text-slate-400 transition-transform duration-200 shrink-0" :class="open ? 'rotate-180' : ''"
+                        <svg class="w-3.5 h-3.5 text-slate-400 transition-transform duration-200 shrink-0"
+                             :class="open ? 'rotate-180' : ''"
                              fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
                         </svg>

@@ -1,4 +1,4 @@
-@extends('layouts.admin')
+@extends('layouts.panitia')
 @section('title', 'Data Pendaftar')
 
 @section('content')

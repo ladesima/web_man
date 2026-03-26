@@ -1,4 +1,4 @@
-@extends('layouts.admin')
+@extends('layouts.panitia')
 @section('title', 'Detail Pendaftar')
 
 @section('content')
@@ -8,7 +8,7 @@
     <img src="{{ asset('ppdb/admin/operasional/detailcrump.png') }}" style="height:40px; width:auto; display:block;" alt="">
     <div class="absolute inset-0 grid items-center"
          style="grid-template-columns: 143px 45px; margin-top: -4px;">
-        <a href="{{ route('admin.operasional.verifikasi') }}"
+        <a href="{{ route('panitia.operasional.verifikasi') }}"
            class="text-[12px] text-slate-500 hover:text-[#00758A] transition-colors text-center">
             Verifikasi Berkas
         </a>
@@ -27,7 +27,7 @@
                    border: 1px solid #1654AA;">
         Perlu Perbaikan
     </button>
-    <a href="{{ route('admin.operasional.verifikasi.validasi', 1) }}"
+    <a href="{{ route('panitia.operasional.verifikasi.validasi', 1) }}"
        class="inline-flex items-center gap-2 px-5 py-2 text-white text-[13px] font-semibold transition-all hover:opacity-90"
        style="background: #27C2DE; border-radius:4px;">
         <img src="{{ asset('ppdb/admin/operasional/verifikasiulang.png') }}" alt="" class="w-4 h-4 object-contain">

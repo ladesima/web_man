@@ -1,4 +1,4 @@
-@extends('layouts.admin')
+@extends('layouts.panitia')
 @section('title', 'Validasi Berkas')
 
 @section('content')
@@ -7,12 +7,12 @@
 <div class="relative mb-5" style="width: fit-content;">
     <img src="{{ asset('ppdb/admin/operasional/validasicrump.png') }}" style="height:40px; width:auto;" alt="">
     <div class="absolute inset-0 flex items-center" style="margin-top: -4px;">
-        <a href="{{ route('admin.operasional.verifikasi') }}"
+        <a href="{{ route('panitia.operasional.verifikasi') }}"
            class="text-[12px] text-slate-500 hover:text-[#00758A] transition-colors"
            style="padding-left: 30px; padding-right: 20px;">
             Verifikasi Berkas
         </a>
-        <a href="{{ route('admin.operasional.verifikasi.detail', 1) }}"
+        <a href="{{ route('panitia.operasional.verifikasi.detail', 1) }}"
            class="text-[12px] text-slate-500 hover:text-[#00758A] transition-colors"
            style="padding-left: 16px; padding-right: 20px;">
             Detail
