@@ -7,6 +7,7 @@
     @vite(['resources/css/app.css', 'resources/js/app.js'])
     <script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
     <style>[x-cloak] { display: none !important; }</style>
+    <meta name="csrf-token" content="{{ csrf_token() }}">
 </head>
 
 <body class="bg-[#F2F8FF] text-slate-900">
@@ -381,6 +382,8 @@
 
 </div>
 
+
 @stack('scripts')
+<script src="//unpkg.com/alpinejs" defer></script>
 </body>
 </html>

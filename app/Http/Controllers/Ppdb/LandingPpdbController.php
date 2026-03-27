@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Ppdb;
 use App\Http\Controllers\Controller;
 use App\Models\MasterPpdb;
 use App\Models\Pendaftaran;
+use App\Models\Faq;
 
 class LandingPpdbController extends Controller
 {
@@ -64,7 +65,12 @@ if ($ppdb) {
             ->values();
     }
 
-    return view('website.ppdb.landing', compact('ppdb'));
+    // 🔥 TAMBAHAN FAQ (INI YANG PENTING)
+    $faqs = Faq::where('status', 'aktif')
+        ->orderBy('urutan')
+        ->get();
+
+    return view('website.ppdb.landing', compact('ppdb', 'faqs'));
 }
 public function jalur($slug)
 {

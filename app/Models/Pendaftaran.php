@@ -38,6 +38,7 @@ class Pendaftaran extends Model
     ];
     protected $casts = [
     'verifikasi_dokumen' => 'array',
+    'is_publish' => 'boolean',
 ];
     public function details()
 {

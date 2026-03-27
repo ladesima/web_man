@@ -13,7 +13,16 @@
     }
 }">
 
-<form id="faqForm">
+<form id="faqForm" method="POST"
+      action="{{ isset($faq) 
+        ? route('admin.operasional.faq.update', $faq->id) 
+        : route('admin.operasional.faq.store') }}">
+    
+    @csrf
+
+    @if(isset($faq))
+        @method('PUT')
+    @endif
 <div class="bg-white rounded-2xl p-8 card-shadow">
     <div class="grid grid-cols-2 gap-8">
 
@@ -21,14 +30,14 @@
         <div class="space-y-5">
             <div>
                 <label class="block text-[13px] font-medium text-[#2B2A28] mb-2">Pertanyaan</label>
-                <textarea id="pertanyaan" rows="4"
-                    class="w-full rounded-xl px-4 py-3 text-[12px] border bg-[#F5F7FF] border-[#DFEAF2] focus:outline-none focus:ring-2 focus:ring-[#006E87] resize-none"></textarea>
+                <textarea name="pertanyaan" id="pertanyaan" rows="4"
+                    class="w-full rounded-xl px-4 py-3 text-[12px] border bg-[#F5F7FF] border-[#DFEAF2] focus:outline-none focus:ring-2 focus:ring-[#006E87] resize-none">{{ $faq->pertanyaan ?? '' }}</textarea>
             </div>
 
             <div>
                 <label class="block text-[13px] font-medium text-[#2B2A28] mb-2">Jawaban</label>
-                <textarea id="jawaban" rows="6"
-                    class="w-full rounded-xl px-4 py-3 text-[12px] border bg-[#F5F7FF] border-[#DFEAF2] focus:outline-none focus:ring-2 focus:ring-[#006E87] resize-none"></textarea>
+                <textarea name="jawaban" id="jawaban" rows="6"
+                    class="w-full rounded-xl px-4 py-3 text-[12px] border bg-[#F5F7FF] border-[#DFEAF2] focus:outline-none focus:ring-2 focus:ring-[#006E87] resize-none">{{ $faq->jawaban ?? '' }}</textarea>
             </div>
         </div>
 
@@ -37,33 +46,34 @@
 
             <div>
                 <label class="block text-[13px] font-medium text-[#2B2A28] mb-2">Status</label>
-                <select id="status"
+                <select name="status" id="status"
                     class="w-full rounded-xl px-4 py-3 text-[12px] border bg-[#F5F7FF] border-[#DFEAF2] focus:outline-none focus:ring-2 focus:ring-[#006E87]">
-                    <option value=""></option>
-                    <option>Aktif</option>
-                    <option>Tidak Aktif</option>
+                    <option value="Aktif"  {{ isset($faq) && $faq->status == 'aktif' ? 'selected' : '' }}>Aktif</option>
+                    <option value="Tidak_Aktif" {{ isset($faq) && $faq->status == 'tidak_aktif' ? 'selected' : '' }}>Tidak Aktif</option>
                 </select>
             </div>
 
             <div>
                 <label class="block text-[13px] font-medium text-[#2B2A28] mb-2">Kategori</label>
-                <select id="kategori"
+                <select name="kategori" id="kategori"
                     class="w-full rounded-xl px-4 py-3 text-[12px] border bg-[#F5F7FF] border-[#DFEAF2] focus:outline-none focus:ring-2 focus:ring-[#006E87]">
-                    <option value=""></option>
-                    <option>Pendaftaran</option>
-                    <option>Berkas</option>
-                    <option>Jalur Seleksi</option>
-                    <option>Jadwal</option>
+                    <option value="Pendaftaran"{{ isset($faq) && $faq->kategori == 'Pendaftaran' ? 'selected' : '' }}>Pendaftaran</option>
+                    <option value="Berkas"{{ isset($faq) && $faq->kategori == 'Berkas' ? 'selected' : '' }}>Berkas</option>
+                    <option value="Jalur Seleksi"{{ isset($faq) && $faq->kategori == 'Jalur Seleksi' ? 'selected' : '' }}>Jalur Seleksi</option>
+                    <option value="Jadwal"{{ isset($faq) && $faq->kategori == 'Jadwal' ? 'selected' : '' }}>Jadwal</option>
                 </select>
             </div>
 
             <div>
                 <label class="block text-[13px] font-medium text-[#2B2A28] mb-2">Urutan</label>
-                <select id="urutan"
+                <select name="urutan" id="urutan"
                     class="w-full rounded-xl px-4 py-3 text-[12px] border bg-[#F5F7FF] border-[#DFEAF2] focus:outline-none focus:ring-2 focus:ring-[#006E87]">
-                    <option value=""></option>
-                    @for ($u = 1; $u <= 20; $u++)
-                        <option value="{{ $u }}">{{ $u }}</option>
+                     <option value=""></option>
+    @for ($u = 1; $u <= 20; $u++)
+        <option value="{{ $u }}" 
+            {{ isset($faq) && $faq->urutan == $u ? 'selected' : '' }}>
+            {{ $u }}
+        </option>
                     @endfor
                 </select>
             </div>

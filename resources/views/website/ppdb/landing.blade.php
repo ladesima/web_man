@@ -471,30 +471,7 @@ document.querySelectorAll('.jadwal-col').forEach((el, i) => {
 
         {{-- List FAQ --}}
         <div class="space-y-3">
-            @php
-            $faqs = [
-                [
-                    'q' => 'Siapa saja yang dapat mendaftar di MAN Jeneponto?',
-                    'a' => 'Seluruh lulusan SMP/MTs sederajat yang memiliki NISN valid dan memenuhi persyaratan yang telah ditetapkan. Pendaftar tidak dibatasi wilayah tempat tinggal.',
-                ],
-                [
-                    'q' => 'Apa saja jalur pendaftaran yang tersedia?',
-                    'a' => 'Tersedia 3 jalur pendaftaran: Jalur Prestasi untuk siswa berprestasi, Jalur Reguler untuk seleksi umum, dan Jalur Afirmasi untuk siswa kurang mampu atau disabilitas.',
-                ],
-                [
-                    'q' => 'Bagaimana cara melakukan pendaftaran?',
-                    'a' => 'Pendaftaran dilakukan secara online. Klik tombol "Daftar Sekarang", buat akun, isi formulir pendaftaran, dan upload berkas yang diperlukan.',
-                ],
-                [
-                    'q' => 'Dokumen apa saja yang perlu disiapkan saat pendaftaran?',
-                    'a' => 'Ijazah/SKL, Rapor 5 semester terakhir, Kartu Keluarga, Akta Kelahiran, dan Pas Foto terbaru. Untuk jalur tertentu mungkin ada dokumen tambahan.',
-                ],
-                [
-                    'q' => 'Bagaimana cara mengetahui hasil seleksi?',
-                    'a' => 'Hasil seleksi dapat dilihat di halaman pengumuman pada website ini atau melalui dashboard akun pendaftar yang sudah dibuat.',
-                ],
-            ];
-            @endphp
+           
 
             @foreach($faqs as $index => $faq)
             <details class="faq-item group bg-[#F7F7F7] rounded-xl cursor-pointer
@@ -503,14 +480,14 @@ document.querySelectorAll('.jadwal-col').forEach((el, i) => {
                      style="--delay: {{ $index * 100 }}ms">
                 <summary class="list-none flex items-center justify-between gap-4 px-6 py-4
                                 font-semibold text-slate-800 text-sm md:text-[15px]">
-                    <span>{{ $faq['q'] }}</span>
+                    <span>{{ $faq->pertanyaan }}</span>
                     <svg class="chevron w-5 h-5 text-slate-400 group-open:text-[#27C2DE] flex-shrink-0 transition-all duration-300"
                          fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
                     </svg>
                 </summary>
                 <div class="px-6 pb-5 pt-1 border-t border-slate-100">
-                    <p class="text-sm leading-7 text-slate-500">{{ $faq['a'] }}</p>
+                    <p class="text-sm leading-7 text-slate-500">{{ $faq->jawaban }}</p>
                 </div>
             </details>
             @endforeach
