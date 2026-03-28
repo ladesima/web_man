@@ -10,6 +10,7 @@ use App\Http\Controllers\Admin\Ppdb\DataPendaftarController;
 use App\Http\Controllers\Admin\DashboardAdminController;
 use App\Http\Controllers\Admin\Ppdb\KelolaPengumumanPpdbController;
 use App\Http\Controllers\Admin\Ppdb\FaqController;
+use App\Http\Controllers\Admin\Ppdb\PanitiaController;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Response;
 
@@ -126,8 +127,20 @@ Route::patch('/operasional/pertanyaan/{id}/jawab',
 );
     
 
-    Route::view('/manajemen/akun', 'admin.ppdb.manajemen.akun-panitia')->name('admin.manajemen.akun');
-    Route::view('/manajemen/riwayat', 'admin.ppdb.manajemen.riwayat-aktivitas')->name('admin.manajemen.riwayat');
+     Route::get('/manajemen/akun', [PanitiaController::class, 'index'])
+        ->name('admin.manajemen.akun');
+
+    Route::post('/manajemen/akun', [PanitiaController::class, 'store'])
+        ->name('admin.manajemen.akun.store');
+
+    Route::patch('/manajemen/akun/{id}', [PanitiaController::class, 'update'])
+        ->name('admin.manajemen.akun.update');
+
+    Route::delete('/manajemen/akun/{id}', [PanitiaController::class, 'destroy'])
+        ->name('admin.manajemen.akun.destroy');
+
+    Route::view('/manajemen/riwayat', 'admin.ppdb.manajemen.riwayat-aktivitas')
+        ->name('admin.manajemen.riwayat');
    
 
    Route::get('/operasional/verifikasi', [VerifikasiController::class, 'index'])
