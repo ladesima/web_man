@@ -76,142 +76,112 @@ class PendaftaranController extends Controller
     |--------------------------------------------------------------------------
     */
     public function store(Request $request, $jalur)
-    {
-        $user = Auth::guard('ppdb')->user();
+{
+    $user = Auth::guard('ppdb')->user();
 
-        if (!$user) {
-            return redirect()->route('ppdb.login');
-        }
-
-        $pendaftaran = Pendaftaran::where('user_id', $user->id)
-            ->latest()
-            ->first();
-
-        /*
-        |------------------------------------------------------------------
-        | 🔒 VALIDASI JALUR (ANTI MANIPULASI URL)
-        |------------------------------------------------------------------
-        */
-        if ($pendaftaran && $pendaftaran->jalur !== $jalur) {
-            return redirect()->route(
-                'siswa.pendaftaran',
-                $pendaftaran->jalur
-            );
-        }
-
-        /*
-        |------------------------------------------------------------------
-        | 🔒 LOCK DATA (JIKA SUDAH FIX & BUKAN REVISI)
-        |------------------------------------------------------------------
-        */
-        if ($pendaftaran && !$pendaftaran->is_revisi && $pendaftaran->status !== 'belum') {
-            return redirect()->route('siswa.upload.berkas', $pendaftaran->jalur)
-                ->with('error', 'Data sudah dikunci dan tidak bisa diubah');
-        }
-
-        /*
-        |------------------------------------------------------------------
-        | VALIDASI INPUT
-        |------------------------------------------------------------------
-        */
-        $request->validate([
-            'ttl' => 'required',
-            'asal_sekolah' => 'required',
-            'alamat' => 'required',
-            'nama_ortu' => 'required',
-            'pekerjaan_ortu' => 'required',
-            'penghasilan_ortu' => 'required',
-            'alamat_ortu' => 'required',
-            'jumlah_saudara' => 'required|integer',
-            'foto' => 'nullable|image|mimes:jpg,jpeg,png|max:2048',
-        ]);
-
-        /*
-        |------------------------------------------------------------------
-        | 🔥 UPLOAD FOTO PROFIL
-        |------------------------------------------------------------------
-        */
-        if ($request->hasFile('foto')) {
-
-            $file = $request->file('foto');
-
-            if ($user->foto) {
-                Storage::disk('public')->delete($user->foto);
-            }
-
-            $path = $file->store('foto_ppdb', 'public');
-
-            $user->update([
-                'foto' => $path
-            ]);
-        }
-
-        /*
-        |------------------------------------------------------------------
-        | 🔥 SIMPAN / UPDATE PENDAFTARAN
-        |------------------------------------------------------------------
-        */
-        $data = [
-            'user_id' => $user->id,
-            'jalur' => $jalur,
-
-            'nama_lengkap' => $user->nama,
-            'nisn' => $user->nisn,
-
-            'ttl' => $request->ttl,
-            'asal_sekolah' => $request->asal_sekolah,
-            'alamat' => $request->alamat,
-            'nama_ortu' => $request->nama_ortu,
-            'pekerjaan_ortu' => $request->pekerjaan_ortu,
-            'penghasilan_ortu' => $request->penghasilan_ortu,
-            'alamat_ortu' => $request->alamat_ortu,
-            'jumlah_saudara' => $request->jumlah_saudara,
-
-            // 🔥 FLOW CONTROL
-            'status' => 'form_selesai',
-            'last_step' => 'berkas'
-        ];
-
-        if ($pendaftaran) {
-            $pendaftaran->update($data);
-        } else {
-            $pendaftaran = Pendaftaran::create($data);
-        }
-
-        /*
-        |------------------------------------------------------------------
-        | 🔥 SIMPAN SYARAT DINAMIS
-        |------------------------------------------------------------------
-        */
-        $ppdb = MasterPpdb::aktifWithRelasi();
-        $syarats = $ppdb?->syarats ?? [];
-
-        foreach ($syarats as $syarat) {
-
-            $value = $request->input('syarat_' . $syarat->id);
-
-            if (!$value) continue;
-
-            DetailPendaftaran::updateOrCreate(
-                [
-                    'pendaftaran_id' => $pendaftaran->id,
-                    'syarat_id' => $syarat->id,
-                ],
-                [
-                    'value' => $syarat->tipe === 'teks' ? $value : null,
-                    'file' => null,
-                ]
-            );
-        }
-
-        /*
-        |------------------------------------------------------------------
-        | 🔁 REDIRECT KE STEP BERIKUTNYA
-        |------------------------------------------------------------------
-        */
-        return redirect()->route('siswa.upload.berkas', $jalur)
-            ->with('success', 'Data formulir berhasil disimpan');
+    if (!$user) {
+        return redirect()->route('ppdb.login');
     }
+
+    $pendaftaran = Pendaftaran::where('user_id', $user->id)
+        ->latest()
+        ->first();
+
+    // 🔒 VALIDASI JALUR
+    if ($pendaftaran && $pendaftaran->jalur !== $jalur) {
+        return redirect()->route('siswa.pendaftaran', $pendaftaran->jalur);
+    }
+
+    // 🔒 LOCK DATA
+    if ($pendaftaran && !$pendaftaran->is_revisi && $pendaftaran->status !== 'belum') {
+        return redirect()->route('siswa.upload.berkas', $pendaftaran->jalur)
+            ->with('error', 'Data sudah dikunci dan tidak bisa diubah');
+    }
+
+    // ✅ VALIDASI
+    $request->validate([
+        'ttl' => 'required',
+        'asal_sekolah' => 'required',
+        'alamat' => 'required',
+        'nama_ortu' => 'required',
+        'pekerjaan_ortu' => 'required',
+        'penghasilan_ortu' => 'required',
+        'alamat_ortu' => 'required',
+        'jumlah_saudara' => 'required|integer',
+        'foto' => 'nullable|image|mimes:jpg,jpeg,png|max:2048',
+    ]);
+    
+
+    // 🔥 HANDLE FOTO (SIMPAN KE PENDAFTARAN)
+    $fotoPath = $pendaftaran ? $pendaftaran->foto : null;
+    if ($request->hasFile('foto')) {
+
+        $file = $request->file('foto');
+
+        // hapus foto lama
+        if ($pendaftaran && $pendaftaran->foto) {
+            Storage::disk('public')->delete($pendaftaran->foto);
+        }
+
+        $fotoPath = $file->store('foto_ppdb', 'public');
+    }
+
+    // 🔥 DATA
+    $data = [
+        'user_id' => $user->id,
+        'jalur' => $jalur,
+
+        'nama_lengkap' => $user->nama,
+        'nisn' => $user->nisn,
+
+        'ttl' => $request->ttl,
+        'asal_sekolah' => $request->asal_sekolah,
+        'alamat' => $request->alamat,
+        'nama_ortu' => $request->nama_ortu,
+        'pekerjaan_ortu' => $request->pekerjaan_ortu,
+        'penghasilan_ortu' => $request->penghasilan_ortu,
+        'alamat_ortu' => $request->alamat_ortu,
+        'jumlah_saudara' => $request->jumlah_saudara,
+
+        // 🔥 FIX UTAMA
+        'foto' => $fotoPath,
+
+        'status' => 'form_selesai',
+        'last_step' => 'berkas'
+    ];
+
+    // 🔥 SIMPAN
+    if ($pendaftaran) {
+        $pendaftaran->update($data);
+    } else {
+        $pendaftaran = Pendaftaran::create($data);
+    }
+
+    // 🔥 SYARAT DINAMIS
+    $ppdb = MasterPpdb::aktifWithRelasi();
+    $syarats = $ppdb?->syarats ?? [];
+
+    foreach ($syarats as $syarat) {
+
+        $value = $request->input('syarat_' . $syarat->id);
+
+        if (!$value) continue;
+
+        DetailPendaftaran::updateOrCreate(
+            [
+                'pendaftaran_id' => $pendaftaran->id,
+                'syarat_id' => $syarat->id,
+            ],
+            [
+                'value' => $syarat->tipe === 'teks' ? $value : null,
+                'file' => null,
+            ]
+        );
+    }
+
+    return redirect()->route('siswa.upload.berkas', $jalur)
+        ->with('success', 'Data formulir berhasil disimpan');
+}
 
 
     /*

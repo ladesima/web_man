@@ -19,7 +19,7 @@ class FaqController extends Controller
                 'id' => $item->id,
                 'pertanyaan' => $item->pertanyaan,
                 'status' => strtolower(str_replace(' ', '_', $item->status)),
-                'kategori' => strtolower(str_replace(' ', '_', $item->kategori)), // 🔥 FIX
+                'kategori' => ucwords(str_replace('_', ' ', $item->kategori)), // 🔥 FIX
                 'urutan' => $item->urutan,
                 'terakhir' => $item->updated_at
                     ? $item->updated_at->format('d-m-y H:i') . ' WITA'

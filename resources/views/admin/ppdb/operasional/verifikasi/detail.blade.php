@@ -83,9 +83,11 @@
         <div class="flex items-center gap-4 flex-1"
              style="border-right: 1px solid #E6E6E6; padding-right: 24px;">
 
-            <img src="{{ asset('ppdb/admin/operasional/cadangan.png') }}"
-                 class="w-16 h-16 object-cover border border-slate-200"
-                 style="border-radius:12px;">
+            <img src="{{ $pendaftaran->foto 
+        ? asset('storage/' . $pendaftaran->foto) 
+        : asset('ppdb/admin/operasional/cadangan.png') }}"
+     class="w-16 h-16 object-cover border border-slate-200"
+     style="border-radius:12px;">
 
             <div>
                 <h2 class="text-[16px] font-bold mb-0.5"

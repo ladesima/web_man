@@ -12,32 +12,27 @@
 
         <h2 class="text-lg font-bold mb-6 text-[#27C2DE]">Data Formulir</h2>
 
-        {{-- FOTO PROFIL --}}
-        <div class="flex justify-center mb-6">
-            <div class="relative w-24 h-24">
-                {{-- Foto preview --}}
-                <img id="foto-preview"
-     src="{{ auth('ppdb')->user()->foto 
-        ? asset('storage/' . auth('ppdb')->user()->foto) 
-        : asset('ppdb/profil.png') }}"
-     alt="Foto Profil"
-     class="w-24 h-24 rounded-full object-cover border-4 border-white"
-     style="box-shadow: 0 2px 12px rgba(39,194,222,0.3);">
+       {{-- FOTO PROFIL --}}
+<div class="flex justify-center mb-6">
+    <div class="relative w-24 h-24">
 
-                {{-- Tombol kamera --}}
-                <button type="button"
-                        onclick="document.getElementById('foto-input').click()"
-                        class="absolute bottom-0 right-0 w-7 h-7 rounded-full flex items-center justify-center border-2 border-white hover:opacity-90 transition"
-                        style="background:#27C2DE;">
-                    <img src="{{ asset('ppdb/kamera.png') }}" alt="Upload" class="w-4 h-4 object-contain brightness-0 invert">
-                </button>
+        {{-- Foto preview --}}
+        <img id="foto-preview"
+            src="{{ asset('ppdb/profil.png') }}"
+            alt="Foto Profil"
+            class="w-24 h-24 rounded-full object-cover border-4 border-white"
+            style="box-shadow: 0 2px 12px rgba(39,194,222,0.3);">
 
-                {{-- Input file (hidden) --}}
-                <input type="file" id="foto-input" name="foto" accept="image/*"
-                       class="hidden"
-                       onchange="previewFoto(this)">
-            </div>
-        </div>
+        {{-- Tombol kamera --}}
+        <button type="button"
+            onclick="document.getElementById('foto-input').click()"
+            class="absolute bottom-0 right-0 w-7 h-7 rounded-full flex items-center justify-center border-2 border-white hover:opacity-90 transition"
+            style="background:#27C2DE;">
+            <img src="{{ asset('ppdb/kamera.png') }}" class="w-4 h-4 brightness-0 invert">
+        </button>
+
+    </div>
+</div>
 
         {{-- ALERT GLOBAL --}}
         @if ($errors->any())
@@ -54,7 +49,9 @@
             @csrf
 
             {{-- Input foto disembunyikan dalam form --}}
-            <input type="file" id="foto-input-form" name="foto" accept="image/*" class="hidden">
+           <input type="file" id="foto-input" name="foto" accept="image/*"
+           class="hidden"
+           onchange="previewFoto(this)">
 
             <div class="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-5">
 
@@ -215,8 +212,8 @@
                         class="px-5 py-1.5 rounded-xl border border-slate-300 text-[12px] font-semibold text-slate-600 hover:bg-slate-50 transition-all">
                     Batal
                 </button>
-                <button type="button"
-                        onclick="document.getElementById('form-pendaftaran').submit()"
+                <button type="submit"
+                        form="form-pendaftaran"
                         class="px-5 py-1.5 rounded-xl text-white text-[12px] font-semibold transition-all"
                         style="background:#27C2DE;">
                     Lanjutkan
