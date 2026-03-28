@@ -14,34 +14,52 @@
     tab: "faq",
     showJawabPopup: false,
     selectedPertanyaan: null,
-    pertanyaanRows: [],
+
+    pertanyaanRows: @json($pertanyaans),
+    faqRows: @json($faqs),
+
+    jawabanText: "",
+
+    searchPertanyaan: "",
+    filterstatusPertanyaan: "",
 
     search: "",
     filterKategori: "",
     filterStatus: "",
 
-    faqRows: @json($faqs),
-
     get filteredFaqRows() {
         return this.faqRows.filter(row => {
+            const matchSearch = row.pertanyaan.toLowerCase().includes(this.search.toLowerCase());
 
-            const matchSearch = row.pertanyaan
-                .toLowerCase()
-                .includes(this.search.toLowerCase());
+            const matchKategori =
+                this.filterKategori === "" || this.filterKategori === "Kategori"
+                    ? true
+                    : row.kategori === this.filterKategori;
 
-            const matchKategori = this.filterKategori === "" || this.filterKategori === "Kategori"
-                ? true
-                : row.kategori === this.filterKategori;
-
-            const matchStatus = this.filterStatus === "" || this.filterStatus === "Status"
-                ? true
-                : (
-                    this.filterStatus === "Aktif"
+            const matchStatus =
+                this.filterStatus === "" || this.filterStatus === "Status"
+                    ? true
+                    : (this.filterStatus === "Aktif"
                         ? row.status === "aktif"
-                        : row.status === "tidak_aktif"
-                );
+                        : row.status === "tidak_aktif");
 
             return matchSearch && matchKategori && matchStatus;
+        });
+    },
+
+    get filteredPertanyaanRows() {
+        return this.pertanyaanRows.filter(row => {
+            const matchSearch = row.pertanyaan.toLowerCase().includes(this.searchPertanyaan.toLowerCase());
+
+            const matchStatus =
+                this.filterstatusPertanyaan === "" ||
+                this.filterstatusPertanyaan === "Status"
+                    ? true
+                    : (this.filterstatusPertanyaan === "Sudah Dijawab"
+                        ? row.status === "sudah_dijawab"
+                        : row.status === "belum_dijawab");
+
+            return matchSearch && matchStatus;
         });
     },
 
@@ -57,34 +75,66 @@
         .then(data => {
             if (data.success) {
                 row.status = data.status;
-            } else {
-                alert("Gagal update status");
+                this.faqRows = [...this.faqRows];
+            }
+        });
+    },
+
+    deleteFaq(row) {
+        if (!confirm("Yakin ingin menghapus FAQ ini?")) return;
+
+        fetch("/admin/operasional/faq/" + row.id, {
+            method: "DELETE",
+            headers: {
+                "X-CSRF-TOKEN": document.querySelector("meta[name=csrf-token]").content,
+                "Accept": "application/json"
             }
         })
-        .catch(() => alert("Terjadi error"));
+        .then(res => res.json())
+        .then(data => {
+            if (data.success) {
+                this.faqRows = this.faqRows.filter(item => item.id !== row.id);
+            }
+        });
     },
-    deleteFaq(row) {
-    if (!confirm("Yakin ingin menghapus FAQ ini?")) return;
 
-    fetch("/admin/operasional/faq/" + row.id, {
-        method: "DELETE",
-        headers: {
-            "X-CSRF-TOKEN": document.querySelector("meta[name=csrf-token]").content,
-            "Accept": "application/json"
+    openJawab(row) {
+        this.selectedPertanyaan = row;
+        this.jawabanText = row.jawaban || "";
+        this.showJawabPopup = true;
+    },
+
+    kirimJawaban() {
+        if (!this.selectedPertanyaan || !this.jawabanText) {
+            alert("Jawaban tidak boleh kosong");
+            return;
         }
-    })
-    .then(res => res.json())
-    .then(data => {
-        if (data.success) {
-            // 🔥 hapus dari tampilan (tanpa reload)
-            this.faqRows = this.faqRows.filter(item => item.id !== row.id);
-        } else {
-            alert("Gagal menghapus data");
-        }
-    })
-    .catch(() => alert("Terjadi error"));
-}
+
+        fetch("/admin/operasional/pertanyaan/" + this.selectedPertanyaan.id + "/jawab", {
+            method: "PATCH",
+            headers: {
+                "X-CSRF-TOKEN": document.querySelector("meta[name=csrf-token]").content,
+                "Content-Type": "application/json",
+                "Accept": "application/json"
+            },
+            body: JSON.stringify({
+                jawaban: this.jawabanText
+            })
+        })
+        .then(res => res.json())
+        .then(data => {
+            if (data.success) {
+                this.selectedPertanyaan.status = "sudah_dijawab";
+                this.pertanyaanRows = [...this.pertanyaanRows];
+
+                this.jawabanText = "";
+                this.showJawabPopup = false;
+            }
+        });
+    }
 }'>
+
+    {{-- ===== TAHUN AJARAN & STATUS ===== --}}
 
     {{-- ===== TABS ===== --}}
     <div class="flex items-center justify-between mb-5">
@@ -263,7 +313,7 @@
 
         <div class="flex gap-3 mb-4 items-center">
             <div class="relative flex-[2]">
-                <input type="text" placeholder="Cari"
+                <input type="text" placeholder="Cari" x-model="searchPertanyaan"
                        class="w-full pl-9 pr-4 py-2.5 text-[12px] border border-slate-200 bg-white focus:outline-none focus:ring-2 focus:ring-[#27C2DE] card-shadow transition-all"
                        style="border-radius:8px;">
                 <svg class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -272,7 +322,7 @@
             </div>
 
             <div class="relative flex-1">
-                <select class="appearance-none w-full pl-4 pr-8 py-2.5 text-[12px] border border-slate-200 bg-white text-slate-600 focus:outline-none card-shadow"
+                <select class="appearance-none w-full pl-4 pr-8 py-2.5 text-[12px] border border-slate-200 bg-white text-slate-600 focus:outline-none card-shadow" x-model="filterstatusPertanyaan"
                         style="border-radius:8px;">
                     <option>Status</option>
                     <option>Sudah Dijawab</option>
@@ -300,7 +350,7 @@
                         </tr>
                     </thead>
                     <tbody class="divide-y divide-slate-100">
-                        <template x-for="(row, i) in pertanyaanRows" :key="row.id">
+                        <template x-for="(row, i) in filteredPertanyaanRows" :key="row.id">
                             <tr class="hover:bg-slate-50 transition-all">
                                 <td class="text-center py-3 px-4 text-[12px] text-[#2B2A28] sticky left-0 z-10 bg-white"
                                     x-text="i+1"></td>
@@ -391,14 +441,14 @@
 
                     <div style="display:flex; flex-direction:column; gap:8px;">
                         <p style="color:#2B2A28; font-size:13px; font-family:Poppins,sans-serif; font-weight:600;">Jawaban</p>
-                        <textarea placeholder="Tulis jawaban..."
+                        <textarea x-model="jawabanText" placeholder="Tulis jawaban..."
                             style="width:100%; height:110px; background:#F5F7FF; border-radius:10px; border:1px solid #DFEAF2; resize:none; padding:10px 12px; font-size:13px; font-family:Poppins,sans-serif; color:#2B2A28; outline:none;"></textarea>
                     </div>
 
                 </div>
 
                 <div style="display:flex; justify-content:center; margin-top:24px;">
-                    <button @click="showJawabPopup = false"
+                    <button @click="kirimJawaban()"
                             style="width:120px; padding:8px; background:#27C2DE; border-radius:4px; border:none; cursor:pointer; color:#FAFEFF; font-size:14px; font-family:Poppins,sans-serif; font-weight:600;">
                         Kirim
                     </button>

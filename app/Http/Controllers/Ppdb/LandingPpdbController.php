@@ -67,8 +67,8 @@ if ($ppdb) {
 
     // 🔥 TAMBAHAN FAQ (INI YANG PENTING)
     $faqs = Faq::where('status', 'aktif')
-        ->orderBy('urutan')
-        ->get();
+    ->orderBy('urutan')
+    ->get(['id','pertanyaan','jawaban','kategori']);
 
     return view('website.ppdb.landing', compact('ppdb', 'faqs'));
 }
