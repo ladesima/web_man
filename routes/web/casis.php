@@ -6,6 +6,7 @@ use App\Http\Controllers\Ppdb\CekNisnController;
 use App\Http\Controllers\Ppdb\LandingPpdbController;
 use App\Http\Controllers\Ppdb\PendaftaranController;
 use App\Http\Controllers\Ppdb\UploadBerkasController;
+use App\Http\Controllers\Admin\Ppdb\FaqController;
 use App\Models\PpdbUser;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -57,6 +58,9 @@ Route::prefix('ppdb')->group(function () {
     Route::get('/reset-password', fn() => view('ppdb.auth.reset-password'))->name('ppdb.reset-password');
     Route::post('/reset-password', [AuthPpdbController::class, 'resetPassword'])->name('ppdb.reset-password.post');
 });
+
+Route::post('/ppdb/pertanyaan', [FaqController::class, 'kirimPertanyaan'])
+    ->name('ppdb.pertanyaan.kirim');
 
 /*
 |--------------------------------------------------------------------------

@@ -542,12 +542,12 @@ document.querySelectorAll('.jadwal-col').forEach((el, i) => {
             Tambah Pertanyaan
         </h2>
 
-        <form onsubmit="submitKontak(event)">
-
+        <form id="formKontak">
+        @csrf
             {{-- Nama --}}
             <div style="margin-bottom:18px;">
                 <label style="display:block; font-size:13px; font-weight:600; color:#2B2A28; margin-bottom:6px;">Nama</label>
-                <input type="text" name="nama" autocomplete="off"
+                <input type="text" name="pengirim" autocomplete="off"
                        style="width:100%; border:none; border-bottom:1.5px solid #CBD5E1; padding:8px 0; font-size:13px; color:#2B2A28; outline:none; background:transparent;"
                        onfocus="this.style.borderBottomColor='#27C2DE'"
                        onblur="this.style.borderBottomColor='#CBD5E1'">
@@ -613,11 +613,63 @@ document.querySelectorAll('.jadwal-col').forEach((el, i) => {
 
 @push('scripts')
 <script>
-    function submitKontak(e) {
+document.addEventListener("DOMContentLoaded", function () {
+
+    const form = document.getElementById("formKontak");
+
+    if (!form) return;
+
+    form.addEventListener("submit", function(e) {
         e.preventDefault();
-        tutupPopupKontak();
-        // Tambahkan logic POST ke server di sini
-    }
+
+        const formData = new FormData(form);
+
+        // 🔥 VALIDASI FRONTEND (TANPA UBAH UI)
+        if (!formData.get('pengirim') || 
+            !formData.get('email') || 
+            !formData.get('kategori') || 
+            !formData.get('pertanyaan')) {
+
+            alert("Semua field wajib diisi ❗");
+            return;
+        }
+
+        fetch("{{ route('ppdb.pertanyaan.kirim') }}", {
+            method: "POST",
+            headers: {
+                "X-CSRF-TOKEN": document.querySelector('meta[name="csrf-token"]').content,
+                "Accept": "application/json"
+            },
+            body: formData
+        })
+        .then(async res => {
+            if (!res.ok) {
+                let err = await res.json().catch(() => ({}));
+                throw err;
+            }
+            return res.json();
+        })
+        .then(data => {
+            // ✅ SUCCESS
+            alert("Pertanyaan berhasil dikirim 👍");
+
+            form.reset();
+            tutupPopupKontak();
+        })
+        .catch(err => {
+            console.error(err);
+
+            // 🔥 HANDLE VALIDATION ERROR LARAVEL
+            if (err.errors) {
+                let pesan = Object.values(err.errors).flat().join("\n");
+                alert(pesan);
+            } else {
+                alert("Terjadi kesalahan saat mengirim ❌");
+            }
+        });
+    });
+
+});
 </script>
 @endpush
 

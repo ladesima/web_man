@@ -13,6 +13,8 @@ use App\Http\Controllers\Admin\Ppdb\FaqController;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Response;
 
+
+
 Route::get('/preview-dokumen', function (Illuminate\Http\Request $request) {
 
     $file = $request->file;
@@ -116,6 +118,12 @@ Route::patch('/operasional/faq/{id}/toggle', [FaqController::class, 'toggleStatu
 
 Route::delete('/operasional/faq/{id}', [FaqController::class, 'destroy'])
     ->name('admin.operasional.faq.destroy');
+
+
+
+Route::patch('/operasional/pertanyaan/{id}/jawab', 
+    [FaqController::class, 'jawabPertanyaan']
+);
     
 
     Route::view('/manajemen/akun', 'admin.ppdb.manajemen.akun-panitia')->name('admin.manajemen.akun');
