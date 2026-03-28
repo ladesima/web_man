@@ -95,7 +95,7 @@ $stats = [
 
     style="background: linear-gradient(to bottom left, {{ $s['from'] }} 0%, {{ $s['to'] }} 100%);
            border: 0.66px solid #F3F3F3;
-           box-shadow: 0px 2.62px 2.62px 0px rgba(161,209,251,0.25);
+           box-shadow: 0px 3.96px 3.96px 0px rgba(161, 209, 251, 0.25);
            filter: saturate(0.45) brightness(1.08);"
 
     onmouseenter="this.style.filter='saturate(1) brightness(1)'; this.style.boxShadow='0px 6px 14px rgba(0,0,0,0.10)'"
@@ -121,8 +121,8 @@ $stats = [
         {{-- Search --}}
         <div class="relative flex-[2]">
             <input type="text" placeholder="Cari" x-model="search"
-                   class="w-full pl-9 pr-4 py-2.5 text-[12px] border border-slate-200 bg-white focus:outline-none focus:ring-2 focus:ring-[#27C2DE]"
-                   style="border-radius: 8px;">
+                  class="w-full pl-9 pr-4 py-2.5 text-[12px] border border-slate-200 bg-white focus:outline-none focus:ring-2 focus:ring-[#27C2DE]"
+                  style="border-radius: 8px; box-shadow: 0px 4px 4px 0px rgba(161, 209, 251, 0.25);">
             <svg class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
             </svg>
@@ -130,7 +130,7 @@ $stats = [
         {{-- Filter Jalur --}}
         <div class="relative flex-1">
             <select class="appearance-none w-full pl-4 pr-8 py-2.5 text-[12px] border border-slate-200 bg-white text-slate-600 focus:outline-none"
-                    style="border-radius: 8px;" x-model="filterJalur">
+                    style="border-radius: 8px; box-shadow: 0px 4px 4px 0px rgba(161, 209, 251, 0.25);" x-model="filterJalur">
                 <option>Jalur</option>
                 <option>Reguler</option>
                 <option>Prestasi</option>
@@ -143,7 +143,7 @@ $stats = [
         {{-- Filter Gelombang --}}
         <div class="relative flex-1">
             <select class="appearance-none w-full pl-4 pr-8 py-2.5 text-[12px] border border-slate-200 bg-white text-slate-600 focus:outline-none"
-                    style="border-radius: 8px;">
+                    style="border-radius: 8px; box-shadow: 0px 4px 4px 0px rgba(161, 209, 251, 0.25);">
                 <option>Gelombang</option>
                 <option>Gelombang I</option>
                 <option>Gelombang II</option>
@@ -155,7 +155,7 @@ $stats = [
         {{-- Filter Status --}}
         <div class="relative flex-1">
             <select class="appearance-none w-full pl-4 pr-8 py-2.5 text-[12px] border border-slate-200 bg-white text-slate-600 focus:outline-none"
-                    style="border-radius: 8px;" x-model="filterStatus">
+                    style="border-radius: 8px; box-shadow: 0px 4px 4px 0px rgba(161, 209, 251, 0.25);" x-model="filterStatus">
                 <option value="">Status</option>
     <option value="menunggu">Menunggu</option>
     <option value="perlu_perbaikan">Perlu Perbaikan</option>
@@ -174,7 +174,7 @@ $stats = [
     </div>
 
     {{-- ===== TABEL ===== --}}
-    <div class="bg-white rounded-2xl overflow-hidden" style="box-shadow: 0px 2px 8px rgba(0,0,0,0.06);">
+    <div class="bg-white rounded-2xl overflow-hidden" style="box-shadow: 0px 4px 4px 0px rgba(161, 209, 251, 0.25);">
         <table class="w-full">
             <thead>
                 <tr style="background:#C4F4FD;">
@@ -221,7 +221,7 @@ $stats = [
                         <td class="text-center py-3 px-4">
                            <a :href="`/admin/operasional/verifikasi/${row.id}`"
    class="inline-flex items-center px-4 py-1.5 rounded-lg text-white text-[12px] font-semibold transition-all hover:opacity-90 active:scale-95"
-   style="background: linear-gradient(90deg, #15B2CE 0%, #00758A 100%);">
+   style="background: linear-gradient(90deg, #1AA2BA 0%, #47E3FF 100%);">
     <img src="{{ asset('ppdb/admin/ditail.png') }}" alt="detail" class="w-4 h-4 object-contain">
     Detail
 </a>

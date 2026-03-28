@@ -220,9 +220,7 @@
         class="inline-flex items-center gap-1.5 px-3 py-1.5 text-[12px] transition-all hover:opacity-80"
         style="border: 1.5px solid #16A34A; color:#16A34A; background:rgba(22,163,74,0.08); border-radius:6px; font-weight:400;">
     
-    <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="#16A34A" stroke-width="2">
-        <path stroke-linecap="round" stroke-linejoin="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
-    </svg>
+   <img src="{{ asset('ppdb/admin/operasional/edit.png') }}" class="w-3.5 h-3.5">
 
     Edit
 </button>
@@ -232,9 +230,7 @@
     class="inline-flex items-center gap-1.5 px-3 py-1.5 text-[12px] transition-all hover:opacity-80"
     style="border: 1.5px solid #EF4444; color:#EF4444; background:rgba(239,68,68,0.08); border-radius:6px; font-weight:400;">
     
-    <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="#EF4444" stroke-width="2">
-        <path stroke-linecap="round" stroke-linejoin="round" d="M6 7h12M9 7v10m6-10v10M10 11v6m4-6v6M5 7l1-3h12l1 3"/>
-    </svg>
+    <img src="{{ asset('ppdb/admin/operasional/sampah.png') }}" class="w-3.5 h-3.5">
 
     Hapus
 </button>

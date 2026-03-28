@@ -10,7 +10,7 @@
 
         {{-- Search --}}
        <div class="flex items-center gap-2 px-4 py-2.5 flex-[2] border border-slate-200"
-     style="background: #FAFEFF; border-radius: 8px;">
+       style="background: #FAFEFF; border-radius: 8px; box-shadow: 0px 4px 4px 0px rgba(161, 209, 251, 0.25);">
             <svg class="w-4 h-4 text-slate-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-4.35-4.35M17 11A6 6 0 1 1 5 11a6 6 0 0 1 12 0z"/>
             </svg>
@@ -25,7 +25,7 @@
         <div class="relative flex-1">
             <select name="jalur"
                 class="appearance-none border border-slate-200 pl-4 pr-8 py-2.5 text-[13px] text-slate-600 outline-none cursor-pointer w-full"
-                style="background: #FAFEFF; border-radius: 8px;">
+                style="background: #FAFEFF; border-radius: 8px; box-shadow: 0px 4px 4px 0px rgba(161, 209, 251, 0.25);">
                 <option value="">Jalur</option>
                 <option value="reguler" {{ request('jalur')=='reguler'?'selected':'' }}>Reguler</option>
                 <option value="prestasi" {{ request('jalur')=='prestasi'?'selected':'' }}>Prestasi</option>
@@ -40,7 +40,7 @@
         <div class="relative flex-1">
             <select name="gelombang"
                 class="appearance-none border border-slate-200 pl-4 pr-8 py-2.5 text-[13px] text-slate-600 outline-none cursor-pointer w-full"
-                style="background: #FAFEFF; border-radius: 8px;">
+                style="background: #FAFEFF; border-radius: 8px; box-shadow: 0px 4px 4px 0px rgba(161, 209, 251, 0.25);">
                 <option value="">Gelombang</option>
                 <option value="1" {{ request('gelombang')=='1'?'selected':'' }}>Gelombang I</option>
                 <option value="2" {{ request('gelombang')=='2'?'selected':'' }}>Gelombang II</option>
@@ -54,7 +54,7 @@
         <div class="relative flex-1">
             <select name="status"
                 class="appearance-none border border-slate-200 pl-4 pr-8 py-2.5 text-[13px] text-slate-600 outline-none cursor-pointer w-full"
-                style="background: #FAFEFF; border-radius: 8px;">
+                style="background: #FAFEFF; border-radius: 8px; box-shadow: 0px 4px 4px 0px rgba(161, 209, 251, 0.25);">
                 <option value="">Status</option>
                 <option value="belum" {{ request('status')=='belum'?'selected':'' }}>Menunggu</option>
                 <option value="perbaikan" {{ request('status')=='perbaikan'?'selected':'' }}>Perbaikan</option>
@@ -71,7 +71,7 @@
         <div class="relative flex-1">
             <select name="waktu"
                 class="appearance-none border border-slate-200 pl-4 pr-8 py-2.5 text-[13px] text-slate-600 outline-none cursor-pointer w-full"
-                style="background: #FAFEFF; border-radius: 8px;">
+                style="background: #FAFEFF; border-radius: 8px; box-shadow: 0px 4px 4px 0px rgba(161, 209, 251, 0.25);">
                 <option value="">Waktu</option>
                 <option value="hari_ini" {{ request('waktu')=='hari_ini'?'selected':'' }}>Hari Ini</option>
                 <option value="minggu_ini" {{ request('waktu')=='minggu_ini'?'selected':'' }}>Minggu Ini</option>
@@ -87,7 +87,8 @@
 
 </form>
 {{-- Tabel --}}
-<div class="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden">
+<div class="bg-white rounded-2xl border border-slate-100 overflow-hidden"
+style="box-shadow: 0px 4px 4px 0px rgba(161, 209, 251, 0.25);">
     <div class="overflow-x-auto">
         <table class="w-full min-w-[900px] text-[13px]">
 
@@ -164,11 +165,8 @@
     <td class="text-center py-3.5 px-4">
         <a href="{{ route('data-pendaftar.show', $row->id) }}"
            class="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg text-white text-[12px] font-semibold transition-all hover:opacity-90 active:scale-95"
-           style="background: linear-gradient(90deg, #15B2CE 0%, #00758A 100%);">
-            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
-            </svg>
+           style="background: linear-gradient(90deg, #1AA2BA 0%, #47E3FF 100%);">
+           <img src="{{ asset('ppdb/admin/operasional/preview.png') }}" class="w-3.5 h-3.5 object-contain">
             Detail
         </a>
     </td>
