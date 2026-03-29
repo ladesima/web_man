@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\Pendaftaran;
+use function logAktivitas; // 🔥 IMPORT HELPER
 
 class VerifikasiController extends Controller
 {
@@ -107,7 +108,7 @@ class VerifikasiController extends Controller
         $pendaftaran->last_step = 'verifikasi';
 
         $pendaftaran->save();
-
+        logAktivitas('Verifikasi data pendaftar: ' . $pendaftaran->nama_lengkap);
         return redirect()
             ->route('admin.operasional.verifikasi')
             ->with('success', 'Verifikasi berhasil disimpan');
@@ -123,7 +124,7 @@ class VerifikasiController extends Controller
             'is_revisi' => false,
             'catatan_revisi' => null
         ]);
-
+        logAktivitas('Meluluskan siswa: ' . $pendaftaran->nama_lengkap);
         return back()->with('success', 'Peserta dinyatakan LULUS');
     }
 
@@ -136,7 +137,7 @@ class VerifikasiController extends Controller
             'last_step' => 'pengumuman',
             'is_revisi' => false
         ]);
-
+        logAktivitas('Menolak siswa: ' . $pendaftaran->nama_lengkap);
         return back()->with('error', 'Peserta dinyatakan TIDAK LULUS');
     }
 
@@ -151,7 +152,7 @@ class VerifikasiController extends Controller
             'catatan_revisi' => null,
             'verifikasi_dokumen' => null
         ]);
-
+        logAktivitas('Reset data pendaftar: ' . $pendaftaran->nama_lengkap);
         return back()->with('info', 'Data berhasil direset');
     }
     public function simpan(Request $request, $id)

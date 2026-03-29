@@ -24,70 +24,101 @@
             </div>
         </div>
 
+    
+       
         {{-- PILIH JALUR --}}
        <div style="margin-top: -20px;">
             <h3 class="text-base font-bold text-[#2B2A28] mb-6">Pilih Jalur Pendaftaran</h3>
+             @php
+    $activeJalur = optional($ppdb->jalurs->firstWhere('is_active', 1))->jalur;
+@endphp
             <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
 
                 {{-- Prestasi --}}
-                <div class="jalur-card relative pt-8 flex flex-col" style="--delay: 0ms">
+                @php $isPrestasi = $activeJalur === 'prestasi'; @endphp
+                <div class="jalur-card relative pt-8 flex flex-col {{ !$isPrestasi ? 'opacity-50' : '' }}" style="--delay: 0ms">
                     <div class="absolute top-0 left-6 z-10">
                         <img src="{{ asset('ppdb/Group 18.svg') }}" alt="Prestasi" class="w-14 h-14 object-contain">
                     </div>
-                    <div class="jalur-inner flex-1 flex flex-col rounded-2xl pt-10 pb-0 px-6 bg-white overflow-hidden"
+                    <div class="jalur-inner flex-1 flex flex-col rounded-2xl pt-10 pb-0 px-6 bg-white overflow-hidden
+    {{ !$isPrestasi ? 'pointer-events-none cursor-not-allowed' : '' }}"
                          style="box-shadow: 0px 4px 4px 0px rgba(0,0,0,0.25);">
                         <h3 class="text-base font-bold text-black">Jalur Prestasi</h3>
                         <p class="mt-2 text-sm leading-6 flex-1" style="color: #575551;">
                             Untuk siswa dengan prestasi akademik atau non akademik
                         </p>
-                        <div class="border-t border-slate-100 mt-6">
-                            <a href="{{ route('ppdb.jalur', 'prestasi') }}"
-                               class="inline-flex items-center gap-1.5 py-4 font-semibold text-sm group"
-                               style="color: #16A9D1;">
-                                Baca Selengkapnya <span class="group-hover:translate-x-1 transition-transform">→</span>
-                            </a>
-                        </div>
+                       <div class="border-t border-slate-100 mt-6">
+    @if($isPrestasi)
+        <a href="{{ route('ppdb.jalur', 'prestasi') }}"
+           class="inline-flex items-center gap-1.5 py-4 font-semibold text-sm group"
+           style="color: #16A9D1;">
+            Baca Selengkapnya <span class="group-hover:translate-x-1 transition-transform">→</span>
+        </a>
+    @else
+        <span class="inline-flex items-center py-4 text-gray-400 font-semibold text-sm">
+            Belum Dibuka
+        </span>
+    @endif
+</div>
                     </div>
                 </div>
 
                 {{-- Regular --}}
-                <div class="jalur-card relative pt-8 flex flex-col" style="--delay: 200ms">
+                @php $isReguler = $activeJalur === 'reguler'; @endphp
+
+<div class="jalur-card relative pt-8 flex flex-col {{ !$isReguler ? 'opacity-50' : '' }}" style="--delay: 200ms">
                     <div class="absolute top-0 left-6 z-10">
                         <img src="{{ asset('ppdb/regular.svg') }}" alt="Regular" class="w-14 h-14 object-contain">
                     </div>
-                    <div class="jalur-inner flex-1 flex flex-col rounded-2xl pt-10 pb-0 px-6 bg-white overflow-hidden"
+                    <div class="jalur-inner flex-1 flex flex-col rounded-2xl pt-10 pb-0 px-6 bg-white overflow-hidden
+                    {{ !$isReguler ? 'pointer-events-none cursor-not-allowed' : '' }}"
                          style="box-shadow: 0px 4px 4px 0px rgba(0,0,0,0.25);">
                         <h3 class="text-base font-bold text-black">Jalur Regular</h3>
                         <p class="mt-2 text-sm leading-6 flex-1" style="color: #575551;">
                             Jalur pendaftaran umum bagi calon siswa yang ingin melanjutkan pendidikan di MAN Jeneponto.
                         </p>
                         <div class="border-t border-slate-100 mt-6">
-                            <a href="{{ route('ppdb.jalur', 'reguler') }}"
-                               class="inline-flex items-center gap-1.5 py-4 font-semibold text-sm group"
-                               style="color: #16A9D1;">
-                                Baca Selengkapnya <span class="group-hover:translate-x-1 transition-transform">→</span>
-                            </a>
-                        </div>
+    @if($isReguler)
+        <a href="{{ route('ppdb.jalur', 'reguler') }}"
+           class="inline-flex items-center gap-1.5 py-4 font-semibold text-sm group"
+           style="color: #16A9D1;">
+            Baca Selengkapnya <span class="group-hover:translate-x-1 transition-transform">→</span>
+        </a>
+    @else
+        <span class="inline-flex items-center py-4 text-gray-400 font-semibold text-sm">
+            Belum Dibuka
+        </span>
+    @endif
+</div>
                     </div>
                 </div>
 
                 {{-- Afirmasi --}}
-                <div class="jalur-card relative pt-8 flex flex-col" style="--delay: 400ms">
+                @php $isAfirmasi = $activeJalur === 'afirmasi'; @endphp
+
+<div class="jalur-card relative pt-8 flex flex-col {{ !$isAfirmasi ? 'opacity-50' : '' }}" style="--delay: 400ms">
                     <div class="absolute top-0 left-6 z-10">
                         <img src="{{ asset('ppdb/afirmasi.svg') }}" alt="Afirmasi" class="w-14 h-14 object-contain">
                     </div>
-                    <div class="jalur-inner flex-1 flex flex-col rounded-2xl pt-10 pb-0 px-6 bg-white overflow-hidden"
+                    <div class="jalur-inner flex-1 flex flex-col rounded-2xl pt-10 pb-0 px-6 bg-white overflow-hidden
+                    {{ !$isAfirmasi ? 'pointer-events-none cursor-not-allowed' : '' }}"
                          style="box-shadow: 0px 4px 4px 0px rgba(0,0,0,0.25);">
                         <h3 class="text-base font-bold text-black">Jalur Afirmasi</h3>
                         <p class="mt-2 text-sm leading-6 flex-1" style="color: #575551;">
                             Untuk calon siswa dari keluarga kurang mampu atau yang memiliki kondisi khusus sesuai ketentuan
                         </p>
                         <div class="border-t border-slate-100 mt-6">
-                            <a href="{{ route('ppdb.jalur', 'afirmasi') }}"
-                               class="inline-flex items-center gap-1.5 py-4 font-semibold text-sm group"
-                               style="color: #16A9D1;">
-                                Baca Selengkapnya <span class="group-hover:translate-x-1 transition-transform">→</span>
-                            </a>
+    @if($isAfirmasi)
+        <a href="{{ route('ppdb.jalur', 'afirmasi') }}"
+           class="inline-flex items-center gap-1.5 py-4 font-semibold text-sm group"
+           style="color: #16A9D1;">
+            Baca Selengkapnya <span class="group-hover:translate-x-1 transition-transform">→</span>
+        </a>
+    @else
+        <span class="inline-flex items-center py-4 text-gray-400 font-semibold text-sm">
+            Belum Dibuka
+        </span>
+    @endif
                         </div>
                     </div>
                 </div>

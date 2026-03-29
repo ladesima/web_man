@@ -6,71 +6,80 @@ use App\Http\Controllers\Controller;
 use App\Models\MasterPpdb;
 use App\Models\Pendaftaran;
 use App\Models\Faq;
+use App\Models\PpdbJalur;
 
 class LandingPpdbController extends Controller
 {
-    public function index()
-    {
-        // ✅ Ambil user (pakai guard saja, clean)
-        $user = auth('ppdb')->user();
+   public function index()
+{
+    $user = auth('ppdb')->user();
 
-        // ✅ Ambil PPDB aktif (pakai helper method)
-        $ppdb = MasterPpdb::aktifWithRelasi();
-        $jalurs = collect();
+    // ✅ PPDB tetap ambil yang aktif
+    $ppdb = MasterPpdb::where('is_active', 1)->first();
 
-if ($ppdb) {
-    $jalurs = $ppdb->jalurs->sortBy(function ($jalur) {
-        return optional($jalur->tahapans->sortBy('tanggal_mulai')->first())->tanggal_mulai;
-    })->values();
-}
-
-        // ✅ Ambil pendaftaran (safe)
-        $pendaftaran = null;
-
-        if ($user) {
-            $pendaftaran = Pendaftaran::where('user_id', $user->id)
-                ->latest()
-                ->first();
+    // 🔥 AMBIL SEMUA JALUR (TANPA FILTER)
+    $jalurs = PpdbJalur::with([
+        'tahapans' => function ($q) {
+            $q->orderBy('tanggal_mulai', 'asc');
         }
+    ])->get();
 
-        return view('ppdb.dashboard.beranda', [
-            'user' => $user,
-            'ppdb' => $ppdb,
-            'pendaftaran' => $pendaftaran,
-            'jalurs' => $jalurs
-        ]);
+    // 🔥 URUTAN CUSTOM
+    $urutan = ['prestasi', 'reguler', 'afirmasi'];
+
+    $jalurs = $jalurs->sortBy(function ($item) use ($urutan) {
+        return array_search($item->jalur, $urutan);
+    })->values();
+
+    // ✅ pendaftaran
+    $pendaftaran = null;
+
+    if ($user) {
+        $pendaftaran = Pendaftaran::where('user_id', $user->id)
+            ->latest()
+            ->first();
     }
+
+    return view('ppdb.dashboard.beranda', [
+        'user' => $user,
+        'ppdb' => $ppdb,
+        'pendaftaran' => $pendaftaran,
+        'jalurs' => $jalurs
+    ]);
+}
 
     /*
     |--------------------------------------------------------------------------
     | LANDING PAGE (PUBLIC)
     |--------------------------------------------------------------------------
     */
-  public function landing()
+ public function landing()
 {
-    $ppdb = MasterPpdb::with([
-        'jalurs.tahapans' => function ($q) {
+    $ppdb = MasterPpdb::where('is_active', 1)->first();
+
+    // 🔥 AMBIL SEMUA JALUR
+    $jalurs = PpdbJalur::with([
+        'tahapans' => function ($q) {
             $q->orderBy('tanggal_mulai', 'asc');
         }
-    ])->where('is_active', 1)->first();
+    ])->get();
 
-    if ($ppdb) {
-        // 🔥 URUTAN CUSTOM
-        $urutan = ['prestasi', 'reguler', 'afirmasi'];
+    // 🔥 URUTAN
+    $urutan = ['prestasi', 'reguler', 'afirmasi'];
 
-        $ppdb->jalurs = $ppdb->jalurs
-            ->sortBy(function ($item) use ($urutan) {
-                return array_search($item->jalur, $urutan);
-            })
-            ->values();
-    }
+    $jalurs = $jalurs->sortBy(function ($item) use ($urutan) {
+        return array_search($item->jalur, $urutan);
+    })->values();
 
-    // 🔥 TAMBAHAN FAQ (INI YANG PENTING)
     $faqs = Faq::where('status', 'aktif')
-    ->orderBy('urutan')
-    ->get(['id','pertanyaan','jawaban','kategori']);
+        ->orderBy('urutan')
+        ->get(['id','pertanyaan','jawaban','kategori']);
 
-    return view('website.ppdb.landing', compact('ppdb', 'faqs'));
+    return view('website.ppdb.landing', [
+        'ppdb' => $ppdb,
+        'jalurs' => $jalurs, // 🔥 TAMBAHAN PENTING
+        'faqs' => $faqs
+    ]);
 }
 public function jalur($slug)
 {

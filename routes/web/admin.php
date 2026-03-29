@@ -11,9 +11,14 @@ use App\Http\Controllers\Admin\DashboardAdminController;
 use App\Http\Controllers\Admin\Ppdb\KelolaPengumumanPpdbController;
 use App\Http\Controllers\Admin\Ppdb\FaqController;
 use App\Http\Controllers\Admin\Ppdb\PanitiaController;
+use App\Http\Controllers\Admin\Ppdb\RiwayatController;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Response;
 
+Route::get('/test-log', function () {
+    logAktivitas('TEST AKTIVITAS MASUK');
+    return 'OK';
+});
 
 
 Route::get('/preview-dokumen', function (Illuminate\Http\Request $request) {
@@ -139,8 +144,10 @@ Route::patch('/operasional/pertanyaan/{id}/jawab',
     Route::delete('/manajemen/akun/{id}', [PanitiaController::class, 'destroy'])
         ->name('admin.manajemen.akun.destroy');
 
-    Route::view('/manajemen/riwayat', 'admin.ppdb.manajemen.riwayat-aktivitas')
-        ->name('admin.manajemen.riwayat');
+    Route::get('/manajemen/riwayat', [RiwayatController::class, 'index'])
+    ->name('admin.manajemen.riwayat');
+
+    Route::delete('/manajemen/riwayat/{id}', [RiwayatController::class, 'destroy']);
    
 
    Route::get('/operasional/verifikasi', [VerifikasiController::class, 'index'])

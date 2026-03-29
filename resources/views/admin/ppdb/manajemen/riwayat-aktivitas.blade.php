@@ -3,19 +3,38 @@
 @section('title', 'Riwayat Aktivitas')
 
 @section('content')
-<div x-data="{
+<div x-data='{
     showDetail: false,
     showHapus: false,
     selectedRow: null,
-    rows: [
-        { id: 1, nama: 'Ayu',   email: '@ayu@gimel.kom',   aktivitas: 'Verifikasi data Rafika', waktu: '23/3/26 - 12:23 WITA' },
-        { id: 2, nama: 'Bagus', email: '@bagus@gmail.kom',  aktivitas: 'Verifikasi data Rafika', waktu: '23/3/26 - 12:23 WITA' },
-        { id: 3, nama: 'Pika',  email: '@gmail.kom',        aktivitas: 'Verifikasi data Rafika', waktu: '23/3/26 - 12:23 WITA' },
-        { id: 4, nama: 'Ary',   email: '@ary@gimel.kom',    aktivitas: 'Verifikasi data Rafika', waktu: '23/3/26 - 12:23 WITA' },
-    ],
-    openDetail(row) { this.selectedRow = row; this.showDetail = true; },
-    openHapus(row)  { this.selectedRow = row; this.showHapus  = true; }
-}">
+    rows: @json($rows),
+
+    openDetail(row) {
+        this.selectedRow = row;
+        this.showDetail = true;
+    },
+
+    openHapus(row) {
+        this.selectedRow = row;
+        this.showHapus = true;
+    },
+
+    deleteData() {
+        fetch("/admin/manajemen/riwayat/" + this.selectedRow.id, {
+            method: "DELETE",
+            headers: {
+                "X-CSRF-TOKEN": document.querySelector("meta[name=csrf-token]").content,
+                "Accept": "application/json"
+            }
+        })
+        .then(res => res.json())
+        .then(() => {
+            this.rows = this.rows.filter(i => i.id !== this.selectedRow.id);
+            this.showHapus = false;
+        })
+        .catch(() => alert("Gagal hapus data"));
+    }
+}'>
 
     {{-- Search --}}
     <div class="flex items-center mb-4">
@@ -124,7 +143,7 @@
                             Batal
                         </button>
                         <button type="button"
-                                @click="showHapus = false"
+                                @click="deleteData()"
                                 class="px-6 py-2 rounded-xl text-white"
                                 style="background:#EF4444;">
                             Ya, Hapus

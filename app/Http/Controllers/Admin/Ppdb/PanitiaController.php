@@ -7,6 +7,7 @@ use Illuminate\Http\Request;
 use App\Models\Panitia;
 use Illuminate\Support\Facades\Hash;
 use Carbon\Carbon;
+use function logAktivitas; // 🔥 IMPORT HELPER
 
 class PanitiaController extends Controller
 {
@@ -43,14 +44,17 @@ class PanitiaController extends Controller
             'status' => 'required'
         ]);
 
-        Panitia::create([
-            'nama' => $request->nama,
-            'email' => $request->email,
-            'username' => $request->username,
-            'password' => Hash::make($request->password),
-            'plain_password' => $request->password, // 🔥 simpan versi asli
-            'status' => $request->status
-        ]);
+        $panitia = Panitia::create([
+    'nama' => $request->nama,
+    'email' => $request->email,
+    'username' => $request->username,
+    'password' => Hash::make($request->password),
+    'plain_password' => $request->password,
+    'status' => $request->status
+]);
+
+// 🔥 TAMBAH INI
+logAktivitas('Menambahkan akun panitia: ' . $panitia->nama);
 
         return back()->with('success', 'Akun berhasil dibuat');
     }
@@ -71,13 +75,18 @@ class PanitiaController extends Controller
             $panitia->plain_password = $request->password; // 🔥 WAJIB
             $panitia->save();
         }
+        logAktivitas('Mengupdate akun panitia: ' . $panitia->nama);
 
         return back()->with('success', 'Akun berhasil diupdate');
     }
 
     public function destroy($id)
     {
-        Panitia::findOrFail($id)->delete();
+        $panitia = Panitia::findOrFail($id);
+
+logAktivitas('Menghapus akun panitia: ' . $panitia->nama);
+
+$panitia->delete();
 
         return response()->json(['success' => true]);
     }

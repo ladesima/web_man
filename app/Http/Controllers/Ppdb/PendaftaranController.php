@@ -108,7 +108,7 @@ class PendaftaranController extends Controller
         'penghasilan_ortu' => 'required',
         'alamat_ortu' => 'required',
         'jumlah_saudara' => 'required|integer',
-        'foto' => 'nullable|image|mimes:jpg,jpeg,png|max:2048',
+        'foto' => 'required|nullable|image|mimes:jpg,jpeg,png|max:2048',
     ]);
     
 
