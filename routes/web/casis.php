@@ -128,9 +128,8 @@ Route::prefix('siswa')->middleware(['auth:ppdb', 'ppdb.step'])->group(function (
         view('ppdb.dashboard.status', compact('jalur'))
     )->name('siswa.verifikasi');
 
-    Route::get('/pengumuman/{jalur}', fn($jalur) =>
-        view('ppdb.pengumuman.index', compact('jalur'))
-    )->name('siswa.pengumuman');
+    Route::get('/pengumuman/{jalur}', [PendaftaranController::class, 'pengumuman'])
+    ->name('siswa.pengumuman');
 
     Route::get('/daftar-ulang/{jalur}', fn($jalur) =>
         view('ppdb.daftar-ulang.index', compact('jalur'))

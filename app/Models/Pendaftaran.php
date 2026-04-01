@@ -6,6 +6,7 @@ use Illuminate\Database\Eloquent\Model;
 use App\Models\DetailPendaftaran;
 use App\Models\PpdbUser;
 use App\Models\Dokumen;
+use App\Models\PpdbJalur;
 
 class Pendaftaran extends Model
 {
@@ -34,7 +35,9 @@ class Pendaftaran extends Model
         'last_step',
         'foto',
         'catatan_revisi',
-        'verifikasi_dokumen'
+        'verifikasi_dokumen',
+        'is_publish',
+        'email_status'
     ];
     protected $casts = [
     'verifikasi_dokumen' => 'array',
@@ -51,5 +54,9 @@ class Pendaftaran extends Model
 public function syarat()
 {
     return $this->belongsTo(\App\Models\PpdbSyarat::class, 'syarat_id');
+}
+public function jalur()
+{
+    return $this->belongsTo(\App\Models\Jalur::class, 'jalur_id');
 }
 }

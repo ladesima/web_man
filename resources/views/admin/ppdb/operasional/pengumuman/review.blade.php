@@ -13,9 +13,45 @@
 <div x-data="{
     showPopup: false,
     selectedPesan: {},
+
     openPopup(pesan) {
         this.selectedPesan = pesan;
         this.showPopup = true;
+    },
+
+    gunakanTemplate() {
+    // simpan ke localStorage biar dibaca halaman pengumuman
+    localStorage.setItem('selected_template', this.selectedPesan.id);
+
+    this.showPopup = false;
+
+    // redirect ke halaman publish
+    window.location.href = '/admin/operasional/pengumuman';
+},
+
+    hapusTemplate(id) {
+        if (!confirm('Yakin ingin menghapus template ini?')) return;
+
+        fetch('/admin/operasional/pengumuman/template/' + id, {
+            method: 'DELETE',
+            headers: {
+                'X-CSRF-TOKEN': document.querySelector('meta[name=csrf-token]').content,
+                'Accept': 'application/json'
+            }
+        })
+        .then(res => res.json())
+        .then(res => {
+            if (res.success) {
+                alert('Template berhasil dihapus');
+                location.reload();
+            } else {
+                alert('Gagal menghapus');
+            }
+        })
+        .catch(err => {
+            console.error(err);
+            alert('Terjadi error');
+        });
     }
 }">
 
@@ -29,9 +65,10 @@
             </a>
             <button class="px-5 py-1.5 text-[13px] transition-all"
                     style="background:#C4F4FD; color:#00758A; font-weight:700; border:1px solid #C4F4FD; border-radius:10px;">
-                Riview Email
+                Review Email
             </button>
         </div>
+
         <a href="{{ route('admin.operasional.pengumuman.tambah') }}"
            class="inline-flex items-center gap-2 px-4 py-2 text-white text-[12px] font-semibold hover:opacity-90 transition-all"
            style="background:#27C2DE; border-radius:8px;">
@@ -44,62 +81,74 @@
 
     {{-- LIST PESAN --}}
     <div class="flex flex-col gap-3">
-        @php
-        $pesanList = [
-            ['id' => 1, 'judul' => 'Perlu Perbaikan', 'preview' => 'Lorem ipsum dolor sit amet, consectetur adipiscing elit...', 'isi' => '<p>Yth. Calon Peserta Didik,</p><p>Terima kasih telah melakukan pendaftaran pada sistem PPDB MAN Jeneponto. Berdasarkan hasil verifikasi berkas yang telah dilakukan oleh panitia, terdapat beberapa dokumen yang perlu diperbaiki atau dilengkapi.</p><p>Kami mohon kepada Saudara/i untuk segera melakukan perbaikan berkas sesuai dengan catatan yang diberikan melalui akun pendaftaran masing-masing.</p><br><p>Hormat kami,</p><p>Panitia PPDB</p><p>MAN Jeneponto</p>'],
-            ['id' => 2, 'judul' => 'Lulus Seleksi Berkas', 'preview' => 'Lorem ipsum dolor sit amet, consectetur adipiscing elit...', 'isi' => '<p>Yth. Calon Peserta Didik,</p><p>Selamat! Berkas Anda telah dinyatakan valid dan lulus seleksi berkas.</p><br><p>Hormat kami,</p><p>Panitia PPDB</p><p>MAN Jeneponto</p>'],
-            ['id' => 3, 'judul' => 'Selamat, Anda adalah Bagian dari MAN JENEPONTO 🤩', 'preview' => 'Lorem ipsum dolor sit amet, consectetur adipiscing elit...', 'isi' => '<p>Yth. Calon Peserta Didik,</p><p>Selamat! Anda dinyatakan LULUS sebagai calon siswa MAN Jeneponto.</p><br><p>Hormat kami,</p><p>Panitia PPDB</p><p>MAN Jeneponto</p>'],
-        ];
-        @endphp
-
         @foreach($pesanList as $pesan)
         <div class="pesan-card px-5 py-4">
             <h3 class="text-[13px] font-bold text-[#2B2A28] mb-1">{{ $pesan['judul'] }}</h3>
             <p class="text-[12px] text-[#94A3B8] leading-relaxed mb-3 line-clamp-2">{{ $pesan['preview'] }}</p>
-            <button @click="openPopup({{ json_encode($pesan) }})" class="btn-detail">
-                <img src="{{ asset('ppdb/admin/operasional/detail2.png') }}" alt="" class="w-3.5 h-3.5 object-contain">
-                Detail
-            </button>
+
+            {{-- DETAIL --}}
+    <button @click="openPopup(@js($pesan))" class="btn-detail">
+        <img src="{{ asset('ppdb/admin/operasional/detail2.png') }}" class="w-3.5 h-3.5">
+        Detail
+    </button>
+
+    {{-- EDIT --}}
+    <a href="{{ route('admin.operasional.pengumuman.template.edit', $pesan['id']) }}"
+       class="btn-detail"
+       style="background:#FFF7E6; border-color:#F59E0B; color:#F59E0B;">
+        Edit
+    </a>
+
+    {{-- HAPUS --}}
+    <button 
+        @click="hapusTemplate({{ $pesan['id'] }})"
+        class="btn-detail"
+        style="background:#FFE4E6; border-color:#EF4444; color:#EF4444;">
+        Hapus
+    </button>
         </div>
         @endforeach
     </div>
 
-    {{-- POPUP PREVIEW --}}
-   {{-- POPUP PREVIEW --}}
+    {{-- POPUP --}}
     <template x-teleport="body">
         <div x-show="showPopup" x-cloak
             class="fixed inset-0 z-50 flex items-center justify-center"
             style="background:rgba(0,0,0,0.45); backdrop-filter:blur(2px);">
+
             <div @click.outside="showPopup = false"
                 class="bg-white w-full shadow-2xl"
                 style="max-width:520px; border-radius:16px;" x-transition>
+
                 <div class="p-8">
 
-                    {{-- Judul --}}
-                    <h2 class="text-[14px] font-bold text-[#2B2A28] text-center mb-6" x-text="selectedPesan.judul"></h2>
+                    <h2 class="text-[14px] font-bold text-[#2B2A28] text-center mb-6"
+                        x-text="selectedPesan.judul"></h2>
 
-                    {{-- Isi Pesan --}}
                     <div class="text-[12px] text-[#575551] leading-relaxed mb-8"
                         style="min-height:240px;"
                         x-html="selectedPesan.isi">
                     </div>
 
-                    {{-- Buttons --}}
                     <div class="flex gap-3 justify-center">
                         <button @click="showPopup = false"
                                 class="text-[12px] font-semibold text-[#2B2A28] hover:bg-slate-50 transition-all"
                                 style="border-radius:4px; border:1px solid #D4D4D4; padding:8px 32px;">
                             Kembali
                         </button>
-                        <a :href="'/admin/operasional/pengumuman/' + selectedPesan.id + '/pesan'"
-                        class="text-white text-[12px] font-semibold hover:opacity-90 transition-all"
-                        style="background:#41D1EA; border-radius:4px; padding:8px 32px;">
-                            Edit
-                        </a>
+
+                        {{-- 🔥 INI YANG DIHUBUNGKAN --}}
+                        <button @click="gunakanTemplate()"
+                                class="text-white text-[12px] font-semibold hover:opacity-90 transition-all"
+                                style="background:#41D1EA; border-radius:4px; padding:8px 32px;">
+                            Gunakan Template
+                        </button>
                     </div>
+
                 </div>
             </div>
         </div>
     </template>
+
 </div>
 @endsection

@@ -18,7 +18,7 @@
 
     <div class="relative z-10 w-full text-center px-4 py-28 md:py-36">
         <h1 class="hero-title text-2xl md:text-4xl font-extrabold text-white leading-snug drop-shadow">
-    PPDBM Tahun Ajaran {{ $ppdb->tahun_ajaran ?? 'Belum dibuka' }}
+    PMBM Tahun Ajaran {{ $ppdb->tahun_ajaran ?? 'Belum dibuka' }}
 </h1>
 
 <p class="hero-sub text-lg md:text-3xl font-semibold text-white drop-shadow">
@@ -103,7 +103,7 @@
                 </h2>
                 <div class="mt-8 space-y-6 text-black text-base md:text-lg leading-8 text-justify">
                     <p>"Assalamualaikum Warahmatullahi Wabarokatuh<br>
-                       Selamat datang di PPDB MAN Jeneponto.</p>
+                       Selamat datang di PMBM MAN Jeneponto.</p>
                     <p>Kami membuka kesempatan bagi putra-putri terbaik untuk bergabung dan
                        berkembang bersama di madrasah yang mengedepankan prestasi, karakter, dan
                        nilai-nilai keislaman.<br>

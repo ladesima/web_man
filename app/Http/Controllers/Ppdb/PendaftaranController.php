@@ -20,55 +20,65 @@ class PendaftaranController extends Controller
     |--------------------------------------------------------------------------
     */
     public function index($jalur)
-    {
-        $user = Auth::guard('ppdb')->user();
+{
+    $user = Auth::guard('ppdb')->user();
 
-        if (!$user) {
-            return redirect()->route('ppdb.login');
-        }
-
-        $pendaftaran = Pendaftaran::where('user_id', $user->id)
-            ->latest()
-            ->first();
-
-        /*
-        |------------------------------------------------------------------
-        | 🔒 VALIDASI JALUR (ANTI MANIPULASI URL)
-        |------------------------------------------------------------------
-        */
-        if ($pendaftaran && $pendaftaran->jalur !== $jalur) {
-            return redirect()->route(
-                'siswa.pendaftaran',
-                $pendaftaran->jalur
-            );
-        }
-
-        /*
-        |------------------------------------------------------------------
-        | 🔥 SET LAST STEP (FIRST ACCESS ONLY)
-        |------------------------------------------------------------------
-        */
-        if ($pendaftaran && empty($pendaftaran->last_step)) {
-            $pendaftaran->update([
-                'last_step' => 'form'
-            ]);
-        }
-
-        /*
-        |------------------------------------------------------------------
-        | 🔥 AMBIL SYARAT DARI ADMIN
-        |------------------------------------------------------------------
-        */
-        $ppdb = MasterPpdb::aktifWithRelasi();
-        $syarats = $ppdb?->syarats ?? collect();
-
-        return view('ppdb.pendaftaran.index', compact(
-            'jalur',
-            'user',
-            'syarats'
-        ));
+    if (!$user) {
+        return redirect()->route('ppdb.login');
     }
 
+    $pendaftaran = Pendaftaran::where('user_id', $user->id)
+        ->latest()
+        ->first();
+
+    // 🔒 VALIDASI JALUR
+    if ($pendaftaran && $pendaftaran->jalur !== $jalur) {
+        return redirect()->route(
+            'siswa.pendaftaran',
+            $pendaftaran->jalur
+        );
+    }
+
+    // 🔥 SET LAST STEP
+    if ($pendaftaran && empty($pendaftaran->last_step)) {
+        $pendaftaran->update([
+            'last_step' => 'form'
+        ]);
+    }
+
+    // 🔥 AMBIL SYARAT
+    $ppdb = MasterPpdb::aktifWithRelasi();
+    $syarats = $ppdb?->syarats ?? collect();
+
+    // =====================================================
+    // 🔥🔥🔥 LOGIKA HASIL PENGUMUMAN (INI YANG PENTING)
+    // =====================================================
+    $hasil = 'belum';
+
+    if ($pendaftaran) {
+
+        if (!$pendaftaran->is_publish) {
+            $hasil = 'proses'; // belum diumumkan
+        } else {
+
+            if ($pendaftaran->status === 'lulus') {
+                $hasil = 'lulus';
+            } elseif ($pendaftaran->status === 'perbaikan') {
+                $hasil = 'perbaikan';
+            } else {
+                $hasil = 'tidak_lulus'; // optional kalau nanti dipakai
+            }
+        }
+    }
+
+    return view('ppdb.pendaftaran.index', compact(
+        'jalur',
+        'user',
+        'syarats',
+        'pendaftaran',
+        'hasil'
+    ));
+}
 
     /*
     |--------------------------------------------------------------------------
@@ -198,4 +208,91 @@ class PendaftaranController extends Controller
             'syarats' => $ppdb?->syarats ?? collect()
         ]);
     }
+    public function verifikasi($jalur)
+{
+    $user = Auth::guard('ppdb')->user();
+
+    $pendaftaran = Pendaftaran::where('user_id', $user->id)
+        ->latest()
+        ->first();
+
+    // =========================================
+    // 🔥 MAPPING STATUS ADMIN → STATUS UI SISWA
+    // =========================================
+    $status = 'menunggu';
+
+    if ($pendaftaran) {
+
+        if (!$pendaftaran->is_publish) {
+            $status = 'menunggu';
+        } else {
+
+            switch ($pendaftaran->status) {
+
+                case 'lulus':
+                    $status = 'diterima';
+                    break;
+
+                case 'perbaikan':
+                    $status = 'perbaikan'; // ❗ penting
+                    break;
+
+                case 'berkas_selesai':
+                case 'form_selesai':
+                    $status = 'menunggu';
+                    break;
+
+                default:
+                    $status = 'tidaklolos';
+                    break;
+            }
+        }
+    }
+
+    return view('ppdb.verifikasi.index', compact(
+        'pendaftaran',
+        'jalur',
+        'status'
+    ));
+}
+public function pengumuman($jalur)
+{
+    $user = \Auth::guard('ppdb')->user();
+
+    // 🔥 ambil data sesuai jalur + yang SUDAH publish
+    $pendaftaran = \App\Models\Pendaftaran::where('user_id', $user->id)
+        ->where('jalur', $jalur)
+        ->latest()
+        ->first();
+
+    $status = 'menunggu';
+
+    if ($pendaftaran) {
+
+        // DEBUG (opsional, bisa kamu cek dulu)
+        // dd($pendaftaran->status, $pendaftaran->is_publish);
+
+        if ($pendaftaran->is_publish == 1) {
+
+            if ($pendaftaran->status === 'lulus') {
+                $status = 'diterima';
+
+            } elseif ($pendaftaran->status === 'perbaikan') {
+                $status = 'perbaikan';
+
+            } else {
+                $status = 'tidaklolos';
+            }
+
+        } else {
+            $status = 'menunggu';
+        }
+    }
+
+    return view('ppdb.pengumuman.index', compact(
+        'jalur',
+        'status',
+        'pendaftaran'
+    ));
+}
 }

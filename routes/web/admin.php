@@ -8,7 +8,7 @@ use App\Http\Controllers\Auth\AdminAuthController;
 use App\Http\Controllers\Admin\VerifikasiController;
 use App\Http\Controllers\Admin\Ppdb\DataPendaftarController;
 use App\Http\Controllers\Admin\DashboardAdminController;
-use App\Http\Controllers\Admin\Ppdb\KelolaPengumumanPpdbController;
+use App\Http\Controllers\Admin\Ppdb\PengumumanController;
 use App\Http\Controllers\Admin\Ppdb\FaqController;
 use App\Http\Controllers\Admin\Ppdb\PanitiaController;
 use App\Http\Controllers\Admin\Ppdb\RiwayatController;
@@ -86,16 +86,38 @@ Route::prefix('admin')->middleware(['auth'])->group(function () {
         ->name('admin.manajemen.media-gambar.panitia');
         
     // PENGUMUMAN
-    Route::get('/operasional/pengumuman', [KelolaPengumumanPpdbController::class, 'index'])
-        ->name('admin.operasional.pengumuman');
+    Route::get('/operasional/pengumuman', [PengumumanController::class, 'index'])
+    ->name('admin.operasional.pengumuman');
 
-    Route::post('/operasional/pengumuman/publish', [KelolaPengumumanPpdbController::class, 'publish'])
-        ->name('admin.operasional.pengumuman.publish');
+    Route::get('/operasional/pengumuman/review', [PengumumanController::class, 'review'])
+    ->name('admin.operasional.pengumuman.review');
 
-    Route::post('/operasional/pengumuman/email', [KelolaPengumumanPpdbController::class, 'kirimEmail'])
+Route::post('/operasional/pengumuman/publish', [PengumumanController::class, 'publish'])
+    ->name('admin.operasional.pengumuman.publish');
+
+    Route::post('/operasional/pengumuman/email', [PengumumanPpdbController::class, 'kirimEmail'])
         ->name('admin.operasional.pengumuman.email');
 
-    Route::view('/operasional/pengumuman/review', 'admin.ppdb.operasional.pengumuman.review')->name('admin.operasional.pengumuman.review');
+    Route::post('/operasional/pengumuman/store', [PengumumanController::class, 'store'])
+    ->name('admin.operasional.pengumuman.store');
+    //publish massal
+    Route::post('/operasional/pengumuman/publish-massal',
+    [PengumumanController::class, 'publishMassal']);
+
+    //edit template
+    Route::get(
+    '/operasional/pengumuman/template/{id}/edit',
+    [PengumumanController::class, 'editTemplate']
+)->name('admin.operasional.pengumuman.template.edit');
+    //update template
+Route::put(
+    '/operasional/pengumuman/template/{id}',
+    [PengumumanController::class, 'updateTemplate']
+)->name('admin.operasional.pengumuman.template.update');
+    //hapus template
+Route::delete('/operasional/pengumuman/template/{id}', 
+    [PengumumanController::class, 'destroyTemplate']);
+
     Route::view('/operasional/pengumuman/tambah', 'admin.ppdb.operasional.pengumuman.tambah')->name('admin.operasional.pengumuman.tambah');
     Route::view('/operasional/pengumuman/{id}/pesan', 'admin.ppdb.operasional.pengumuman.detail-pesan')->name('admin.operasional.pengumuman.pesan');
 

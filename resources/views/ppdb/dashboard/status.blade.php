@@ -5,8 +5,7 @@
 @section('content')
 
 @php
-    // nanti diganti dari database: menunggu, diterima, perbaikan, tidaklolos
-    $status = 'menunggu';
+    // gunakan status dari controller (sudah di-map)
 @endphp
 
 <div class="px-6 py-6">
@@ -69,12 +68,13 @@
                 <img src="{{ asset('ppdb/perbaikan.png') }}" alt="Perbaikan"
                      class="w-16 h-16 object-contain mb-3">
                 <h2 class="text-base font-bold mb-2" style="color: #f59e0b;">
-                    Perlu Perbaikan
-                </h2>
-                <p class="text-sm text-slate-500 leading-6 max-w-sm">
-                    Terdapat dokumen yang perlu diperbaiki. Silakan unggah ulang berkas
-                    yang sesuai untuk melanjutkan proses daftar ulang.
-                </p>
+    Tidak Lulus - Perlu Perbaikan
+</h2>
+
+<p class="text-sm text-slate-500 leading-6 max-w-sm">
+    Maaf, Anda belum lulus pada tahap ini karena terdapat berkas yang perlu diperbaiki.
+    Silakan lakukan perbaikan sesuai arahan panitia untuk melanjutkan proses.
+</p>
                 <div class="mt-5">
                     <a href="{{ route('siswa.berkas', $jalur) }}"
                        class="px-8 py-2 rounded-full text-white font-semibold text-sm"

@@ -3,6 +3,8 @@
 @section('title', 'Tambah Pesan')
 
 @section('content')
+<form method="POST" action="{{ route('admin.operasional.pengumuman.store') }}">
+@csrf
 <style>
 .card-shadow {
     box-shadow: 0px 4px 4px 0px rgba(161, 209, 251, 0.25);
@@ -64,8 +66,13 @@
     charCount: 0,
     maxChar: 10000,
     updateCount() {
-        this.charCount = document.getElementById('editor-area').innerText.length;
-    }
+    const editor = document.getElementById('editor-area');
+
+    this.charCount = editor.innerText.length;
+
+    // 🔥 INJECT: sync ke hidden input
+    document.getElementById('isi-hidden').value = editor.innerHTML;
+}
 }">
 
     {{-- ===== BREADCRUMB ===== --}}
@@ -84,12 +91,12 @@
         <div class="grid grid-cols-2 gap-5 mb-5">
             <div>
                 <label class="form-label">Dari (Nama Sekolah)</label>
-                <input type="text" class="form-input" value="Panitia, MAN Jeneponto" readonly
+                <input type="text" class="form-input" value="Panitia PPDB, MAN Jeneponto" readonly
                        style="background:#F5F7FF; color:#94A3B8; cursor:not-allowed; border-color:#DFEAF2;">
             </div>
             <div>
                 <label class="form-label">Email Pengirim (Nama Sekolah)</label>
-                <input type="text" class="form-input" value="PPDB@manjeneponto.sch.id" readonly
+                <input type="text" class="form-input" value="manjepot@gmail.com" readonly
                        style="background:#F5F7FF; color:#94A3B8; cursor:not-allowed; border-color:#DFEAF2;">
             </div>
         </div>
@@ -99,12 +106,12 @@
             <div>
                 <label class="form-label">Penerima</label>
                 <div class="relative">
-                    <select class="form-input appearance-none pr-8"
+                    <select class="form-input appearance-none pr-8" name="penerima" required
                             style="background:#F5F7FF; border-color:#DFEAF2; color:#94A3B8;">
                         <option value="" disabled selected></option>
                         <option value="lulus">Lulus</option>
                         <option value="tidak_lulus">Tidak Lulus</option>
-                        <option value="perbaikan">Perlu Perbaikan</option>
+                        <option value="perlu_perbaikan">Perlu Perbaikan</option>
                         <option value="semua">Semua Peserta</option>
                     </select>
                     <svg class="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400"
@@ -119,7 +126,7 @@
         {{-- Subjek/Judul --}}
         <div class="mb-5">
             <label class="form-label">Subjek/Judul</label>
-            <input type="text" class="form-input"
+            <input type="text" class="form-input" name="judul" required
                    style="background:#F5F7FF; border-color:#DFEAF2;"
                    placeholder="">
         </div>
@@ -187,13 +194,15 @@
                      x-on:input="updateCount()">
                 </div>
             </div>
+            
+            <textarea name="isi" id="isi-hidden" hidden></textarea>
 
             <p class="text-[11px] text-slate-400 mt-1.5" x-text="charCount + '/10000'">0/10000</p>
         </div>
 
         {{-- Submit --}}
         <div class="flex justify-center">
-            <button type="button"
+            <button type="submit"
                     class="px-10 py-2.5 text-white text-[12px] font-semibold hover:opacity-90 transition-all active:scale-95"
                     style="background:#41D1EA; border-radius:4px;">
                 Simpan
