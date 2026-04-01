@@ -204,9 +204,11 @@ $stats = [
                             <span x-show="row.status === 'menunggu'"
                                   style="background:#FEF3C7; color:#D97706; border:1px solid #D97706; border-radius:4px;"
                                   class="px-3 py-1 text-[11px] font-semibold">Menunggu</span>
-                            <span x-show="row.status === 'perlu_perbaikan'"
-                                  style="background:#E3F2FD; color:#1565C0; border:1px solid #1565C0; border-radius:4px;"
-                                  class="px-3 py-1 text-[11px] font-semibold">Perlu Perbaikan</span>
+                           <span x-show="row.status === 'perlu_perbaikan'"
+        class="inline-block px-3 py-1 text-[11px] font-semibold whitespace-nowrap"
+        style="background:#E3F2FD; color:#1565C0; border:1px solid #1565C0; border-radius:4px;">
+        Perlu Perbaikan
+    </span>
                             <span x-show="row.status === 'siap_seleksi'"
                                   style="background:#EDE9FE; color:#7C3AED; border:1px solid #7C3AED; border-radius:4px;"
                                   class="px-3 py-1 text-[11px] font-semibold">Siap Seleksi</span>

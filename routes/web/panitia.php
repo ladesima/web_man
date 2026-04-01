@@ -1,39 +1,68 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
-
+use App\Http\Controllers\Panitia\AuthController;
+use App\Http\Controllers\Panitia\DashboardPanitiaController;
+use App\Http\Middleware\PanitiaMiddleware;
+use App\Http\Controllers\Panitia\DataPendaftarController;
+use App\Http\Controllers\Panitia\VerifikasiController;
+Route::get('/preview/{file}', function ($file) {
+    return response()->file(storage_path('app/public/' . $file));
+})->name('preview.dokumen');
 Route::prefix('panitia')->name('panitia.')->group(function () {
+    
+    
+    // ================================
+    // 🔐 AUTH (TANPA LOGIN)
+    // ================================
+    Route::get('/login', [AuthController::class, 'showLogin'])->name('login');
+    Route::post('/login', [AuthController::class, 'login'])->name('login.process');
 
-    Route::view('/dashboard', 'panitia.dashboard')->name('dashboard');
-    Route::view('/data-pendaftar', 'panitia.data-pendaftar.index')->name('data-pendaftar');
+    // ================================
+    // 🔒 PROTECTED (WAJIB LOGIN)
+    // ================================
+    Route::middleware(['panitia.auth'])->group(function () {
 
-    // ── OPERASIONAL ──────────────────────────────────────────────
+        Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 
-    // Verifikasi Berkas
-    Route::view('/operasional/verifikasi',            'panitia.operasional.verifikasi.index')       ->name('operasional.verifikasi');
-    Route::view('/operasional/verifikasi/detail',     'panitia.operasional.verifikasi.detail')      ->name('operasional.verifikasi.detail');
-    Route::view('/operasional/verifikasi/validasi',   'panitia.operasional.verifikasi.validasi')    ->name('operasional.verifikasi.validasi');
+        Route::get('/dashboard', [DashboardPanitiaController::class, 'index'])
+        ->name('dashboard');
+        // ── OPERASIONAL ─────────────────────────
 
-    // Pengumuman (Operasional)
-    Route::view('/operasional/pengumuman',            'panitia.operasional.pengumuman.index')       ->name('operasional.pengumuman');
-    Route::view('/operasional/pengumuman/review',     'panitia.operasional.pengumuman.review')      ->name('operasional.pengumuman.review');
-    Route::view('/operasional/pengumuman/tambah',     'panitia.operasional.pengumuman.tambah')      ->name('operasional.pengumuman.tambah');
-    Route::view('/operasional/pengumuman/{id}/pesan', 'panitia.operasional.pengumuman.detail-pesan')->name('operasional.pengumuman.pesan');
+        Route::prefix('operasional')->name('operasional.')->group(function () {
 
-    // FAQ & Bantuan
-    Route::view('/operasional/faq',                   'panitia.operasional.faq')                   ->name('operasional.faq');
-    Route::view('/operasional/faq/tambah',            'panitia.operasional.faq-tambah')             ->name('operasional.faq.tambah');
+            // Verifikasi
+            Route::get('/verifikasi', [VerifikasiController::class, 'index'])->name('verifikasi');
+            Route::get('/verifikasi/{id}', [VerifikasiController::class, 'show'])
+    ->name('verifikasi.detail');
+            Route::get('/verifikasi/{id}/validasi', 
+    [VerifikasiController::class, 'validasi']
+)->name('verifikasi.validasi');
+            Route::post('/verifikasi/{id}/simpan',
+    [VerifikasiController::class, 'simpanValidasi']
+)->name('verifikasi.simpan');
+            // Pengumuman
+            Route::view('/pengumuman', 'panitia.operasional.pengumuman.index')->name('pengumuman');
+            Route::view('/pengumuman/review', 'panitia.operasional.pengumuman.review')->name('pengumuman.review');
+            Route::view('/pengumuman/tambah', 'panitia.operasional.pengumuman.tambah')->name('pengumuman.tambah');
+            Route::view('/pengumuman/{id}/pesan', 'panitia.operasional.pengumuman.detail-pesan')->name('pengumuman.pesan');
 
-    // ── SELEKSI ───────────────────────────────────────────────────
-    Route::view('/seleksi', 'panitia.seleksi.index')->name('seleksi');
+            // FAQ
+            Route::view('/faq', 'panitia.operasional.faq')->name('faq');
+            Route::view('/faq/tambah', 'panitia.operasional.faq-tambah')->name('faq.tambah');
+        });
 
-    // ── PENGUMUMAN (menu utama, bawah Seleksi Nilai) ──────────────
-    Route::view('/pengumuman', 'panitia.pengumuman.index')->name('pengumuman');
+        // ── SELEKSI ─────────────────────────────
+        Route::view('/seleksi', 'panitia.seleksi.index')->name('seleksi');
 
-    // ── AUTH ──────────────────────────────────────────────────────
-    Route::post('/logout', function () {
-        auth()->logout();
-        return redirect('/');
-    })->name('logout');
+        // ── PENGUMUMAN ──────────────────────────
+        Route::view('/pengumuman', 'panitia.pengumuman.index')->name('pengumuman');
+
+        // ── DATA PENDAFTAR ──────────────────────
+        Route::get('/data-pendaftar', [DataPendaftarController::class, 'index'])
+        ->name('data-pendaftar');
+        });
+
+
 
 });

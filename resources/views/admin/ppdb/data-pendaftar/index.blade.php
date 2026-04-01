@@ -36,19 +36,7 @@
             </svg>
         </div>
 
-        {{-- Filter Gelombang --}}
-        <div class="relative flex-1">
-            <select name="gelombang"
-                class="appearance-none border border-slate-200 pl-4 pr-8 py-2.5 text-[13px] text-slate-600 outline-none cursor-pointer w-full"
-                style="background: #FAFEFF; border-radius: 8px; box-shadow: 0px 4px 4px 0px rgba(161, 209, 251, 0.25);">
-                <option value="">Gelombang</option>
-                <option value="1" {{ request('gelombang')=='1'?'selected':'' }}>Gelombang I</option>
-                <option value="2" {{ request('gelombang')=='2'?'selected':'' }}>Gelombang II</option>
-            </select>
-            <svg class="pointer-events-none absolute right-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
-            </svg>
-        </div>
+        
 
         {{-- Filter Status --}}
         <div class="relative flex-1">

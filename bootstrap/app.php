@@ -13,6 +13,7 @@ return Application::configure(basePath: dirname(__DIR__))
     ->withMiddleware(function (Middleware $middleware): void {
         $middleware->alias([
         'ppdb.step' => \App\Http\Middleware\CheckPpdbStep::class,
+        'panitia.auth' => \App\Http\Middleware\PanitiaMiddleware::class,
     ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {

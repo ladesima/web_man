@@ -18,11 +18,8 @@
             <p class="text-[12px] font-semibold mb-1" style="color:#2A9FD8;">Total Pendaftar</p>
             <img src="{{ asset('ppdb/panitia/totalpendaftar.png') }}" alt="" class="w-8 h-8 object-contain">
         </div>
-        <p class="text-[28px] font-bold text-[#2B2A28] leading-none mb-2">1298</p>
-        <span class="text-[10px] font-semibold text-[#2B2A28] px-3 py-[4px] rounded-full"
-              style="background: linear-gradient(90deg, rgba(252,255,203,1) 0%, rgba(229,241,7,1) 100%);">
-            +32 dari kemarin
-        </span>
+        <p class="text-[28px] font-bold text-[#2B2A28] leading-none mb-2">{{ $total }}</p>
+        
     </div>
 
     {{-- 2. Menunggu Verifikasi --}}
@@ -36,11 +33,8 @@
             <p class="text-[12px] font-semibold" style="color:#E8872A;">Menunggu Verifikasi</p>
             <img src="{{ asset('ppdb/panitia/menungguverifikasi.png') }}" alt="" class="w-8 h-8 object-contain">
         </div>
-        <p class="text-[28px] font-bold text-[#2B2A28] leading-none mb-2">234</p>
-        <span class="text-[10px] font-semibold text-[#2B2A28] px-3 py-[4px] rounded-full"
-              style="background: linear-gradient(90deg, rgba(252,255,203,1) 0%, rgba(229,241,7,1) 100%);">
-            -12 dari kemarin
-        </span>
+        <p class="text-[28px] font-bold text-[#2B2A28] leading-none mb-2">{{ $perluVerifikasi }}</p>
+        
     </div>
 
     {{-- 3. Data Valid --}}
@@ -54,11 +48,8 @@
             <p class="text-[12px] font-semibold" style="color:#1BAD6A;">Data Valid</p>
             <img src="{{ asset('ppdb/panitia/datavalid.png') }}" alt="" class="w-8 h-8 object-contain">
         </div>
-        <p class="text-[28px] font-bold text-[#2B2A28] leading-none mb-2">23</p>
-        <span class="text-[10px] font-semibold text-[#2B2A28] px-3 py-[4px] rounded-full"
-              style="background: linear-gradient(90deg, rgba(252,255,203,1) 0%, rgba(229,241,7,1) 100%);">
-            12 April - 23 Mei 2026
-        </span>
+        <p class="text-[28px] font-bold text-[#2B2A28] leading-none mb-2">{{ $berkasValid }}</p>
+        
     </div>
 
     {{-- 4. Perlu Perbaikan --}}
@@ -72,11 +63,8 @@
             <p class="text-[12px] font-semibold" style="color:#2F6FD4;">Perlu Perbaikan</p>
             <img src="{{ asset('ppdb/panitia/perluperbaikan.png') }}" alt="" class="w-8 h-8 object-contain">
         </div>
-        <p class="text-[28px] font-bold text-[#2B2A28] leading-none mb-2">87</p>
-        <span class="text-[10px] font-semibold text-[#2B2A28] px-3 py-[4px] rounded-full"
-              style="background: linear-gradient(90deg, rgba(252,255,203,1) 0%, rgba(229,241,7,1) 100%);">
-            Berakhir dalam 14 Hari
-        </span>
+        <p class="text-[28px] font-bold text-[#2B2A28] leading-none mb-2">{{ $perluPerbaikan }}</p>
+        
     </div>
 
 </div>
@@ -161,15 +149,15 @@
             <div class="flex flex-col gap-2">
                 <div class="flex items-center gap-2">
                     <div class="w-3 h-3 rounded-full" style="background:rgba(145,233,249,1)"></div>
-                    <span class="text-[12px] text-[#2B2A28]">Prestasi : 345</span>
+                    <span class="text-[12px] text-[#2B2A28]">Prestasi : {{ $prestasi }}</span>
                 </div>
                 <div class="flex items-center gap-2">
                     <div class="w-3 h-3 rounded-full" style="background:rgba(0,135,159,1)"></div>
-                    <span class="text-[12px] text-[#2B2A28]">Regular : 23</span>
+                    <span class="text-[12px] text-[#2B2A28]">Regular : {{ $reguler }}</span>
                 </div>
                 <div class="flex items-center gap-2">
                     <div class="w-3 h-3 rounded-full" style="background:rgba(39,194,222,1)"></div>
-                    <span class="text-[12px] text-[#2B2A28]">Afirmasi : 129</span>
+                    <span class="text-[12px] text-[#2B2A28]">Afirmasi : {{ $afirmasi }}</span>
                 </div>
             </div>
         </div>
@@ -205,11 +193,11 @@
     new Chart(ctx, {
         type: 'bar',
         data: {
-            labels: ['Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu', 'Ahad'],
+            labels: @json($labels),
             datasets: [
                 {
                     label: 'Prestasi',
-                    data: [80, 90, 110, 95, 85, 75, 88],
+                    data: @json($dataPrestasi),
                     backgroundColor: gradPrestasi,
                     borderWidth: 0,
                     borderRadius: 0,
@@ -218,7 +206,7 @@
                 },
                 {
                     label: 'Regular',
-                    data: [60, 70, 80, 75, 65, 55, 70],
+                    data: @json($dataReguler),
                     backgroundColor: gradRegular,
                     borderWidth: 0,
                     borderRadius: 0,
@@ -227,7 +215,7 @@
                 },
                 {
                     label: 'Afirmasi',
-                    data: [100, 110, 130, 120, 105, 95, 115],
+                    data: @json($dataAfirmasi),
                     backgroundColor: gradAfirmasi,
                     borderWidth: 0,
                     borderRadius: 0,
@@ -270,7 +258,7 @@
         data: {
             labels: ['Reguler', 'Afirmasi', 'Prestasi'],
             datasets: [{
-                data: [23, 129, 345],
+                data: [{{ $reguler }}, {{ $afirmasi }}, {{ $prestasi }}],
                 backgroundColor: [
                     'rgba(0,135,159,1)',
                     'rgba(39,194,222,1)',

@@ -5,7 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\Pendaftaran;
-use function logAktivitas; // 🔥 IMPORT HELPER
+use function logAktivitas;
 
 class VerifikasiController extends Controller
 {
@@ -22,8 +22,8 @@ class VerifikasiController extends Controller
 
                 'status' => match ($item->status) {
                     'belum', 'form_selesai' => 'menunggu',
-                    'berkas_selesai' => 'siap_seleksi',
                     'perbaikan' => 'perlu_perbaikan',
+                    'berkas_selesai' => 'siap_seleksi',
                     'lulus' => 'berkas_valid',
                     'tidak_lulus' => 'berkas_ditolak',
                     default => 'menunggu',
@@ -47,21 +47,19 @@ class VerifikasiController extends Controller
     public function show($id)
     {
         $pendaftaran = Pendaftaran::findOrFail($id);
-
         return view('admin.ppdb.operasional.verifikasi.detail', compact('pendaftaran'));
     }
 
     public function validasi($id)
     {
         $pendaftaran = Pendaftaran::findOrFail($id);
-
         return view('admin.ppdb.operasional.verifikasi.validasi', compact('pendaftaran'));
     }
 
     /*
-    |--------------------------------------------------------------------------|
-    | 🔥 SIMPAN VALIDASI (FIX CATATAN)
-    |--------------------------------------------------------------------------|
+    |------------------------------------------------------------------
+    | 🔥 SIMPAN VALIDASI FINAL (LOGIC BARU)
+    |------------------------------------------------------------------
     */
     public function simpanValidasi(Request $request, $id)
     {
@@ -69,7 +67,6 @@ class VerifikasiController extends Controller
 
         $data = $request->verifikasi ?? [];
 
-        $finalStatus = 'lulus';
         $catatanGlobal = [];
 
         foreach ($data as $key => $item) {
@@ -77,30 +74,39 @@ class VerifikasiController extends Controller
             $status = $item['status'] ?? null;
             $catatan = $item['catatan'] ?? null;
 
-            // 🔥 VALIDASI jika ditolak wajib isi catatan
-            if ($status === 'no') {
-
-                if (empty($catatan)) {
-                    return back()->with('error', 'Catatan wajib diisi jika ada dokumen ditolak');
-                }
-
-                $finalStatus = 'perbaikan';
+            // ❗ wajib isi catatan jika ditolak
+            if ($status === 'no' && empty($catatan)) {
+                return back()->with('error', 'Catatan wajib diisi jika ada dokumen ditolak');
             }
 
-            // 🔥 KUMPULKAN CATATAN GLOBAL
             if (!empty($catatan)) {
                 $catatanGlobal[] =
                     strtoupper(str_replace('_', ' ', $key)) . ' : ' . $catatan;
             }
         }
 
-        // 🔥 SIMPAN JSON DETAIL
+        // 🔥 SIMPAN JSON
         $pendaftaran->verifikasi_dokumen = json_encode($data);
 
-        // 🔥 STATUS OTOMATIS
+        // 🔥 LOGIC STATUS BARU
+        $statuses = collect($data)->pluck('status');
+
+        $allOk = $statuses->every(fn($s) => $s === 'ok');
+        $allNo = $statuses->every(fn($s) => $s === 'no');
+
+        if ($allOk) {
+            $finalStatus = 'lulus';
+
+        } elseif ($allNo) {
+            $finalStatus = 'tidak_lulus';
+
+        } else {
+            $finalStatus = 'perbaikan';
+        }
+
         $pendaftaran->status = $finalStatus;
 
-        // 🔥 INI YANG PENTING (SYNC KE DATABASE)
+        // 🔥 CATATAN GLOBAL
         $pendaftaran->catatan_revisi = count($catatanGlobal)
             ? implode(' | ', $catatanGlobal)
             : null;
@@ -108,12 +114,19 @@ class VerifikasiController extends Controller
         $pendaftaran->last_step = 'verifikasi';
 
         $pendaftaran->save();
+
         logAktivitas('Verifikasi data pendaftar: ' . $pendaftaran->nama_lengkap);
+
         return redirect()
             ->route('admin.operasional.verifikasi')
             ->with('success', 'Verifikasi berhasil disimpan');
     }
 
+    /*
+    |------------------------------------------------------------------
+    | ACTION MANUAL
+    |------------------------------------------------------------------
+    */
     public function lulus($id)
     {
         $pendaftaran = Pendaftaran::findOrFail($id);
@@ -124,7 +137,9 @@ class VerifikasiController extends Controller
             'is_revisi' => false,
             'catatan_revisi' => null
         ]);
+
         logAktivitas('Meluluskan siswa: ' . $pendaftaran->nama_lengkap);
+
         return back()->with('success', 'Peserta dinyatakan LULUS');
     }
 
@@ -137,7 +152,9 @@ class VerifikasiController extends Controller
             'last_step' => 'pengumuman',
             'is_revisi' => false
         ]);
+
         logAktivitas('Menolak siswa: ' . $pendaftaran->nama_lengkap);
+
         return back()->with('error', 'Peserta dinyatakan TIDAK LULUS');
     }
 
@@ -152,40 +169,9 @@ class VerifikasiController extends Controller
             'catatan_revisi' => null,
             'verifikasi_dokumen' => null
         ]);
+
         logAktivitas('Reset data pendaftar: ' . $pendaftaran->nama_lengkap);
+
         return back()->with('info', 'Data berhasil direset');
     }
-    public function simpan(Request $request, $id)
-{
-    $pendaftaran = Pendaftaran::findOrFail($id);
-
-    $data = $request->verifikasi;
-
-    // VALIDASI: jika ada "no" wajib catatan
-    foreach ($data as $key => $item) {
-        if (($item['status'] ?? null) === 'no' && empty($item['catatan'])) {
-            return back()->withErrors([
-                'error' => 'Catatan wajib diisi jika tidak approve'
-            ]);
-        }
-    }
-
-    // SIMPAN JSON
-    $pendaftaran->verifikasi_dokumen = json_encode($data);
-
-    // LOGIKA STATUS
-    $allOk = collect($data)->every(fn($d) => ($d['status'] ?? '') === 'ok');
-
-    if ($allOk) {
-        $pendaftaran->status = 'lulus';
-    } else {
-        $pendaftaran->status = 'perbaikan';
-    }
-
-    $pendaftaran->save();
-
-    return redirect()
-        ->route('admin.operasional.verifikasi.show', $id)
-        ->with('success', 'Verifikasi berhasil disimpan');
-}
 }

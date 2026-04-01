@@ -6,6 +6,8 @@ use Illuminate\Database\Eloquent\Model;
 
 class Panitia extends Model
 {
+    protected $table = 'panitias';
+
     protected $fillable = [
         'nama',
         'email',
@@ -16,5 +18,7 @@ class Panitia extends Model
         'plain_password'
     ];
 
-    protected $hidden = ['password'];
+    protected $hidden = [
+        'password'
+    ];
 }

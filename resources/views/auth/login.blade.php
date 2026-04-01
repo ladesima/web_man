@@ -31,17 +31,34 @@
 
             <form method="POST" action="{{ route('login.post') }}" class="w-full space-y-4">
                 @csrf
-
+                {{-- Role --}}
+<div>
+    <label class="block text-xs font-medium text-[#2B2A28] mb-1">Login Sebagai</label>
+   <select name="role" id="roleSelect"
+    class="w-full px-3 py-2.5 rounded bg-[#EEF2F7] border-0
+           focus:outline-none focus:ring-2 focus:ring-[#27C2DE] focus:bg-white
+           text-sm transition-all">
+    <option value="admin">Admin</option>
+    <option value="panitia">Panitia</option>
+</select>
+</div>
                 {{-- Email --}}
-                <div>
-                    <label class="block text-xs font-medium text-[#2B2A28] mb-1">Email</label>
-                    <input type="email" name="email" value="{{ old('email') }}"
-                           placeholder="admin@example.com"
-                           class="w-full px-3 py-2.5 rounded bg-[#EEF2F7] border-0
-                                  focus:outline-none focus:ring-2 focus:ring-[#27C2DE] focus:bg-white
-                                  text-sm transition-all @error('email') ring-2 ring-red-400 @enderror">
-                </div>
-
+                <div id="emailField">
+    <label class="block text-xs font-medium text-[#2B2A28] mb-1">Email</label>
+    <input type="email" name="email"
+           placeholder="admin@example.com"
+           class="w-full px-3 py-2.5 rounded bg-[#EEF2F7] border-0
+                  focus:outline-none focus:ring-2 focus:ring-[#27C2DE] focus:bg-white
+                  text-sm transition-all">
+</div>
+                {{-- Username (untuk panitia) --}}
+<div id="usernameField">
+    <label class="block text-xs font-medium text-[#2B2A28] mb-1">Username (Panitia)</label>
+    <input type="text" name="username"
+           class="w-full px-3 py-2.5 rounded bg-[#EEF2F7] border-0
+                  focus:outline-none focus:ring-2 focus:ring-[#27C2DE] focus:bg-white
+                  text-sm transition-all">
+</div>
                 {{-- Password --}}
                 <div>
                     <label class="block text-xs font-medium text-[#2B2A28] mb-1">Password</label>
@@ -100,5 +117,26 @@
             }
         }
     </script>
+    <script>
+    const roleSelect = document.getElementById('roleSelect');
+    const emailField = document.getElementById('emailField');
+    const usernameField = document.getElementById('usernameField');
+
+    function toggleFields() {
+        if (roleSelect.value === 'admin') {
+            emailField.style.display = 'block';
+            usernameField.style.display = 'none';
+        } else {
+            emailField.style.display = 'none';
+            usernameField.style.display = 'block';
+        }
+    }
+
+    // run saat halaman load
+    toggleFields();
+
+    // run saat ganti role
+    roleSelect.addEventListener('change', toggleFields);
+</script>
 </body>
 </html>
