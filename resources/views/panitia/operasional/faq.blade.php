@@ -16,24 +16,124 @@
     showJawabPopup: false,
     selectedPertanyaan: null,
 
-    faqRows: [
-        { id: 1, pertanyaan: 'Siapa saja yang dapat mendaftar di MAN Jeneponto?', status: 'aktif',       kategori: 'Pendaftaran',   urutan: 1, terakhir: '23/3/26 - 12:22 WITA' },
-        { id: 2, pertanyaan: 'Apa saja jalur pendaftaran yang tersedia?',          status: 'tidak_aktif', kategori: 'Berkas',        urutan: 2, terakhir: '23/3/26 - 12:22 WITA' },
-        { id: 3, pertanyaan: 'Bagaimana cara melakukan pendaftaran?',              status: 'tidak_aktif', kategori: 'Jalur Seleksi', urutan: 3, terakhir: '23/3/26 - 12:22 WITA' },
-        { id: 4, pertanyaan: 'Bagaimana cara melakukan pendaftaran?',              status: 'tidak_aktif', kategori: 'Jadwal',        urutan: 4, terakhir: '23/3/26 - 12:22 WITA' },
-    ],
+    search: '',
+    filterKategori: '',
+    filterStatus: '',
 
-    pertanyaanRows: [
-        { id: 1, pertanyaan: 'Apakah bisa mendaftar lebih dari 1 jalur?', pengirim: 'maudy', email: 'maudy@gmail.com', status: 'sudah_dijawab', kategori: 'Pendaftaran' },
-        { id: 2, pertanyaan: 'Kenapa saya tidak bisa login?',             pengirim: 'maudy', email: 'maudy@gmail.com', status: 'belum_dijawab', kategori: 'Berkas' },
-        { id: 3, pertanyaan: 'Tutotrial Upload berkas',                   pengirim: 'maudy', email: 'maudy@gmail.com', status: 'belum_dijawab', kategori: 'Jalur Seleksi' },
-        { id: 4, pertanyaan: 'NISN saya tidak ditemukan',                 pengirim: 'maudy', email: 'maudy@gmail.com', status: 'belum_dijawab', kategori: 'Jadwal' },
-    ],
+    searchPertanyaan: '',
+    filterstatusPertanyaan: '',
+
+    faqRows: @js($faqs ?? []),
+    pertanyaanRows: @js($pertanyaans ?? []),
+
+    jawabanText: '',
 
     openJawab(row) {
         this.selectedPertanyaan = row;
+        this.jawabanText = row.jawaban || '';
         this.showJawabPopup = true;
+    },
+
+    filteredFaqRows() {
+        return this.faqRows.filter(row => {
+            const matchSearch = row.pertanyaan.toLowerCase().includes(this.search.toLowerCase());
+
+            const matchKategori =
+                this.filterKategori === '' || this.filterKategori === 'Kategori'
+                    ? true
+                    : row.kategori === this.filterKategori;
+
+            const matchStatus =
+                this.filterStatus === '' || this.filterStatus === 'Status'
+                    ? true
+                    : (this.filterStatus === 'Aktif'
+                        ? row.status === 'aktif'
+                        : row.status === 'tidak_aktif');
+
+            return matchSearch && matchKategori && matchStatus;
+        });
+    },
+
+    filteredPertanyaanRows() {
+        return this.pertanyaanRows.filter(row => {
+            const matchSearch = row.pertanyaan.toLowerCase().includes(this.searchPertanyaan.toLowerCase());
+
+            const matchStatus =
+                this.filterstatusPertanyaan === '' ||
+                this.filterstatusPertanyaan === 'Status'
+                    ? true
+                    : (this.filterstatusPertanyaan === 'Sudah Dijawab'
+                        ? row.status === 'sudah_dijawab'
+                        : row.status === 'belum_dijawab');
+
+            return matchSearch && matchStatus;
+        });
+    },
+
+    hapusFaq(row) {
+        if (!confirm('Yakin ingin menghapus FAQ ini?')) return;
+
+        fetch('/panitia/operasional/faq/' + row.id, {
+            method: 'DELETE',
+            headers: {
+                'X-CSRF-TOKEN': document.querySelector('meta[name=csrf-token]').content,
+                'Accept': 'application/json'
+            }
+        })
+        .then(res => res.json())
+        .then(data => {
+            if (data.success) {
+                this.faqRows = this.faqRows.filter(item => item.id !== row.id);
+            }
+        });
+    },
+
+    toggleStatus(row) {
+        fetch('/panitia/faq/' + row.id + '/toggle', {
+            method: 'PATCH',
+            headers: {
+                'X-CSRF-TOKEN': document.querySelector('meta[name=csrf-token]').content,
+                'Accept': 'application/json'
+            }
+        })
+        .then(res => res.json())
+        .then(data => {
+            if (data.success) {
+                row.status = data.status;
+                this.faqRows = [...this.faqRows];
+            }
+        });
+    },
+
+    kirimJawaban() {
+        if (!this.selectedPertanyaan || !this.jawabanText) {
+            alert('Jawaban tidak boleh kosong');
+            return;
+        }
+
+        fetch('/panitia/operasional/pertanyaan/' + this.selectedPertanyaan.id + '/jawab', {
+            method: 'PATCH',
+            headers: {
+                'X-CSRF-TOKEN': document.querySelector('meta[name=csrf-token]').content,
+                'Content-Type': 'application/json',
+                'Accept': 'application/json'
+            },
+            body: JSON.stringify({
+                jawaban: this.jawabanText
+            })
+        })
+        .then(res => res.json())
+        .then(data => {
+            if (data.success) {
+                this.selectedPertanyaan.status = 'sudah_dijawab';
+                this.pertanyaanRows = [...this.pertanyaanRows];
+
+                this.jawabanText = '';
+                this.showJawabPopup = false;
+            }
+        });
     }
+
 }">
 
     {{-- ===== TABS ===== --}}
@@ -62,7 +162,7 @@
         {{-- Filter + Tambah --}}
         <div class="flex gap-3 mb-4 items-center">
             <div class="relative flex-[2]">
-                <input type="text" placeholder="Cari"
+                <input type="text" placeholder="Cari" x-model="search"
                        class="w-full pl-9 pr-4 py-2.5 text-[12px] border border-slate-200 bg-white focus:outline-none focus:ring-2 focus:ring-[#27C2DE] card-shadow transition-all"
                        style="border-radius:8px;">
                 <svg class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -71,7 +171,7 @@
             </div>
 
             <div class="relative flex-1">
-                <select class="appearance-none w-full pl-4 pr-8 py-2.5 text-[12px] border border-slate-200 bg-white text-slate-600 focus:outline-none card-shadow"
+                <select class="appearance-none w-full pl-4 pr-8 py-2.5 text-[12px] border border-slate-200 bg-white text-slate-600 focus:outline-none card-shadow" x-model="filterKategori"
                         style="border-radius:8px;">
                     <option>Kategori</option>
                     <option>Pendaftaran</option>
@@ -85,7 +185,7 @@
             </div>
 
             <div class="relative flex-1">
-                <select class="appearance-none w-full pl-4 pr-8 py-2.5 text-[12px] border border-slate-200 bg-white text-slate-600 focus:outline-none card-shadow"
+                <select class="appearance-none w-full pl-4 pr-8 py-2.5 text-[12px] border border-slate-200 bg-white text-slate-600 focus:outline-none card-shadow" x-model="filterStatus"
                         style="border-radius:8px;">
                     <option>Status</option>
                     <option>Aktif</option>
@@ -99,7 +199,7 @@
             <div class="flex-1"></div>
 
             {{-- Tombol Tambah FAQ → pindah ke halaman baru --}}
-            <a href="{{ route('admin.operasional.faq.tambah') }}"
+            <a href="{{ route('panitia.operasional.faq.tambah') }}"
                class="flex items-center gap-2 px-4 py-2.5 text-white text-[12px] transition-all hover:opacity-90"
                style="background:#27C2DE; border-radius:4px; font-weight:400;">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -127,7 +227,7 @@
                         </tr>
                     </thead>
                     <tbody class="divide-y divide-slate-100">
-                        <template x-for="(row, i) in faqRows" :key="row.id">
+                        <template x-for="(row, i) in filteredFaqRows()" :key="row.id">
                             <tr class="hover:bg-slate-50 transition-all">
                                 <td class="text-center py-3 px-4 text-[13px] text-[#2B2A28] sticky left-0 z-10 bg-white"
                                     x-text="i+1"></td>
@@ -138,7 +238,7 @@
                                 <td class="text-center py-3 px-4 whitespace-nowrap">
                                     <span x-show="row.status === 'aktif'"
                                           class="px-3 py-1 text-[12px] font-normal" style="background:rgba(22,163,74,0.08); color:#16A34A; border:1px solid #16A34A; border-radius:8px;">Aktif</span>
-                                    <span x-show="row.status === 'tidak_aktif'"
+                                    <span x-show="row.status === 'tidak_aktif'" @click="toggleStatus(row)"
                                           class="px-3 py-1 text-[12px] font-normal" style="background:rgba(148,163,184,0.08); color:#94A3B8; border:1px solid #CBD5E1; border-radius:8px;">Tidak Aktif</span>
                                 </td>
 
@@ -161,37 +261,27 @@
                                 <td class="text-center py-3 px-4 text-[13px] text-[#575551] whitespace-nowrap" x-text="row.terakhir"></td>
 
                                 <td class="text-center py-3 px-4 whitespace-nowrap">
-                                    <div class="flex items-center justify-center gap-2">
+    <div class="flex items-center justify-center gap-2">
 
-                                        {{-- Tombol Lihat --}}
-                                        <button class="inline-flex items-center gap-1.5 px-3 py-1.5 text-[12px] transition-all hover:opacity-80"
-                                                style="border: 1.5px solid #1654AA; color:#1654AA; background:rgba(22,84,170,0.08); border-radius:6px; font-weight:400;">
-                                            <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="#1654AA" stroke-width="2">
-                                                <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
-                                                <path stroke-linecap="round" stroke-linejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.477 0 8.268 2.943 9.542 7-1.274 4.057-5.065 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
-                                            </svg>
-                                            Lihat
-                                        </button>
+        {{-- Tombol Edit --}}
+        <a :href="'{{ route('panitia.operasional.faq.edit', ':id') }}'.replace(':id', row.id)"
+           class="inline-flex items-center gap-1.5 px-3 py-1.5 text-[12px] transition-all hover:opacity-80"
+           style="border: 1.5px solid #16A34A; color:#16A34A; background:rgba(22,163,74,0.08); border-radius:6px;">
+            <img src="{{ asset('ppdb/admin/operasional/edit.png') }}" class="w-3.5 h-3.5">
+            Edit
+        </a>
 
-                                        {{-- Tombol Edit (jika aktif) --}}
-                                        <button x-show="row.status === 'aktif'"
-                                                class="inline-flex items-center gap-1.5 px-3 py-1.5 text-[12px] transition-all hover:opacity-80"
-                                                style="border: 1.5px solid #16A34A; color:#16A34A; background:rgba(22,163,74,0.08); border-radius:6px; font-weight:400;">
-                                            <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="#16A34A" stroke-width="2">
-                                                <path stroke-linecap="round" stroke-linejoin="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
-                                            </svg>
-                                            Edit
-                                        </button>
+        {{-- Tombol Hapus --}}
+        <button @click="hapusFaq(row)"
+                class="inline-flex items-center gap-1.5 px-3 py-1.5 text-[12px] transition-all hover:opacity-80"
+                style="border: 1.5px solid #DC2626; color:#DC2626; background:rgba(220,38,38,0.08); border-radius:6px;">
+            <img src="{{ asset('ppdb/admin/operasional/sampah.png') }}" class="w-3.5 h-3.5">
 
-                                        {{-- Tombol Aktifkan (jika tidak aktif) --}}
-                                        <button x-show="row.status === 'tidak_aktif'"
-                                                class="inline-flex items-center gap-1.5 px-3 py-1.5 text-[12px] transition-all hover:opacity-80"
-                                                style="border: 1.5px solid #EC4899; color:#EC4899; background:rgba(236,72,153,0.08); border-radius:6px; font-weight:400;">
-                                            Aktifkan
-                                        </button>
+            Hapus
+        </button>
 
-                                    </div>
-                                </td>
+    </div>
+</td>
                             </tr>
                         </template>
                     </tbody>
@@ -242,7 +332,7 @@
                         </tr>
                     </thead>
                     <tbody class="divide-y divide-slate-100">
-                        <template x-for="(row, i) in pertanyaanRows" :key="row.id">
+                        <template x-for="(row, i) in filteredPertanyaanRows()" :key="row.id">
                             <tr class="hover:bg-slate-50 transition-all">
                                 <td class="text-center py-3 px-4 text-[12px] text-[#2B2A28] sticky left-0 z-10 bg-white"
                                     x-text="i+1"></td>
@@ -333,14 +423,14 @@
 
                     <div style="display:flex; flex-direction:column; gap:8px;">
                         <p style="color:#2B2A28; font-size:13px; font-family:Poppins,sans-serif; font-weight:600;">Jawaban</p>
-                        <textarea placeholder="Tulis jawaban..."
+                        <textarea placeholder="Tulis jawaban..." x-model="jawabanText"
                             style="width:100%; height:110px; background:#F5F7FF; border-radius:10px; border:1px solid #DFEAF2; resize:none; padding:10px 12px; font-size:13px; font-family:Poppins,sans-serif; color:#2B2A28; outline:none;"></textarea>
                     </div>
 
                 </div>
 
                 <div style="display:flex; justify-content:center; margin-top:24px;">
-                    <button @click="showJawabPopup = false"
+                    <button @click="kirimJawaban()"
                             style="width:120px; padding:8px; background:#27C2DE; border-radius:4px; border:none; cursor:pointer; color:#FAFEFF; font-size:14px; font-family:Poppins,sans-serif; font-weight:600;">
                         Kirim
                     </button>

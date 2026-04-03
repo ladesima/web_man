@@ -8,6 +8,7 @@ use App\Http\Controllers\Panitia\DataPendaftarController;
 use App\Http\Controllers\Panitia\VerifikasiController;
 use App\Http\Controllers\Panitia\PengumumanController;
 use App\Http\Controllers\Panitia\PengumumanNilaiController;
+use App\Http\Controllers\Panitia\PertanyaanController;
 
 Route::get('/preview/{file}', function ($file) {
     return response()->file(storage_path('app/public/' . $file));
@@ -85,8 +86,14 @@ Route::prefix('panitia')->name('panitia.')->group(function () {
             Route::view('/pengumuman/tambah', 'panitia.operasional.pengumuman.tambah')->name('pengumuman.tambah');
             Route::view('/pengumuman/{id}/pesan', 'panitia.operasional.pengumuman.detail-pesan')->name('pengumuman.pesan');
             // FAQ
-            Route::view('/faq', 'panitia.operasional.faq')->name('faq');
-            Route::view('/faq/tambah', 'panitia.operasional.faq-tambah')->name('faq.tambah');
+            Route::get('/faq', [PertanyaanController::class, 'index'])->name('faq');
+            Route::patch('/pertanyaan/{id}/jawab', [PertanyaanController::class, 'jawab']);
+            Route::delete('/faq/{id}', [PertanyaanController::class, 'destroy']);
+            Route::get('/faq/tambah', [PertanyaanController::class, 'create'])->name('faq.tambah');
+            Route::post('/faq', [PertanyaanController::class, 'store'])->name('faq.store');
+
+            Route::get('/faq/{id}/edit', [PertanyaanController::class, 'edit'])->name('faq.edit');
+            Route::put('/faq/{id}', [PertanyaanController::class, 'update'])->name('faq.update');
         
             
             });
