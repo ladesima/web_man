@@ -7,6 +7,7 @@
     @vite(['resources/css/app.css', 'resources/js/app.js'])
     <script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
     <style>[x-cloak] { display: none !important; }</style>
+    <meta name="csrf-token" content="{{ csrf_token() }}">
 </head>
 
 <body class="bg-[#F2F8FF] text-slate-900">
@@ -15,10 +16,10 @@
     $isDashboard     = request()->routeIs('panitia.dashboard');
     $isDataPendaftar = request()->routeIs('panitia.data-pendaftar*');
     $isOperasional   = request()->routeIs('panitia.operasional*');
+    $isPengumumanOperasional    = request()->routeIs('panitia.operasional.pengumuman*');
     $isSeleksi       = request()->routeIs('panitia.seleksi*');
-    $isPengumuman    = request()->routeIs('panitia.pengumuman*');
+    $isPengumumanNilai = request()->routeIs('panitia.operasional.pengumuman_nilai*');
 @endphp
-
 <div x-data="{
     sidebarOpen: true,
     showLogout: false,
@@ -120,16 +121,19 @@
 
                 <div x-show="operasionalOpen && sidebarOpen" x-cloak class="mt-1 ml-7">
                     @php
-                        $opSubMenus = [
-                            ['route' => 'panitia.operasional.verifikasi', 'label' => 'Verifikasi Berkas', 'index' => 0],
-                            ['route' => 'panitia.operasional.pengumuman', 'label' => 'Pengumuman',         'index' => 1],
-                            ['route' => 'panitia.operasional.faq',        'label' => 'FAQ & Bantuan',      'index' => 2],
-                        ];
-                        $opActiveIndex = -1;
-                        foreach($opSubMenus as $sm) {
-                            if(request()->routeIs($sm['route'])) $opActiveIndex = $sm['index'];
-                        }
-                    @endphp
+    $opSubMenus = [
+        ['route' => 'panitia.operasional.verifikasi', 'label' => 'Verifikasi Berkas', 'index' => 0],
+        ['route' => 'panitia.operasional.pengumuman', 'label' => 'Pengumuman', 'index' => 1],
+        ['route' => 'panitia.operasional.faq', 'label' => 'FAQ & Bantuan', 'index' => 2],
+    ];
+
+    $opActiveIndex = -1;
+    foreach ($opSubMenus as $sm) {
+        if (request()->routeIs($sm['route'])) {
+            $opActiveIndex = $sm['index'];
+        }
+    }
+@endphp
                     @foreach($opSubMenus as $sm)
                     @php $isOpActive = ($sm['index'] === $opActiveIndex); @endphp
                     <div class="flex items-stretch">
@@ -170,25 +174,41 @@
             @endif
 
             {{-- Pengumuman --}}
-            @if($isPengumuman)
-            <a href="{{ route('panitia.pengumuman') }}" class="block relative h-[44px]"
-            :class="sidebarOpen ? 'ml-3 mr-0' : 'mx-2'">
-                <div x-show="sidebarOpen" x-cloak class="absolute -left-3 top-0 w-[6px] h-[40px] rounded-r-xl bg-[#27C2DE]"></div>
-                <div class="w-full h-full flex items-center gap-2.5"
-                    :class="sidebarOpen ? 'rounded-l-[10px] px-3' : 'rounded-[10px] justify-center'"
-                    style="background: linear-gradient(90deg, #15B2CE 0%, #00758A 100%);">
-                    <img src="{{ asset('ppdb/admin/pengumuman2.png') }}" alt="" class="w-[18px] h-[18px] object-contain brightness-0 invert shrink-0">
-                    <span x-show="sidebarOpen" x-cloak class="text-white font-semibold text-[13px] whitespace-nowrap">Pengumuman</span>
-                </div>
-            </a>
-            @else
-            <a href="{{ route('panitia.pengumuman') }}"
-            class="block h-[44px] flex items-center gap-2.5 rounded-[10px] text-[#464646] hover:bg-[#EEF9FC] hover:text-[#27C2DE] transition-all font-semibold text-[13px]"
-            :class="sidebarOpen ? 'mx-3 px-3' : 'mx-2 justify-center'">
-                <img src="{{ asset('ppdb/admin/pengumuman2.png') }}" alt="" class="w-[18px] h-[18px] object-contain shrink-0">
-                <span x-show="sidebarOpen" x-cloak class="whitespace-nowrap">Pengumuman</span>
-            </a>
-            @endif
+           @if($isPengumumanNilai)
+<a href="{{ route('panitia.pengumuman_nilai') }}" class="block relative h-[44px]"
+:class="sidebarOpen ? 'ml-3 mr-0' : 'mx-2'">
+
+    <div x-show="sidebarOpen" x-cloak
+         class="absolute -left-3 top-0 w-[6px] h-[40px] rounded-r-xl bg-[#27C2DE]"></div>
+
+    <div class="w-full h-full flex items-center gap-2.5"
+         :class="sidebarOpen ? 'rounded-l-[10px] px-3' : 'rounded-[10px] justify-center'"
+         style="background: linear-gradient(90deg, #15B2CE 0%, #00758A 100%);">
+
+        <img src="{{ asset('ppdb/admin/pengumuman2.png') }}"
+             class="w-[18px] h-[18px] brightness-0 invert">
+
+        <span x-show="sidebarOpen" x-cloak
+              class="text-white font-semibold text-[13px]">
+            Pengumuman Nilai
+        </span>
+    </div>
+</a>
+@else
+<a href="{{ route('panitia.pengumuman_nilai') }}"
+   class="block h-[44px] flex items-center gap-2.5 rounded-[10px]
+          text-[#464646] hover:bg-[#EEF9FC] hover:text-[#27C2DE]
+          transition-all font-semibold text-[13px]"
+   :class="sidebarOpen ? 'mx-3 px-3' : 'mx-2 justify-center'">
+
+    <img src="{{ asset('ppdb/admin/pengumuman2.png') }}"
+         class="w-[18px] h-[18px]">
+
+    <span x-show="sidebarOpen" x-cloak>
+        Pengumuman Nilai
+    </span>
+</a>
+@endif
 
             {{-- Divider --}}
             <div class="pt-3 pb-2 px-3"><div class="h-px bg-slate-100"></div></div>
@@ -244,7 +264,7 @@
                     @elseif(request()->routeIs('panitia.seleksi*'))
                         <h1 class="text-[17px] font-bold text-[#006E87]">Seleksi Nilai</h1>
                         <p class="text-[11px] text-[#2B2A28]">Kelola seleksi nilai calon siswa baru</p>
-                    @elseif(request()->routeIs('panitia.pengumuman*'))
+                    @elseif(request()->routeIs('panitia.pengumuman_nilai*'))
                         <h1 class="text-[17px] font-bold text-[#006E87]">Pengumuman</h1>
                         <p class="text-[11px] text-[#2B2A28]">Lihat hasil seleksi peserta yang telah dipublikasikan</p>
                     @else

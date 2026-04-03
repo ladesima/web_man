@@ -18,60 +18,45 @@
 }
 </style>
 
-<div x-data="{
-    tab: 'home',
-    showPublish: false,
-    showBerhasil: false,
-    checkedCount: 0,
-    checkAll: false,
-    rows: [
-        { id: 1, nama: 'Muhammad Naufal', no: '121731871', jalur: 'Prestasi', hasil: 'Perbaikan',   status_pub: 'belum',   status_email: 'belum_terkirim', tgl: '23/3/26 - 12:23 WITA', checked: false },
-        { id: 2, nama: 'Zahara Liberty',  no: '121731871', jalur: 'Prestasi', hasil: 'Lulus',       status_pub: 'belum',   status_email: 'belum_terkirim', tgl: '23/3/26 - 12:23 WITA', checked: false },
-        { id: 3, nama: 'Ahmad Sahroni',   no: '121731871', jalur: 'Prestasi', hasil: 'Lulus',       status_pub: 'publish', status_email: 'terkirim',       tgl: '23/3/26 - 12:23 WITA', checked: false },
-        { id: 4, nama: 'Zony Erikson',    no: '121731871', jalur: 'Prestasi', hasil: 'Tidak Lulus', status_pub: 'publish', status_email: 'terkirim',       tgl: '23/3/26 - 12:23 WITA', checked: false },
-    ],
-    toggleAll() {
-        this.checkAll = !this.checkAll;
-        this.rows.forEach(r => r.checked = this.checkAll);
-        this.updateCount();
-    },
-    updateCount() {
-        this.checkedCount = this.rows.filter(r => r.checked).length;
-    }
-}">
-
+<div x-data="pengumumanData()">
     {{-- ===== TABS + ACTION BUTTONS ===== --}}
     <div class="flex items-center justify-between mb-5">
 
         {{-- Tab --}}
-       <div class="flex gap-1 p-1 bg-white" style="border-radius:14px; box-shadow: 0px 2px 8px rgba(0,0,0,0.06); border: 1px solid #F0F0F0;">
+       <div class="flex gap-1 p-1 bg-white"
+     style="border-radius:14px; box-shadow: 0px 2px 8px rgba(0,0,0,0.06); border: 1px solid #F0F0F0;">
 
-    <button @click="tab = 'home'"
-            :style="tab === 'home'
-                ? 'background:#C4F4FD; color:#00758A; font-weight:700; border: 1px solid #C4F4FD; border-radius:10px;'
-                : 'background:transparent; color:#94A3B8; font-weight:400; border: 1px solid transparent; border-radius:10px;'"
-            class="px-5 py-1.5 text-[13px] transition-all">
-        Home
-    </button>
+    {{-- HOME --}}
+    <a href="{{ route('panitia.operasional.pengumuman') }}"
+   class="px-5 py-1.5 text-[13px] transition-all"
+   style="border-radius:10px;"
+   :style="!window.location.pathname.includes('review')
+        ? 'background:#C4F4FD; color:#00758A; font-weight:700; border: 1px solid #C4F4FD;'
+        : 'background:transparent; color:#94A3B8; font-weight:400; border: 1px solid transparent;'">
+    Home
+</a>
 
-    <a href="{{ route('admin.operasional.pengumuman.review') }}"
-    :style="window.location.pathname.includes('review')
-            ? 'background:#C4F4FD; color:#00758A; font-weight:700; border: 1px solid #C4F4FD; border-radius:10px;'
-            : 'background:transparent; color:#94A3B8; font-weight:400; border: 1px solid #E2E8F0; border-radius:10px;'"
-    class="px-5 py-1.5 text-[13px] transition-all">
-        Review Email
-    </a>
+    {{-- REVIEW --}}
+    <a href="{{ route('panitia.operasional.pengumuman.review') }}"
+   class="px-5 py-1.5 text-[13px] transition-all"
+   style="border-radius:10px;"
+   :style="window.location.pathname.includes('review')
+        ? 'background:#C4F4FD; color:#00758A; font-weight:700; border: 1px solid #C4F4FD;'
+        : 'background:transparent; color:#94A3B8; font-weight:400; border: 1px solid #E2E8F0;'">
+    Review Email
+</a>
+
 </div>
 
         {{-- Action Buttons --}}
         <div class="flex gap-3">
-            <button @click="showPublish = true"
+            <button @click="hitungStatistik(); showPublish = true"
                     class="inline-flex items-center gap-2 px-4 py-2 text-white text-[12px] font-semibold hover:opacity-90 transition-all"
                     style="background:#27C2DE; border-radius:8px;">
                 <img src="{{ asset('ppdb/admin/operasional/publish.png') }}" alt="" class="w-4 h-4 object-contain brightness-0 invert">
                 Publish Massal
             </button>
-            <button class="inline-flex items-center gap-2 px-4 py-2 text-[12px] font-semibold hover:opacity-90 transition-all"
+            <button @click="publishSelected()" class="inline-flex items-center gap-2 px-4 py-2 text-[12px] font-semibold hover:opacity-90 transition-all"
                     style="background: white; border: 1.5px solid #00758A; color:#00758A; border-radius:8px;">
                 <img src="{{ asset('ppdb/admin/operasional/kirim.png') }}" alt="" class="w-4 h-4 object-contain">
                 Kirim Yang Ditandai
@@ -104,7 +89,17 @@
                     <p class="text-[11px] font-semibold" style="color:{{ $s['color'] }}">{{ $s['label'] }}</p>
                     <img src="{{ asset('ppdb/admin/operasional/' . $s['icon']) }}" alt="" class="w-8 h-8 object-contain">
                 </div>
-                <p class="text-[26px] font-bold text-[#2B2A28]">1298</p>
+                <p class="text-[26px] font-bold text-[#2B2A28]">
+    @if($s['label'] == 'Siap Diumumkan')
+        {{ $siap_diumumkan }}
+    @elseif($s['label'] == 'Total Lulus')
+        {{ $lulus }}
+    @elseif($s['label'] == 'Tidak Lulus')
+        {{ $tidak_lulus }}
+    @elseif($s['label'] == 'Perlu Perbaikan')
+        {{ $perbaikan }}
+    @endif
+</p>
             </div>
             @endforeach
         </div>
@@ -113,7 +108,7 @@
         <div class="flex gap-3 mb-4 items-center w-full">
             {{-- Search --}}
             <div class="relative flex-[2]">
-                <input type="text" placeholder="Cari"
+                <input type="text" placeholder="Cari" x-model="search"
                        class="w-full pl-9 pr-4 py-2.5 text-[12px] border border-slate-200 bg-white focus:outline-none focus:ring-2 focus:ring-[#27C2DE] card-shadow"
                        style="border-radius:8px;">
                 <svg class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -121,17 +116,54 @@
                 </svg>
             </div>
             {{-- Dropdowns --}}
-            @foreach(['Jalur', 'Gelombang', 'Hasil Seleksi', 'Status Publish', 'Email'] as $f)
-            <div class="relative flex-1">
-                <select class="appearance-none w-full pl-4 pr-8 py-2.5 text-[12px] border border-slate-200 bg-white text-slate-600 focus:outline-none card-shadow"
-                        style="border-radius:8px;">
-                    <option>{{ $f }}</option>
-                </select>
-                <svg class="pointer-events-none absolute right-2 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
-                </svg>
-            </div>
-            @endforeach
+            <div class="flex gap-3 flex-[5]">
+
+    {{-- JALUR --}}
+    <div class="relative flex-1">
+        <select x-model="filterJalur"
+            class="appearance-none w-full pl-4 pr-8 py-2.5 text-[12px] border border-slate-200 bg-white text-slate-600 focus:outline-none card-shadow"
+            style="border-radius:8px;">
+            <option value="">Jalur</option>
+            <option value="prestasi">Prestasi</option>
+            <option value="reguler">Reguler</option>
+            <option value="afirmasi">Afirmasi</option>
+        </select>
+    </div>
+
+    {{-- HASIL --}}
+    <div class="relative flex-1">
+        <select x-model="filterHasil"
+            class="appearance-none w-full pl-4 pr-8 py-2.5 text-[12px] border border-slate-200 bg-white text-slate-600 focus:outline-none card-shadow"
+            style="border-radius:8px;">
+            <option value="">Hasil Seleksi</option>
+            <option value="Lulus">Lulus</option>
+            <option value="Tidak Lulus">Tidak Lulus</option>
+        </select>
+    </div>
+
+    {{-- PUBLISH --}}
+    <div class="relative flex-1">
+        <select x-model="filterPublish"
+            class="appearance-none w-full pl-4 pr-8 py-2.5 text-[12px] border border-slate-200 bg-white text-slate-600 focus:outline-none card-shadow"
+            style="border-radius:8px;">
+            <option value="">Status Publish</option>
+            <option value="publish">Publish</option>
+            <option value="belum">Belum</option>
+        </select>
+    </div>
+
+    {{-- EMAIL --}}
+    <div class="relative flex-1">
+        <select x-model="filterEmail"
+            class="appearance-none w-full pl-4 pr-8 py-2.5 text-[12px] border border-slate-200 bg-white text-slate-600 focus:outline-none card-shadow"
+            style="border-radius:8px;">
+            <option value="">Email</option>
+            <option value="terkirim">Terkirim</option>
+            <option value="belum_terkirim">Belum Terkirim</option>
+        </select>
+    </div>
+
+</div>
         </div>
 
         {{-- ===== TABEL — dengan drop shadow Figma ===== --}}
@@ -158,7 +190,7 @@
                         </tr>
                     </thead>
                     <tbody class="divide-y divide-slate-100">
-                        <template x-for="(row, i) in rows" :key="row.id">
+                        <template x-for="(row, i) in paginatedRows" :key="row.id">
                             <tr class="hover:bg-slate-50 transition-all">
                                 <td class="py-3 px-4 sticky left-0 z-10 bg-white">
                                     <input type="checkbox" x-model="row.checked" @change="updateCount()" class="custom-check">
@@ -171,11 +203,32 @@
                                 <td class="text-center py-3 px-3 text-[12px] text-[#2B2A28] whitespace-nowrap" x-text="row.no"></td>
                                 <td class="text-center py-3 px-3 text-[12px] text-[#2B2A28] whitespace-nowrap" x-text="row.jalur"></td>
                                 <td class="text-center py-3 px-3 whitespace-nowrap">
-                                    <span class="px-3 py-1 text-[11px] font-medium"
-                                          style="background: rgba(255,154,220,0.20); border: 1px solid #F80ECD; border-radius:4px; color:#F80ECD;">
-                                        Siap umumkan
-                                    </span>
-                                </td>
+
+    <span x-show="row.status_verifikasi === 'Menunggu'"
+        class="px-3 py-1 text-[11px]"
+        style="background:#FEF3C7; border:1px solid #F59E0B; color:#F59E0B; border-radius:4px;">
+        Menunggu
+    </span>
+
+    <span x-show="row.status_verifikasi === 'Berkas Valid'"
+        class="px-3 py-1 text-[11px]"
+        style="background:#DCFCE7; border:1px solid #16A34A; color:#16A34A; border-radius:4px;">
+        Berkas Valid
+    </span>
+
+    <span x-show="row.status_verifikasi === 'Perlu Perbaikan'"
+        class="px-3 py-1 text-[11px]"
+        style="background:#DBEAFE; border:1px solid #2563EB; color:#2563EB; border-radius:4px;">
+        Perlu Perbaikan
+    </span>
+
+    <span x-show="row.status_verifikasi === 'Siap Seleksi'"
+        class="px-3 py-1 text-[11px]"
+        style="background:#FCE7F3; border:1px solid #F80ECD; color:#F80ECD; border-radius:4px;">
+        Siap Seleksi
+    </span>
+
+</td>
                                 <td class="text-center py-3 px-3 text-[12px] text-[#2B2A28] whitespace-nowrap" x-text="row.hasil"></td>
                                 <td class="text-center py-3 px-3 whitespace-nowrap">
                                     <span x-show="row.status_pub === 'publish'"
@@ -195,11 +248,11 @@
                                 </td>
                                 <td class="text-center py-3 px-3 text-[12px] text-[#575551] whitespace-nowrap" x-text="row.tgl"></td>
                                 <td class="text-center py-3 px-3 whitespace-nowrap">
-                                    <a :href="'/admin/operasional/pengumuman/' + row.id"
-                                       class="inline-flex items-center px-4 py-1.5 text-white text-[12px] font-semibold transition-all hover:opacity-90 active:scale-95"
-                                       style="background:#27C2DE; border-radius:4px;">
-                                        Detail
-                                    </a>
+                                    <a :href="'/panitia/operasional/verifikasi/' + row.id"
+   class="inline-flex items-center px-4 py-1.5 text-white text-[12px] font-semibold transition-all hover:opacity-90 active:scale-95"
+   style="background:#27C2DE; border-radius:4px;">
+    Detail
+</a>
                                 </td>
                             </tr>
                         </template>
@@ -212,7 +265,13 @@
         <div class="flex items-center gap-3 px-1 py-3">
 
             {{-- Kiri: info --}}
-            <span class="text-[12px] text-slate-400 whitespace-nowrap">1 - 4 of 450</span>
+            <span class="text-[12px] text-slate-400 whitespace-nowrap">
+    <span x-text="(currentPage - 1) * perPage + 1"></span>
+    -
+    <span x-text="Math.min(currentPage * perPage, totalData)"></span>
+    of
+    <span x-text="totalData"></span>
+</span>
 
             {{-- Spacer --}}
             <div class="flex-1"></div>
@@ -221,12 +280,13 @@
             <div class="flex items-center gap-2">
                 <span class="text-[12px] text-slate-400 whitespace-nowrap">Rows per page:</span>
                 <div class="relative">
-                    <select class="appearance-none pl-3 pr-7 py-1.5 text-[12px] text-white font-semibold focus:outline-none"
-                            style="background:#27C2DE; border-radius:6px; min-width:52px;">
-                        <option>15</option>
-                        <option>25</option>
-                        <option>50</option>
-                    </select>
+                    <select x-model="perPage"
+        class="appearance-none pl-3 pr-7 py-1.5 text-[12px] text-white font-semibold focus:outline-none"
+        style="background:#27C2DE; border-radius:6px; min-width:52px;">
+    <option value="15">15</option>
+    <option value="25">25</option>
+    <option value="50">50</option>
+</select>
                     <svg class="pointer-events-none absolute right-2 top-1/2 -translate-y-1/2 w-3 h-3 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
                     </svg>
@@ -234,16 +294,22 @@
             </div>
 
          <div class="flex gap-2">
-            <button class="flex items-center justify-center hover:opacity-80 transition-all active:scale-95"
-                    style="width:29px; height:32px; background:#C8E6FD; border-radius:8px;
-                        box-shadow: 0px 4px 12px 0px rgba(0,0,0,0.20);">
-                <img src="{{ asset('ppdb/admin/operasional/arrowleft.png') }}" alt="prev" class="w-3.5 h-3.5 object-contain">
-            </button>
-            <button class="flex items-center justify-center hover:opacity-80 transition-all active:scale-95"
-                    style="width:29px; height:32px; background:#005C6B; border-radius:8px;
-                        box-shadow: 0px 4px 12px 0px rgba(0,0,0,0.20);">
-                <img src="{{ asset('ppdb/admin/operasional/arrowright.png') }}" alt="next" class="w-3.5 h-3.5 object-contain brightness-0 invert">
-            </button>
+           <button @click="if(currentPage > 1) currentPage--"
+        class="flex items-center justify-center hover:opacity-80 transition-all active:scale-95"
+        :class="currentPage === 1 ? 'opacity-40 cursor-not-allowed' : ''"
+        style="width:29px; height:32px; background:#C8E6FD; border-radius:8px;
+        box-shadow: 0px 4px 12px rgba(0,0,0,0.20);">
+    <img src="{{ asset('ppdb/admin/operasional/arrowleft.png') }}"
+         class="w-3.5 h-3.5 object-contain">
+</button>
+            <button @click="if(currentPage < totalPages) currentPage++"
+        class="flex items-center justify-center hover:opacity-80 transition-all active:scale-95"
+        :class="currentPage === totalPages ? 'opacity-40 cursor-not-allowed' : ''"
+        style="width:29px; height:32px; background:#005C6B; border-radius:8px;
+        box-shadow: 0px 4px 12px rgba(0,0,0,0.20);">
+    <img src="{{ asset('ppdb/admin/operasional/arrowright.png') }}"
+         class="w-3.5 h-3.5 object-contain brightness-0 invert">
+</button>
         </div>
         </div>
 
@@ -268,17 +334,37 @@
             <h2 class="text-[15px] font-bold text-[#2B2A28] text-center mb-4">Publish Pengumuman</h2>
 
             {{-- Subtitle --}}
-            <p class="text-[13px] font-bold text-[#2B2A28] mb-3">Publikasikan Pengumuman Untuk 2 Peserta?</p>
+            <p class="text-[13px] font-bold text-[#2B2A28] mb-3">Publikasikan Pengumuman Untuk <span x-text="totalSiap"></span> Peserta?</p>
 
             {{-- Ceklis items --}}
-            <div class="space-y-2 mb-2">
-                @foreach(['Sudah Divalidasi : 2 Peserta', 'Lulus : 1 Peserta', 'Perbaikan : 1 Peserta'] as $item)
-                <div class="flex items-center gap-2">
-                    <img src="{{ asset('ppdb/admin/operasional/ceklis2.png') }}" alt="" class="w-4 h-4 object-contain flex-shrink-0">
-                    <span class="text-[12px] text-[#575551]">{{ $item }}</span>
-                </div>
-                @endforeach
-            </div>
+            <div class="space-y-2 text-[12px] text-[#575551]">
+
+    <div class="flex items-center gap-2">
+        <img src="{{ asset('ppdb/admin/operasional/ceklis2.png') }}" class="w-4 h-4">
+        <span>
+            Sudah Divalidasi :
+            <b x-text="totalValid"></b> Peserta
+        </span>
+    </div>
+
+    <div class="flex items-center gap-2">
+        <img src="{{ asset('ppdb/admin/operasional/ceklis2.png') }}" class="w-4 h-4">
+        <span>
+            Lulus :
+            <b x-text="totalLulus"></b> Peserta
+            &nbsp;
+        </span>
+    </div>
+
+    <div class="flex items-center gap-2">
+        <img src="{{ asset('ppdb/admin/operasional/ceklis2.png') }}" class="w-4 h-4">
+        <span>
+            Perbaikan :
+            <b x-text="totalPerbaikan"></b> Peserta
+        </span>
+    </div>
+
+</div>
 
             {{-- Warning items --}}
             <div class="space-y-2 mb-5">
@@ -297,7 +383,7 @@
                         style="border-radius:8px; border: 1px solid #D4D4D4;">
                     Batal
                 </button>
-                <button @click="showPublish = false; showBerhasil = true"
+                <button @click="publishMassal()"
                         class="px-8 py-2 text-white text-[12px] font-semibold hover:opacity-90 transition-all"
                         style="background:#27C2DE; border-radius:8px;">
                     Publish
@@ -329,24 +415,29 @@
           {{-- Green box --}}
             <div class="px-3 py-2.5 mb-3"
                 style="background: rgba(181,255,190,0.20); border: 0.5px solid #D4D4D4; height:42px; display:flex; align-items:center;">
-                <span class="text-[12px] font-semibold text-[#2B2A28]">1 Pengumuman Terkirim Via Email</span>
+                <span class="text-[12px] font-semibold text-[#2B2A28]"><span x-text="successCount + ' Pengumuman Terkirim Via Email'"></span></span>
             </div>
             {{-- Kirim items --}}
-            <div class="space-y-2 mb-3">
-                @foreach(['Berhasil Kirim : 1 Email', 'Gagal Terkirim : 1 Email'] as $item)
-                <div class="flex items-center gap-2">
-                    <img src="{{ asset('ppdb/admin/operasional/ceklis2.png') }}" alt="" class="w-4 h-4 object-contain flex-shrink-0">
-                    <span class="text-[12px] text-[#575551]">{{ $item }}</span>
-                </div>
-                @endforeach
-            </div>
+<div class="space-y-2 mb-3">
+
+    <div class="flex items-center gap-2">
+        <img src="{{ asset('ppdb/admin/operasional/ceklis2.png') }}" class="w-4 h-4">
+        <span class="text-[12px]" x-text="'Berhasil Kirim : ' + successCount + ' Email'"></span>
+    </div>
+
+    <div class="flex items-center gap-2">
+        <img src="{{ asset('ppdb/admin/operasional/ceklis2.png') }}" class="w-4 h-4">
+        <span class="text-[12px]" x-text="'Gagal Terkirim : ' + failedCount + ' Email'"></span>
+    </div>
+
+</div>
 
             {{-- Email tidak valid --}}
             <div class="px-3 py-2 mb-5"
                 style="border: 0.5px solid #D4D4D4;">
                 <div class="flex items-center gap-2">
                     <img src="{{ asset('ppdb/admin/operasional/ceklis2.png') }}" alt="" class="w-4 h-4 object-contain flex-shrink-0">
-                    <span class="text-[12px] text-[#575551]">Zahra@Gimel.Com</span>
+                    <span class="text-[12px] text-[#575551]"><span x-text="email"></span>
                     <span class="text-[12px] font-semibold" style="color:#27C2DE;">- Email Tidak Valid</span>
                 </div>
             </div>
@@ -365,3 +456,152 @@
 
 </div>
 @endsection
+<script>
+function pengumumanData() {
+    return {
+        tab: 'home',
+        showPublish: false,
+        showBerhasil: false,
+        checkedCount: 0,
+        checkAll: false,
+
+        rows: @json($rows),
+        allRows: @json($rows),
+
+        search: '',
+        filterHasil: '',
+        filterPublish: '',
+        filterEmail: '',
+        filterJalur: '',
+        successCount: 0,
+failedCount: 0,
+invalidEmails: [],
+
+totalSiap: 0,
+totalValid: 0,
+totalLulus: 0,
+totalPerbaikan: 0,
+
+        currentPage: 1,
+        perPage: 15,
+
+        // =========================
+        // FILTER
+        // =========================
+        get filteredRows() {
+            return this.allRows.filter(r => {
+                let nama = (r.nama || '').toLowerCase();
+                let jalur = (r.jalur || '').toLowerCase();
+
+                return (
+                    (this.search === '' || nama.includes(this.search.toLowerCase())) &&
+                    (this.filterHasil === '' || r.hasil === this.filterHasil) &&
+                    (this.filterPublish === '' || r.status_pub === this.filterPublish) &&
+                    (this.filterEmail === '' || r.status_email === this.filterEmail) &&
+                    (this.filterJalur === '' || jalur === this.filterJalur.toLowerCase())
+                );
+            });
+        },
+        hitungStatistik() {
+    let siap = this.allRows.filter(r => r.status_email === 'belum_terkirim');
+
+    this.totalSiap = siap.length;
+    this.totalValid = siap.filter(r => r.status_verifikasi === 'Berkas Valid').length;
+    this.totalLulus = siap.filter(r => r.hasil === 'Lulus').length;
+    this.totalPerbaikan = siap.filter(r => r.status_verifikasi === 'Perlu Perbaikan').length;
+},
+
+        // =========================
+        // PAGINATION
+        // =========================
+        get totalData() {
+            return this.filteredRows.length;
+        },
+
+        get totalPages() {
+            return Math.ceil(this.totalData / this.perPage) || 1;
+        },
+        get selectedIds() {
+    return this.allRows
+        .filter(r => r.checked)
+        .map(r => r.id);
+},
+
+        get paginatedRows() {
+            let start = (this.currentPage - 1) * this.perPage;
+            return this.filteredRows.slice(start, start + this.perPage);
+        },
+
+        async publishMassal() {
+    let res = await fetch('/panitia/operasional/pengumuman/publish-massal', {
+        method: 'POST',
+        headers: {
+            'X-CSRF-TOKEN': '{{ csrf_token() }}',
+            'Content-Type': 'application/json'
+        }
+    });
+
+    let data = await res.json();
+
+    if (data.success) {
+        this.successCount = data.success_count || 0;
+        this.failedCount = data.failed_count || 0;
+        this.invalidEmails = data.invalid || [];
+
+        this.showPublish = false;
+        this.showBerhasil = true;
+
+        setTimeout(() => location.reload(), 2000);
+    }
+},
+async publishSelected() {
+    if (this.selectedIds.length === 0) {
+        alert('Pilih data dulu');
+        return;
+    }
+
+    let res = await fetch('/panitia/operasional/pengumuman/publish-selected', {
+        method: 'POST',
+        headers: {
+            'X-CSRF-TOKEN': '{{ csrf_token() }}',
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+            ids: this.selectedIds
+        })
+    });
+
+    let data = await res.json();
+
+    if (data.success) {
+        location.reload();
+    }
+},
+
+        // =========================
+        // CHECKBOX
+        // =========================
+        toggleAll() {
+            this.checkAll = !this.checkAll;
+
+            this.filteredRows.forEach(r => {
+                r.checked = this.checkAll;
+            });
+
+            this.updateCount();
+        },
+
+        updateCount() {
+            this.checkedCount = this.allRows.filter(r => r.checked).length;
+        },
+        watch: {
+    perPage() { this.currentPage = 1 },
+    search() { this.currentPage = 1 },
+    filterHasil() { this.currentPage = 1 },
+    filterPublish() { this.currentPage = 1 },
+    filterEmail() { this.currentPage = 1 },
+    filterJalur() { this.currentPage = 1 },
+}
+    }
+}
+</script>

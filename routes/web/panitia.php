@@ -6,6 +6,9 @@ use App\Http\Controllers\Panitia\DashboardPanitiaController;
 use App\Http\Middleware\PanitiaMiddleware;
 use App\Http\Controllers\Panitia\DataPendaftarController;
 use App\Http\Controllers\Panitia\VerifikasiController;
+use App\Http\Controllers\Panitia\PengumumanController;
+use App\Http\Controllers\Panitia\PengumumanNilaiController;
+
 Route::get('/preview/{file}', function ($file) {
     return response()->file(storage_path('app/public/' . $file));
 })->name('preview.dokumen');
@@ -41,22 +44,61 @@ Route::prefix('panitia')->name('panitia.')->group(function () {
             Route::post('/verifikasi/{id}/simpan',
     [VerifikasiController::class, 'simpanValidasi']
 )->name('verifikasi.simpan');
+
+            Route::get('/verifikasi/{id}', 
+    [VerifikasiController::class, 'show']
+)->name('verifikasi.detail');
             // Pengumuman
-            Route::view('/pengumuman', 'panitia.operasional.pengumuman.index')->name('pengumuman');
-            Route::view('/pengumuman/review', 'panitia.operasional.pengumuman.review')->name('pengumuman.review');
+            Route::get('/pengumuman', [PengumumanController::class, 'index'])
+    ->name('pengumuman');
+
+            Route::get('/pengumuman/review',
+        [PengumumanController::class, 'review']
+    )->name('pengumuman.review');
+
+            Route::delete('/pengumuman/template/{id}',
+    [PengumumanController::class, 'destroyTemplate']);
+
+            Route::get('/pengumuman/template/{id}/edit',
+    [PengumumanController::class, 'editTemplate']
+)->name('pengumuman.template.edit');
+
+            Route::post('/pengumuman/publish-massal',
+    [PengumumanController::class, 'publishMassal']
+)->name('pengumuman.publish.massal');
+
+            Route::post('/pengumuman/publish-selected',
+    [PengumumanController::class, 'publishSelected']
+)->name('pengumuman.publish.selected');
+
+            Route::post('/pengumuman/store',
+    [PengumumanController::class, 'store']
+)->name('pengumuman.store');
+
+            Route::put('/pengumuman/template/{id}',
+    [PengumumanController::class, 'updateTemplate']
+)->name('pengumuman.template.update');
+
+            
+
+            
             Route::view('/pengumuman/tambah', 'panitia.operasional.pengumuman.tambah')->name('pengumuman.tambah');
             Route::view('/pengumuman/{id}/pesan', 'panitia.operasional.pengumuman.detail-pesan')->name('pengumuman.pesan');
-
             // FAQ
             Route::view('/faq', 'panitia.operasional.faq')->name('faq');
             Route::view('/faq/tambah', 'panitia.operasional.faq-tambah')->name('faq.tambah');
-        });
+        
+            
+            });
 
         // ── SELEKSI ─────────────────────────────
         Route::view('/seleksi', 'panitia.seleksi.index')->name('seleksi');
 
         // ── PENGUMUMAN ──────────────────────────
-        Route::view('/pengumuman', 'panitia.pengumuman.index')->name('pengumuman');
+        Route::get('/pengumuman_nilai', function () {
+    return view('panitia.pengumuman_nilai.index');
+})->name('pengumuman_nilai');
+        
 
         // ── DATA PENDAFTAR ──────────────────────
         Route::get('/data-pendaftar', [DataPendaftarController::class, 'index'])

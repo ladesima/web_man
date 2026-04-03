@@ -60,19 +60,28 @@
 }
 </style>
 
+<form method="POST" action="{{ route('panitia.operasional.pengumuman.store') }}">
+@csrf
+
 <div x-data="{
     charCount: 0,
     maxChar: 10000,
+
     updateCount() {
-        this.charCount = document.getElementById('editor-area').innerText.length;
-    }
+    const editor = document.getElementById('editor-area');
+
+    this.charCount = editor.innerText.length;
+
+    // 🔥 INI YANG KIRIM KE BACKEND
+    document.getElementById('isi-hidden').value = editor.innerHTML;
+}
 }">
 
     {{-- ===== BREADCRUMB ===== --}}
     <div class="flex items-center gap-2 mb-5 text-[12px] text-slate-400">
-        <a href="{{ route('admin.operasional.pengumuman') }}" class="hover:text-[#27C2DE] transition-colors">Pengumuman</a>
+        <a href="{{ route('panitia.operasional.pengumuman') }}" class="hover:text-[#27C2DE] transition-colors">Pengumuman</a>
         <svg xmlns="http://www.w3.org/2000/svg" class="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
-        <a href="{{ route('admin.operasional.pengumuman.review') }}" class="hover:text-[#27C2DE] transition-colors">Riview Email</a>
+        <a href="{{ route('panitia.operasional.pengumuman.review') }}" class="hover:text-[#27C2DE] transition-colors">Review Email</a>
         <svg xmlns="http://www.w3.org/2000/svg" class="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
         <span class="text-[#27C2DE] font-semibold">Tambah Pesan</span>
     </div>
@@ -99,7 +108,7 @@
             <div>
                 <label class="form-label">Penerima</label>
                 <div class="relative">
-                    <select class="form-input appearance-none pr-8"
+                    <select name="penerima" class="form-input appearance-none pr-8" required
                             style="background:#F5F7FF; border-color:#DFEAF2; color:#94A3B8;">
                         <option value="" disabled selected></option>
                         <option value="lulus">Lulus</option>
@@ -119,7 +128,7 @@
         {{-- Subjek/Judul --}}
         <div class="mb-5">
             <label class="form-label">Subjek/Judul</label>
-            <input type="text" class="form-input"
+            <input type="text" name="judul" class="form-input" required
                    style="background:#F5F7FF; border-color:#DFEAF2;"
                    placeholder="">
         </div>
@@ -186,6 +195,7 @@
                      @input="updateCount()"
                      x-on:input="updateCount()">
                 </div>
+                <textarea name="isi" id="isi-hidden" hidden></textarea>
             </div>
 
             <p class="text-[11px] text-slate-400 mt-1.5" x-text="charCount + '/10000'">0/10000</p>
@@ -193,7 +203,7 @@
 
         {{-- Submit --}}
         <div class="flex justify-center">
-            <button type="button"
+            <button type="submit"
                     class="px-10 py-2.5 text-white text-[12px] font-semibold hover:opacity-90 transition-all active:scale-95"
                     style="background:#41D1EA; border-radius:4px;">
                 Simpan
@@ -203,4 +213,6 @@
     </div>
 
 </div>
+</form>
+
 @endsection

@@ -95,7 +95,7 @@ Route::prefix('admin')->middleware(['auth'])->group(function () {
 Route::post('/operasional/pengumuman/publish', [PengumumanController::class, 'publish'])
     ->name('admin.operasional.pengumuman.publish');
 
-    Route::post('/operasional/pengumuman/email', [PengumumanPpdbController::class, 'kirimEmail'])
+    Route::post('/operasional/pengumuman/email', [PengumumanController::class, 'kirimEmail'])
         ->name('admin.operasional.pengumuman.email');
 
     Route::post('/operasional/pengumuman/store', [PengumumanController::class, 'store'])
