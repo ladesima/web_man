@@ -9,6 +9,7 @@ use App\Http\Controllers\Panitia\VerifikasiController;
 use App\Http\Controllers\Panitia\PengumumanController;
 use App\Http\Controllers\Panitia\PengumumanNilaiController;
 use App\Http\Controllers\Panitia\PertanyaanController;
+use App\Http\Controllers\Panitia\NilaiSeleksiController;
 
 Route::get('/preview/{file}', function ($file) {
     return response()->file(storage_path('app/public/' . $file));
@@ -99,12 +100,20 @@ Route::prefix('panitia')->name('panitia.')->group(function () {
             });
 
         // ── SELEKSI ─────────────────────────────
-        Route::view('/seleksi', 'panitia.seleksi.index')->name('seleksi');
+        Route::get('/seleksi', [NilaiSeleksiController::class, 'index'])
+        ->name('seleksi');
+
+        Route::patch('/seleksi/{id}/nilai', [NilaiSeleksiController::class, 'updateNilai'])
+        ->name('seleksi.nilai');
+
+    // optional
+        Route::get('/seleksi/{id}', [NilaiSeleksiController::class, 'show']);
+        Route::patch('/seleksi/{id}/reset', [NilaiSeleksiController::class, 'resetNilai']);
 
         // ── PENGUMUMAN ──────────────────────────
         Route::get('/pengumuman_nilai', function () {
-    return view('panitia.pengumuman_nilai.index');
-})->name('pengumuman_nilai');
+            return view('panitia.pengumuman_nilai.index');
+                })->name('pengumuman_nilai');
         
 
         // ── DATA PENDAFTAR ──────────────────────

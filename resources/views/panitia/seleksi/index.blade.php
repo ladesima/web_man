@@ -48,113 +48,212 @@
 </style>
 
 <div x-data="{
+    // =========================
+    // STATE
+    // =========================
     showModal: false,
     modalMode: 'input',
     selectedPeserta: null,
-    form: { nilaiRapor: '', nilaiPrestasi: '' },
+    search: '',
+filterJalur: '',
+filterGelombang: '',
+filterStatus: '',
 
-    peserta: [
-        { id:1, nama:'Ahmad Sahroni',   gelombang:'I', jalur:'Prestasi', nisn:'121731871', sekolah:'SMP 1 Makassar', nilaiRapor:70,   nilaiPrestasi:76,   nilaiTotal:72,   noPendaftaran:'12123455' },
-        { id:2, nama:'Muhammad Naufal', gelombang:'I', jalur:'Prestasi', nisn:'121731871', sekolah:'SMP 1 Makassar', nilaiRapor:null, nilaiPrestasi:null, nilaiTotal:null, noPendaftaran:'12123456' },
-        { id:3, nama:'Zahara Liberty',  gelombang:'I', jalur:'Prestasi', nisn:'121731871', sekolah:'SMP 1 Makassar', nilaiRapor:99,   nilaiPrestasi:87,   nilaiTotal:92,   noPendaftaran:'12123457' },
-        { id:4, nama:'Zony Erikson',    gelombang:'I', jalur:'Prestasi', nisn:'121731871', sekolah:'SMP 1 Makassar', nilaiRapor:65,   nilaiPrestasi:66,   nilaiTotal:60,   noPendaftaran:'12123458' },
-    ],
+    form: {
+        nilaiRapor: '',
+        nilaiPrestasi: ''
+    },
 
+    // =========================
+    // DATA DARI BACKEND
+    // =========================
+    peserta: @js($pesertas),
+
+    // =========================
+    // HITUNG NILAI
+    // =========================
     get nilaiTotalCalc() {
         const r = parseFloat(this.form.nilaiRapor);
         const p = parseFloat(this.form.nilaiPrestasi);
+
         if (isNaN(r) || isNaN(p)) return null;
+
         return Math.round((r + p) / 2);
     },
+
+    // =========================
+    // STATUS (MODAL)
+    // =========================
     get statusCalc() {
         const t = this.nilaiTotalCalc;
+
         if (t === null) return '';
-        if (t >= 95) return 'Lulus';
-        if (t >= 76 && t <= 84) return 'Masa Sanggah';
-        if (t < 73)  return 'Tidak Lulus';
-        return 'Perlu Ditinjau';
+        if (t >= 80) return 'Lulus';
+        if (t == 75) return 'Memenuhi Syarat';
+        return 'Tidak Lulus';
     },
+
     get statusBgCalc() {
         const s = this.statusCalc;
-        if (s === 'Lulus')        return 'background:#DCFCE7; color:#16A34A; border:1px solid #16A34A; border-radius:8px;';
-        if (s === 'Masa Sanggah') return 'background:#FEF3C7; color:#D97706; border:1px solid #D97706; border-radius:8px;';
-        if (s === 'Tidak Lulus')  return 'background:#FFEBEE; color:#C62828; border:1px solid #C62828; border-radius:8px;';
+
+        if (s === 'Lulus')
+            return 'background:#DCFCE7; color:#16A34A; border:1px solid #16A34A; border-radius:8px;';
+        if (s === 'Memenuhi Syarat')
+            return 'background:#FEF3C7; color:#D97706; border:1px solid #D97706; border-radius:8px;';
+        if (s === 'Tidak Lulus')
+            return 'background:#FFEBEE; color:#C62828; border:1px solid #C62828; border-radius:8px;';
+
         return 'background:#F1F5F9; color:#64748B; border:1px solid #CBD5E1; border-radius:8px;';
     },
 
+    // =========================
+    // STATUS (TABLE)
+    // =========================
     getStatus(p) {
         if (p.nilaiTotal === null) return 'Belum Dinilai';
-        if (p.nilaiTotal >= 95)   return 'Lulus';
-        if (p.nilaiTotal >= 76 && p.nilaiTotal <= 84) return 'Masa Sanggah';
-        if (p.nilaiTotal < 73)    return 'Tidak Lulus';
-        return 'Perlu Ditinjau';
+        if (p.nilaiTotal >= 80) return 'Lulus';
+        if (p.nilaiTotal == 75) return 'memenuhi syarat';
+        return 'Tidak Lulus';
     },
+
     getStatusStyle(p) {
         const s = this.getStatus(p);
-        if (s === 'Lulus')        return 'background:#DCFCE7; color:#16A34A; border:1px solid #16A34A; border-radius:4px;';
-        if (s === 'Masa Sanggah') return 'background:#FEF3C7; color:#D97706; border:1px solid #D97706; border-radius:4px;';
-        if (s === 'Tidak Lulus')  return 'background:#FFEBEE; color:#C62828; border:1px solid #C62828; border-radius:4px;';
+
+        if (s === 'Lulus')
+            return 'background:#DCFCE7; color:#16A34A; border:1px solid #16A34A; border-radius:4px;';
+        if (s === 'Memenuhi Syarat')
+            return 'background:#FEF3C7; color:#D97706; border:1px solid #D97706; border-radius:4px;';
+        if (s === 'Tidak Lulus')
+            return 'background:#FFEBEE; color:#C62828; border:1px solid #C62828; border-radius:4px;';
+
         return 'background:#F1F5F9; color:#64748B; border:1px solid #CBD5E1; border-radius:4px;';
     },
 
+    // =========================
+    // OPEN MODAL
+    // =========================
     openInput(p) {
         this.selectedPeserta = p;
-        this.form.nilaiRapor    = '';
+        this.form.nilaiRapor = '';
         this.form.nilaiPrestasi = '';
         this.modalMode = 'input';
         this.showModal = true;
-        this.$nextTick(() => this._updateSaveBtn());
+
+        this.$nextTick(() => this.updateButton());
     },
+
     openEdit(p) {
         this.selectedPeserta = p;
-        this.form.nilaiRapor    = p.nilaiRapor    ?? '';
+        this.form.nilaiRapor = p.nilaiRapor ?? '';
         this.form.nilaiPrestasi = p.nilaiPrestasi ?? '';
         this.modalMode = 'edit';
         this.showModal = true;
-        this.$nextTick(() => this._updateSaveBtn());
+
+        this.$nextTick(() => this.updateButton());
     },
+
     openView(p) {
         this.selectedPeserta = p;
-        this.form.nilaiRapor    = p.nilaiRapor    ?? '';
+        this.form.nilaiRapor = p.nilaiRapor ?? '';
         this.form.nilaiPrestasi = p.nilaiPrestasi ?? '';
         this.modalMode = 'view';
         this.showModal = true;
     },
+
+    // =========================
+    // SIMPAN KE DATABASE
+    // =========================
     saveNilai() {
-        const idx = this.peserta.findIndex(p => p.id === this.selectedPeserta.id);
-        if (idx !== -1) {
-            this.peserta[idx].nilaiRapor    = parseFloat(this.form.nilaiRapor);
-            this.peserta[idx].nilaiPrestasi = parseFloat(this.form.nilaiPrestasi);
-            this.peserta[idx].nilaiTotal    = this.nilaiTotalCalc;
-        }
-        this.showModal = false;
+        if (!this.selectedPeserta) return;
+
+        fetch(`/panitia/seleksi/${this.selectedPeserta.id}/nilai`, {
+            method: 'PATCH',
+            headers: {
+                'X-CSRF-TOKEN': document.querySelector('meta[name=csrf-token]').content,
+                'Content-Type': 'application/json',
+                'Accept': 'application/json'
+            },
+            body: JSON.stringify({
+                nilai_rapor: this.form.nilaiRapor,
+                nilai_prestasi: this.form.nilaiPrestasi
+            })
+        })
+        .then(res => res.json())
+        .then(data => {
+            if (data.success) {
+
+                let idx = this.peserta.findIndex(p => p.id === this.selectedPeserta.id);
+
+                if (idx !== -1) {
+                    this.peserta[idx].nilaiRapor = data.data.nilai_rapor;
+                    this.peserta[idx].nilaiPrestasi = data.data.nilai_prestasi;
+                    this.peserta[idx].nilaiTotal = data.data.nilai_total;
+                }
+
+                this.showModal = false;
+            }
+        })
+        .catch(err => {
+            console.error(err);
+            alert('Gagal menyimpan nilai');
+        });
     },
 
-    // Dipanggil setiap kali form berubah (via x-effect)
-    _updateSaveBtn() {
+    // =========================
+    // BUTTON STATE
+    // =========================
+    updateButton() {
         const btn = document.getElementById('btnSimpanNilai');
         if (!btn) return;
+
         const valid = this.nilaiTotalCalc !== null;
-        btn.dataset.valid = valid ? 'true' : 'false';
-        // Jika valid → langsung biru tua otomatis tanpa perlu hover
-        // Jika tidak valid → biru muda, hover baru berubah biru tua
+
         btn.style.backgroundColor = valid ? '#27C2DE' : '#C4F4FD';
         btn.style.cursor = valid ? 'pointer' : 'not-allowed';
-        btn.style.opacity = '1';
-    }
-}">
+    },
+    get filteredPeserta() {
+    return this.peserta.filter(p => {
+
+        // SEARCH (nama + NISN)
+        const matchSearch =
+            p.nama.toLowerCase().includes(this.search.toLowerCase()) ||
+            p.nisn.toLowerCase().includes(this.search.toLowerCase());
+
+        // JALUR
+        const matchJalur =
+            this.filterJalur === '' ||
+            p.jalur === this.filterJalur;
+
+        // GELOMBANG
+        const matchGelombang =
+            this.filterGelombang === '' ||
+            p.gelombang === this.filterGelombang;
+
+        // STATUS
+        let status = this.getStatus(p);
+
+        const matchStatus =
+            this.filterStatus === '' ||
+            status === this.filterStatus;
+
+        return matchSearch && matchJalur && matchGelombang && matchStatus;
+    });
+}
+}"
+x-effect="updateButton()"
+>
 
     {{-- Pantau perubahan form secara reaktif --}}
     <span x-effect="
         // Dipicu setiap kali nilaiRapor atau nilaiPrestasi berubah
         form.nilaiRapor; form.nilaiPrestasi;
-        _updateSaveBtn();
+        updateButton();
     " class="hidden"></span>
 
     {{-- ===== FILTER & SEARCH ===== --}}
     <div class="flex gap-3 mb-4 items-center w-full">
         <div class="relative flex-[2]">
-            <input type="text" placeholder="Cari nama/NISN"
+            <input type="text" placeholder="Cari nama/NISN" x-model="search"
                    class="w-full pl-9 pr-4 py-2.5 text-[12px] border border-slate-200 bg-white focus:outline-none focus:ring-2 focus:ring-[#27C2DE] card-shadow"
                    style="border-radius:8px;">
             <svg class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -162,37 +261,26 @@
             </svg>
         </div>
         <div class="relative flex-1">
-            <select class="appearance-none w-full pl-4 pr-8 py-2.5 text-[12px] border border-slate-200 bg-white text-slate-600 focus:outline-none card-shadow"
+            <select class="appearance-none w-full pl-4 pr-8 py-2.5 text-[12px] border border-slate-200 bg-white text-slate-600 focus:outline-none card-shadow" x-model="filterJalur"
                     style="border-radius:8px;">
-                <option>Jalur</option>
-                <option>Prestasi</option>
-                <option>Reguler</option>
-                <option>Hafidz</option>
+                <option value="">Jalur</option>
+    <option value="Prestasi">Prestasi</option>
+    <option value="Reguler">Reguler</option>
+    <option value="Afirmasi">Afirmasi</option>
             </select>
             <svg class="pointer-events-none absolute right-2 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
             </svg>
         </div>
+        
         <div class="relative flex-1">
-            <select class="appearance-none w-full pl-4 pr-8 py-2.5 text-[12px] border border-slate-200 bg-white text-slate-600 focus:outline-none card-shadow"
+            <select class="appearance-none w-full pl-4 pr-8 py-2.5 text-[12px] border border-slate-200 bg-white text-slate-600 focus:outline-none card-shadow" x-model="filterStatus"
                     style="border-radius:8px;">
-                <option>Gelombang</option>
-                <option>Gelombang I</option>
-                <option>Gelombang II</option>
-                <option>Gelombang III</option>
-            </select>
-            <svg class="pointer-events-none absolute right-2 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
-            </svg>
-        </div>
-        <div class="relative flex-1">
-            <select class="appearance-none w-full pl-4 pr-8 py-2.5 text-[12px] border border-slate-200 bg-white text-slate-600 focus:outline-none card-shadow"
-                    style="border-radius:8px;">
-                <option>Status</option>
-                <option>Lulus</option>
-                <option>Masa Sanggah</option>
-                <option>Tidak Lulus</option>
-                <option>Belum Dinilai</option>
+                <option value="">Status</option>
+                <option value="Lulus">Lulus</option>
+                <option value="Memenuhi Syarat">Memenuhi Syarat</option>
+                <option value="Tidak Lulus">Tidak Lulus</option>
+                <option value="Belum Dinilai">Belum Dinilai</option>
             </select>
             <svg class="pointer-events-none absolute right-2 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
@@ -212,7 +300,6 @@
                         <th class="text-center py-3 px-4 text-[12px] font-semibold text-[#2B2A28] whitespace-nowrap" style="min-width:120px;">Nilai Prestasi</th>
                         <th class="text-center py-3 px-4 text-[12px] font-semibold text-[#2B2A28] whitespace-nowrap" style="min-width:100px;">Nilai Total</th>
                         <th class="text-center py-3 px-4 text-[12px] font-semibold text-[#2B2A28] whitespace-nowrap" style="min-width:130px;">Status Seleksi</th>
-                        <th class="text-center py-3 px-4 text-[12px] font-semibold text-[#2B2A28] whitespace-nowrap" style="min-width:100px;">Gelombang</th>
                         <th class="text-center py-3 px-4 text-[12px] font-semibold text-[#2B2A28] whitespace-nowrap" style="min-width:90px;">Jalur</th>
                         <th class="text-center py-3 px-4 text-[12px] font-semibold text-[#2B2A28] whitespace-nowrap" style="min-width:120px;">NISN</th>
                         <th class="text-left py-3 px-4 text-[12px] font-semibold text-[#2B2A28] whitespace-nowrap" style="min-width:140px;">Asal Sekolah</th>
@@ -220,7 +307,7 @@
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-slate-100">
-                    <template x-for="(p, i) in peserta" :key="p.id">
+                    <template x-for="(p, i) in filteredPeserta" :key="p.id">
                         <tr class="hover:bg-slate-50 transition-all">
                             <td class="text-center py-3 px-4 text-[12px] text-[#2B2A28] sticky left-0 z-10 bg-white" x-text="i+1"></td>
                             <td class="py-3 px-4 text-[12px] font-medium text-[#2B2A28] sticky left-10 z-10 bg-white" style="box-shadow: 4px 0 4px 0 rgba(161,209,251,0.25);" x-text="p.nama"></td>
@@ -228,7 +315,6 @@
                             <td class="text-center py-3 px-4 text-[12px] text-[#2B2A28]"><span x-text="p.nilaiPrestasi !== null ? p.nilaiPrestasi : '–'"></span></td>
                             <td class="text-center py-3 px-4 text-[12px] font-semibold text-[#2B2A28]"><span x-text="p.nilaiTotal !== null ? p.nilaiTotal : '–'"></span></td>
                             <td class="text-center py-3 px-4"><span class="px-3 py-1 text-[11px] font-semibold" :style="getStatusStyle(p)" x-text="getStatus(p)"></span></td>
-                            <td class="text-center py-3 px-4 text-[12px] text-[#2B2A28]" x-text="p.gelombang"></td>
                             <td class="text-center py-3 px-4 text-[12px] text-[#2B2A28]" x-text="p.jalur"></td>
                             <td class="text-center py-3 px-4 text-[12px] text-[#2B2A28] font-mono" x-text="p.nisn"></td>
                             <td class="py-3 px-4 text-[12px] text-[#2B2A28]" x-text="p.sekolah"></td>
@@ -266,9 +352,9 @@
     <div class="bg-white rounded-2xl px-5 py-4 mt-4 card-shadow">
         <p class="text-[12px] text-[#575551] mb-1.5">Status seleksi ditentukan otomatis berdasarkan ketentuan penilaian yang berlaku</p>
         <ul class="space-y-1 mb-2">
-            <li class="flex items-center gap-2 text-[12px] text-[#575551]"><span>•</span> Lulus = 95</li>
-            <li class="flex items-center gap-2 text-[12px] text-[#575551]"><span>•</span> Masa Sanggah = 76-84</li>
-            <li class="flex items-center gap-2 text-[12px] text-[#575551]"><span>•</span> Tidak Lulus = &lt;73</li>
+            <li class="flex items-center gap-2 text-[12px] text-[#575551]"><span>•</span> Lulus = 80-100</li>
+            <li class="flex items-center gap-2 text-[12px] text-[#575551]"><span>•</span> Memenuhi Syarat = 75</li>
+            <li class="flex items-center gap-2 text-[12px] text-[#575551]"><span>•</span> Tidak Lulus = &lt;0-74</li>
         </ul>
         <p class="text-[12px] text-[#575551]">Nilai Prestasi sesuai jalur pendaftaran dapat mencakup, nilai lomba, sertifikat dan hafalan Al-Qur'an</p>
     </div>
@@ -358,9 +444,9 @@
 
                     {{-- Keterangan --}}
                     <div class="px-3 py-2.5" style="background:#F8FBFF; border:1px solid #E2E8F0; border-radius:8px;">
-                        <p class="text-[10px] text-[#575551]">• Lulus = 95</p>
-                        <p class="text-[10px] text-[#575551]">• Masa Sanggah = 76-84</p>
-                        <p class="text-[10px] text-[#575551]">• Tidak Lulus = &lt;73</p>
+                        <p class="text-[10px] text-[#575551]">• Lulus = 80-100</p>
+                        <p class="text-[10px] text-[#575551]">• Memenuhi Syarat = 75</p>
+                        <p class="text-[10px] text-[#575551]">• Tidak Lulus = &lt;0-75</p>
                     </div>
                 </div>
 

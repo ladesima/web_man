@@ -37,7 +37,9 @@ class Pendaftaran extends Model
         'catatan_revisi',
         'verifikasi_dokumen',
         'is_publish',
-        'email_status'
+        'email_status',
+        'nilai_rapor',
+        'nilai_prestasi'
     ];
     protected $casts = [
     'verifikasi_dokumen' => 'array',
