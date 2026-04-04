@@ -112,7 +112,7 @@ filterStatus: '',
     getStatus(p) {
         if (p.nilaiTotal === null) return 'Belum Dinilai';
         if (p.nilaiTotal >= 80) return 'Lulus';
-        if (p.nilaiTotal == 75) return 'memenuhi syarat';
+        if (p.nilaiTotal == 75) return 'Memenuhi Syarat';
         return 'Tidak Lulus';
     },
 
@@ -238,6 +238,21 @@ filterStatus: '',
 
         return matchSearch && matchJalur && matchGelombang && matchStatus;
     });
+},
+get totalPeserta() {
+    return this.peserta.length;
+},
+
+get totalLulus() {
+    return this.peserta.filter(p => this.getStatus(p) === 'Lulus').length;
+},
+
+get totalTidakLulus() {
+    return this.peserta.filter(p => this.getStatus(p) === 'Tidak Lulus').length;
+},
+
+get totalSanggah() {
+    return this.peserta.filter(p => this.getStatus(p) === 'Memenuhi Syarat').length;
 }
 }"
 x-effect="updateButton()"
@@ -249,6 +264,52 @@ x-effect="updateButton()"
         form.nilaiRapor; form.nilaiPrestasi;
         updateButton();
     " class="hidden"></span>
+     {{-- ===== STAT CARDS ===== --}}
+    <div class="grid grid-cols-4 gap-3 mb-5">
+        <div class="relative rounded-2xl px-4 py-4 overflow-hidden transition-all duration-200"
+             style="background: linear-gradient(to bottom left, #FAFEFF 0%, #59DEFF 100%); border: 0.66px solid #F3F3F3; box-shadow: 0px 2.62px 2.62px 0px rgba(161,209,251,0.25); filter: saturate(0.45) brightness(1.08);"
+             onmouseenter="this.style.filter='saturate(1) brightness(1)'; this.style.boxShadow='0px 6px 14px rgba(0,0,0,0.10)'"
+             onmouseleave="this.style.filter='saturate(0.45) brightness(1.08)'; this.style.boxShadow='0px 2.62px 2.62px 0px rgba(161,209,251,0.25)'">
+            <div class="flex items-start justify-between mb-2">
+                <p class="text-[11px] font-semibold" style="color:#0099B8;">Total Peserta diumumkan</p>
+                <img src="{{ asset('ppdb/admin/operasional/totalpendaftar.png') }}" class="w-7 h-7 object-contain">
+            </div>
+            <p class="text-[26px] font-bold text-[#2B2A28]" x-text="totalPeserta"></p>
+        </div>
+
+        <div class="relative rounded-2xl px-4 py-4 overflow-hidden transition-all duration-200"
+             style="background: linear-gradient(to bottom left, #FAFEFF 0%, #88FFC4 100%); border: 0.66px solid #F3F3F3; box-shadow: 0px 2.62px 2.62px 0px rgba(161,209,251,0.25); filter: saturate(0.45) brightness(1.08);"
+             onmouseenter="this.style.filter='saturate(1) brightness(1)'; this.style.boxShadow='0px 6px 14px rgba(0,0,0,0.10)'"
+             onmouseleave="this.style.filter='saturate(0.45) brightness(1.08)'; this.style.boxShadow='0px 2.62px 2.62px 0px rgba(161,209,251,0.25)'">
+            <div class="flex items-start justify-between mb-2">
+                <p class="text-[11px] font-semibold" style="color:#15803D;">Lulus</p>
+                <img src="{{ asset('ppdb/admin/operasional/berkasvalid.png') }}" class="w-7 h-7 object-contain">
+            </div>
+            <p class="text-[26px] font-bold text-[#2B2A28]" x-text="totalLulus"></p>
+        </div>
+
+        <div class="relative rounded-2xl px-4 py-4 overflow-hidden transition-all duration-200"
+             style="background: linear-gradient(to bottom left, #FAFEFF 0%, #FF9696 100%); border: 0.66px solid #F3F3F3; box-shadow: 0px 2.62px 2.62px 0px rgba(161,209,251,0.25); filter: saturate(0.45) brightness(1.08);"
+             onmouseenter="this.style.filter='saturate(1) brightness(1)'; this.style.boxShadow='0px 6px 14px rgba(0,0,0,0.10)'"
+             onmouseleave="this.style.filter='saturate(0.45) brightness(1.08)'; this.style.boxShadow='0px 2.62px 2.62px 0px rgba(161,209,251,0.25)'">
+            <div class="flex items-start justify-between mb-2">
+                <p class="text-[11px] font-semibold" style="color:#DC2626;">Tidak Lulus</p>
+                <img src="{{ asset('ppdb/admin/operasional/berkasditolak.png') }}" class="w-7 h-7 object-contain">
+            </div>
+            <p class="text-[26px] font-bold text-[#2B2A28]" x-text="totalTidakLulus"></p>
+        </div>
+
+        <div class="relative rounded-2xl px-4 py-4 overflow-hidden transition-all duration-200"
+             style="background: linear-gradient(to bottom left, #FAFEFF 0%, #FFD59E 100%); border: 0.66px solid #F3F3F3; box-shadow: 0px 2.62px 2.62px 0px rgba(161,209,251,0.25); filter: saturate(0.45) brightness(1.08);"
+             onmouseenter="this.style.filter='saturate(1) brightness(1)'; this.style.boxShadow='0px 6px 14px rgba(0,0,0,0.10)'"
+             onmouseleave="this.style.filter='saturate(0.45) brightness(1.08)'; this.style.boxShadow='0px 2.62px 2.62px 0px rgba(161,209,251,0.25)'">
+            <div class="flex items-start justify-between mb-2">
+                <p class="text-[11px] font-semibold" style="color:#D97706;">Memenuhi Syarat</p>
+                <img src="{{ asset('ppdb/admin/operasional/menunggu.png') }}" class="w-7 h-7 object-contain">
+            </div>
+            <p class="text-[26px] font-bold text-[#2B2A28]" x-text="totalSanggah"></p>
+        </div>
+    </div>
 
     {{-- ===== FILTER & SEARCH ===== --}}
     <div class="flex gap-3 mb-4 items-center w-full">

@@ -173,42 +173,6 @@
             </a>
             @endif
 
-            {{-- Pengumuman --}}
-           @if($isPengumumanNilai)
-<a href="{{ route('panitia.pengumuman_nilai') }}" class="block relative h-[44px]"
-:class="sidebarOpen ? 'ml-3 mr-0' : 'mx-2'">
-
-    <div x-show="sidebarOpen" x-cloak
-         class="absolute -left-3 top-0 w-[6px] h-[40px] rounded-r-xl bg-[#27C2DE]"></div>
-
-    <div class="w-full h-full flex items-center gap-2.5"
-         :class="sidebarOpen ? 'rounded-l-[10px] px-3' : 'rounded-[10px] justify-center'"
-         style="background: linear-gradient(90deg, #15B2CE 0%, #00758A 100%);">
-
-        <img src="{{ asset('ppdb/admin/pengumuman2.png') }}"
-             class="w-[18px] h-[18px] brightness-0 invert">
-
-        <span x-show="sidebarOpen" x-cloak
-              class="text-white font-semibold text-[13px]">
-            Pengumuman Nilai
-        </span>
-    </div>
-</a>
-@else
-<a href="{{ route('panitia.pengumuman_nilai') }}"
-   class="block h-[44px] flex items-center gap-2.5 rounded-[10px]
-          text-[#464646] hover:bg-[#EEF9FC] hover:text-[#27C2DE]
-          transition-all font-semibold text-[13px]"
-   :class="sidebarOpen ? 'mx-3 px-3' : 'mx-2 justify-center'">
-
-    <img src="{{ asset('ppdb/admin/pengumuman2.png') }}"
-         class="w-[18px] h-[18px]">
-
-    <span x-show="sidebarOpen" x-cloak>
-        Pengumuman Nilai
-    </span>
-</a>
-@endif
 
             {{-- Divider --}}
             <div class="pt-3 pb-2 px-3"><div class="h-px bg-slate-100"></div></div>
