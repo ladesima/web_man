@@ -256,7 +256,7 @@
                                 </td>
                                 <td class="text-center py-3 px-3 text-[12px] text-[#575551] whitespace-nowrap" x-text="row.tgl"></td>
                                 <td class="text-center py-3 px-3 whitespace-nowrap">
-                                    <a :href="'/admin/operasional/pengumuman/' + row.id"
+                                    <a :href="'/admin/operasional/verifikasi/' + row.id"
                                        class="inline-flex items-center px-4 py-1.5 text-white text-[12px] font-semibold transition-all hover:opacity-90 active:scale-95"
                                        style="background:#27C2DE; border-radius:4px;">
                                         Detail

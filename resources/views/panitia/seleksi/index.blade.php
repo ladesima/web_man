@@ -87,10 +87,9 @@ filterStatus: '',
     get statusCalc() {
         const t = this.nilaiTotalCalc;
 
-        if (t === null) return '';
         if (t >= 80) return 'Lulus';
-        if (t == 75) return 'Memenuhi Syarat';
-        return 'Tidak Lulus';
+if (t >= 75 && t <= 79) return 'Memenuhi Syarat';
+return 'Tidak Lulus';
     },
 
     get statusBgCalc() {
@@ -112,7 +111,7 @@ filterStatus: '',
     getStatus(p) {
         if (p.nilaiTotal === null) return 'Belum Dinilai';
         if (p.nilaiTotal >= 80) return 'Lulus';
-        if (p.nilaiTotal == 75) return 'Memenuhi Syarat';
+if (p.nilaiTotal >= 75 && p.nilaiTotal <= 79) return 'Memenuhi Syarat';
         return 'Tidak Lulus';
     },
 
@@ -414,7 +413,7 @@ x-effect="updateButton()"
         <p class="text-[12px] text-[#575551] mb-1.5">Status seleksi ditentukan otomatis berdasarkan ketentuan penilaian yang berlaku</p>
         <ul class="space-y-1 mb-2">
             <li class="flex items-center gap-2 text-[12px] text-[#575551]"><span>•</span> Lulus = 80-100</li>
-            <li class="flex items-center gap-2 text-[12px] text-[#575551]"><span>•</span> Memenuhi Syarat = 75</li>
+            <li class="flex items-center gap-2 text-[12px] text-[#575551]"><span>•</span> Memenuhi Syarat = 75-79</li>
             <li class="flex items-center gap-2 text-[12px] text-[#575551]"><span>•</span> Tidak Lulus = &lt;0-74</li>
         </ul>
         <p class="text-[12px] text-[#575551]">Nilai Prestasi sesuai jalur pendaftaran dapat mencakup, nilai lomba, sertifikat dan hafalan Al-Qur'an</p>
@@ -462,9 +461,6 @@ x-effect="updateButton()"
                                 <span class="px-2 py-0.5 text-[10px] font-semibold"
                                       style="background:#EEF9FC; border:1px solid #27C2DE; border-radius:4px; color:#27C2DE;"
                                       x-text="selectedPeserta ? selectedPeserta.jalur : ''"></span>
-                                <span class="px-2 py-0.5 text-[10px] font-semibold"
-                                      style="background:#FFFBEB; border:1px solid #D97706; border-radius:4px; color:#D97706;"
-                                      x-text="selectedPeserta ? 'Gelombang ' + selectedPeserta.gelombang : ''"></span>
                             </div>
                         </div>
                     </div>
@@ -506,7 +502,7 @@ x-effect="updateButton()"
                     {{-- Keterangan --}}
                     <div class="px-3 py-2.5" style="background:#F8FBFF; border:1px solid #E2E8F0; border-radius:8px;">
                         <p class="text-[10px] text-[#575551]">• Lulus = 80-100</p>
-                        <p class="text-[10px] text-[#575551]">• Memenuhi Syarat = 75</p>
+                        <p class="text-[10px] text-[#575551]">• Memenuhi Syarat = 75-79</p>
                         <p class="text-[10px] text-[#575551]">• Tidak Lulus = &lt;0-75</p>
                     </div>
                 </div>

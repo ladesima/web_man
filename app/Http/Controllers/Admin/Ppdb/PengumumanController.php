@@ -15,63 +15,99 @@ class PengumumanController extends Controller
 {
 public function index()
 {
-    $pendaftaran = Pendaftaran::latest()->get();
+    $pendaftaran = Pendaftaran::with('user')->latest()->get();
 
-    $rows = $pendaftaran->map(function ($item) {
-
-        // 🔥 MAP STATUS DB → UI
-        $status_verifikasi = match ($item->status) {
-            'form_selesai' => 'Menunggu',
-            'berkas_selesai' => 'Siap Seleksi',
-            'perbaikan' => 'Perlu Perbaikan',
-            'lulus' => 'Berkas Valid',
-            default => 'Menunggu',
-        };
-
-        // 🔥 MAP KE HASIL SELEKSI
-        $hasil = match ($item->status) {
-    'lulus' => 'Lulus',
-
-    // 🔥 semua selain lulus = tidak lulus
-    'perbaikan' => 'Tidak Lulus',
-    'form_selesai' => 'Tidak Lulus',
-    'berkas_selesai' => 'Tidak Lulus',
-
-    default => 'Tidak Lulus',
-};
-
-        return [
-            'id' => $item->id,
-            'nama' => $item->nama_lengkap ?? '-',
-            'no' => $item->id ?? '-',
-            'jalur' => $item->jalur ?? '-',
-
-            'status_verifikasi' => $status_verifikasi,
-            'hasil' => $hasil,
-
-            'status_pub' => $item->is_publish ? 'publish' : 'belum',
-            'status_email' => $item->email_status ?? 'belum_terkirim',
-
-            'tgl' => $item->updated_at
-                ? \Carbon\Carbon::parse($item->updated_at)->format('d/m/y - H:i') . ' WITA'
-                : '-',
-
-            'checked' => false
-        ];
-    });
+        $rows = $pendaftaran->map(function ($item) {
 
     // =========================
-    // 📊 STATISTIK
+    // 🎯 HITUNG NILAI
     // =========================
-    $total = $rows->count();
-    $lulus = $rows->where('hasil', 'Lulus')->count();
-    $tidak_lulus = $rows->where('hasil', 'Tidak Lulus')->count();
-    $perbaikan = $rows->where('hasil', 'Perbaikan')->count();
+    $nilaiTotal = null;
+    $statusNilai = null;
 
-    // 🔥 INI YANG KAMU BUTUHKAN
-    $siap_diumumkan = $rows
-        ->where('status_email', 'belum_terkirim')
-        ->count();
+    if ($item->nilai_rapor !== null && $item->nilai_prestasi !== null) {
+        $nilaiTotal = round(($item->nilai_rapor + $item->nilai_prestasi) / 2);
+
+        if ($nilaiTotal >= 80) {
+    $statusNilai = 'valid';
+} elseif ($nilaiTotal >= 75) {
+    $statusNilai = 'memenuhi';
+} else {
+    $statusNilai = 'kurang';
+}
+    }
+
+    // =========================
+    // 📂 STATUS BERKAS
+    // =========================
+    $statusBerkas = 'tidak_valid';
+
+    if ($item->status == 'lulus') {
+        $statusBerkas = 'valid';
+    }
+
+    // =========================
+    // 🧠 HASIL AKHIR
+    // =========================
+    $hasil = '-';
+
+if ($statusBerkas == 'valid' && $statusNilai == 'valid') {
+    $hasil = 'Lulus';
+}
+elseif ($statusBerkas == 'valid' && $statusNilai == 'memenuhi') {
+    $hasil = 'Lulus';
+}
+elseif ($statusBerkas == 'tidak_valid' && $statusNilai == 'valid') {
+    $hasil = 'Perbaikan';
+}
+elseif ($statusBerkas == 'tidak_valid' && $statusNilai == 'memenuhi') {
+    $hasil = 'Perbaikan';
+}
+elseif ($statusNilai == 'kurang') {
+    $hasil = 'Tidak Lulus';
+}
+
+    // =========================
+    // 📊 STATUS VERIFIKASI UI
+    // =========================
+    $status_verifikasi = match ($statusBerkas) {
+        'valid' => 'Berkas Valid',
+        'tidak_valid' => 'Perlu Perbaikan',
+        default => 'Menunggu',
+    };
+
+    return [
+        'id' => $item->id,
+        'nama' => $item->nama_lengkap ?? '-',
+        'no' => $item->id ?? '-',
+        'jalur' => $item->jalur ?? '-',
+
+        'nilai_total' => $nilaiTotal,
+        'status_nilai' => $statusNilai,
+        'status_berkas' => $statusBerkas,
+
+        'status_verifikasi' => $status_verifikasi,
+        'hasil' => $hasil,
+
+        'status_pub' => $item->is_publish ? 'publish' : 'belum',
+        'status_email' => $item->email_status ?? 'belum_terkirim',
+
+        'tgl' => $item->updated_at
+            ? Carbon::parse($item->updated_at)->format('d/m/y - H:i') . ' WITA'
+            : '-',
+
+        'checked' => false
+    ];
+});
+
+        $total = $rows->count();
+        $lulus = $rows->where('hasil', 'Lulus')->count();
+        $tidak_lulus = $rows->where('hasil', 'Tidak Lulus')->count();
+        $perbaikan = $rows->where('hasil', 'Perlu Perbaikan')->count();
+
+        $siap_diumumkan = $rows
+            ->where('status_email', 'belum_terkirim')
+            ->count();
 
     return view('admin.ppdb.operasional.pengumuman.index', compact(
         'rows',

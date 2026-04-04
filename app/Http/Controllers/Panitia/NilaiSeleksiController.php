@@ -47,6 +47,7 @@ class NilaiSeleksiController extends Controller
         'nilaiRapor' => $nilaiRapor,
         'nilaiPrestasi' => $nilaiPrestasi,
         'nilaiTotal' => $nilaiTotal,
+        'gelombang' => $item->gelombang,
     ];
 });
 

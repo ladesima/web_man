@@ -138,6 +138,7 @@
             <option value="">Hasil Seleksi</option>
             <option value="Lulus">Lulus</option>
             <option value="Tidak Lulus">Tidak Lulus</option>
+            <option value="Perlu Perbaikan">Perlu Perbaikan</option>
         </select>
     </div>
 
