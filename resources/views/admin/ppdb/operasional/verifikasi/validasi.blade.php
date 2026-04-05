@@ -129,12 +129,52 @@ $verifikasi = json_decode($pendaftaran->verifikasi_dokumen ?? '{}', true);
 
 @php
 $dokumen = [
- ['nama'=>'akta_lahir','label'=>'Akta Kelahiran','file'=>$pendaftaran->akta_lahir],
- ['nama'=>'kartu_keluarga','label'=>'Kartu Keluarga','file'=>$pendaftaran->kartu_keluarga],
- ['nama'=>'rapor','label'=>'Rapor','file'=>$pendaftaran->rapor],
- ['nama'=>'verifikasi_pd','label'=>'Verifikasi PD','file'=>$pendaftaran->verifikasi_pd],
- ['nama'=>'sertifikat_prestasi','label'=>'Sertifikat Prestasi','file'=>$pendaftaran->sertifikat_prestasi],
- ['nama'=>'sk_sekolah','label'=>'SK Sekolah','file'=>$pendaftaran->sk_sekolah],
+    [
+        'nama' => 'akta_lahir',
+        'label' => 'Akta Lahir',
+        'file' => $pendaftaran->akta_lahir,
+    ],
+    [
+        'nama' => 'kartu_keluarga',
+        'label' => 'Kartu Keluarga',
+        'file' => $pendaftaran->kartu_keluarga,
+    ],
+    [
+        'nama' => 'verifikasi_pd',
+        'label' => 'Bukti Verifikasi',
+        'file' => $pendaftaran->verifikasi_pd,
+    ],
+];
+
+// 🔥 LOGIKA JALUR
+if ($pendaftaran->jalur === 'prestasi') {
+    $dokumen[] = [
+        'nama' => 'sertifikat_prestasi',
+        'label' => 'Sertifikat Prestasi',
+        'file' => $pendaftaran->sertifikat_prestasi,
+    ];
+}
+
+if ($pendaftaran->jalur === 'afirmasi') {
+    $dokumen[] = [
+        'nama' => 'kip',
+        'label' => 'Kartu Indonesia Pintar (KIP)',
+        'file' => $pendaftaran->kip,
+    ];
+}
+
+// ❌ REGULER otomatis tidak masuk apa-apa
+
+$dokumen[] = [
+    'nama' => 'rapor',
+    'label' => 'Rapor',
+    'file' => $pendaftaran->rapor,
+];
+
+$dokumen[] = [
+    'nama' => 'sk_sekolah',
+    'label' => 'SKL',
+    'file' => $pendaftaran->sk_sekolah,
 ];
 @endphp
 

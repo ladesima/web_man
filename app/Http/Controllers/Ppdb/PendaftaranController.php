@@ -28,16 +28,15 @@ class PendaftaranController extends Controller
     }
 
     $pendaftaran = Pendaftaran::where('user_id', $user->id)
-        ->latest()
-        ->first();
+    ->where('jalur', $jalur)
+    ->latest()
+    ->first();
 
     // 🔒 VALIDASI JALUR
     if ($pendaftaran && $pendaftaran->jalur !== $jalur) {
-        return redirect()->route(
-            'siswa.pendaftaran',
-            $pendaftaran->jalur
-        );
-    }
+    // biarkan lanjut (multi jalur)
+    $pendaftaran = null;
+}
 
     // 🔥 SET LAST STEP
     if ($pendaftaran && empty($pendaftaran->last_step)) {
@@ -87,6 +86,15 @@ class PendaftaranController extends Controller
     */
     public function store(Request $request, $jalur)
 {
+    $user = Auth('ppdb')->user();
+    $cek = Pendaftaran::where('user_id', $user->id)
+    ->where('jalur', $jalur)
+    ->whereNotIn('status', ['tidak_lulus'])
+    ->exists();
+
+if ($cek && !$pendaftaran) {
+    return back()->with('error', 'Anda sudah mendaftar di jalur ini');
+}
     $user = Auth::guard('ppdb')->user();
 
     if (!$user) {
@@ -94,13 +102,15 @@ class PendaftaranController extends Controller
     }
 
     $pendaftaran = Pendaftaran::where('user_id', $user->id)
-        ->latest()
-        ->first();
+    ->where('jalur', $jalur)
+    ->latest()
+    ->first();
 
     // 🔒 VALIDASI JALUR
     if ($pendaftaran && $pendaftaran->jalur !== $jalur) {
-        return redirect()->route('siswa.pendaftaran', $pendaftaran->jalur);
-    }
+    // biarkan lanjut (multi jalur)
+    $pendaftaran = null;
+}
 
     // 🔒 LOCK DATA
     if ($pendaftaran && !$pendaftaran->is_revisi && $pendaftaran->status !== 'belum') {
@@ -118,7 +128,7 @@ class PendaftaranController extends Controller
         'penghasilan_ortu' => 'required',
         'alamat_ortu' => 'required',
         'jumlah_saudara' => 'required|integer',
-        'foto' => 'required|nullable|image|mimes:jpg,jpeg,png|max:2048',
+        'foto' => 'required|image|mimes:jpg,jpeg,png|max:2048',
     ]);
     
 
@@ -208,43 +218,79 @@ class PendaftaranController extends Controller
             'syarats' => $ppdb?->syarats ?? collect()
         ]);
     }
-    public function verifikasi($jalur)
+   public function verifikasi($jalur)
 {
     $user = Auth::guard('ppdb')->user();
 
+    if (!$user) {
+        return redirect()->route('ppdb.login');
+    }
+
     $pendaftaran = Pendaftaran::where('user_id', $user->id)
+        ->where('jalur', $jalur)
         ->latest()
         ->first();
 
-    // =========================================
-    // 🔥 MAPPING STATUS ADMIN → STATUS UI SISWA
-    // =========================================
     $status = 'menunggu';
 
     if ($pendaftaran) {
 
+        // ❌ BELUM DIPUBLISH
         if (!$pendaftaran->is_publish) {
             $status = 'menunggu';
         } else {
 
-            switch ($pendaftaran->status) {
+            // =====================================
+            // 🔥 CEK VERIFIKASI BERKAS
+            // =====================================
+            $verifikasi = $pendaftaran->verifikasi_dokumen;
 
-                case 'lulus':
-                    $status = 'diterima';
-                    break;
+            $berkas_valid = true;
 
-                case 'perbaikan':
-                    $status = 'perbaikan'; // ❗ penting
-                    break;
+            if ($verifikasi) {
+                $verifikasi = is_array($verifikasi) ? $verifikasi : json_decode($verifikasi, true);
 
-                case 'berkas_selesai':
-                case 'form_selesai':
-                    $status = 'menunggu';
-                    break;
+                if (in_array('tidak_valid', $verifikasi)) {
+                    $berkas_valid = false;
+                }
+            } else {
+                $berkas_valid = false;
+            }
 
-                default:
-                    $status = 'tidaklolos';
-                    break;
+            // =====================================
+            // 🔥 CEK NILAI
+            // =====================================
+            $nilaiRapor = $pendaftaran->nilai_rapor;
+            $nilaiPrestasi = $pendaftaran->nilai_prestasi;
+
+            $nilaiTotal = null;
+            if ($nilaiRapor !== null && $nilaiPrestasi !== null) {
+                $nilaiTotal = round(($nilaiRapor + $nilaiPrestasi) / 2);
+            }
+
+            $nilai_status = 'belum';
+
+            if ($nilaiTotal !== null) {
+                if ($nilaiTotal > 80) {
+                    $nilai_status = 'lulus';
+                } elseif ($nilaiTotal >= 75) {
+                    $nilai_status = 'memenuhi';
+                } else {
+                    $nilai_status = 'tidak';
+                }
+            }
+
+            // =====================================
+            // 🔥 FINAL LOGIKA (SESUAI RULE KAMU)
+            // =====================================
+            if ($berkas_valid && in_array($nilai_status, ['lulus', 'memenuhi'])) {
+                $status = 'diterima';
+            } elseif (!$berkas_valid && in_array($nilai_status, ['lulus', 'memenuhi'])) {
+                $status = 'perbaikan';
+            } elseif ($nilai_status === 'tidak') {
+                $status = 'tidaklolos';
+            } else {
+                $status = 'menunggu';
             }
         }
     }
@@ -295,4 +341,5 @@ public function pengumuman($jalur)
         'pendaftaran'
     ));
 }
+
 }

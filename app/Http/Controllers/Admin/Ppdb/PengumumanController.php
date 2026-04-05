@@ -20,52 +20,72 @@ public function index()
         $rows = $pendaftaran->map(function ($item) {
 
     // =========================
-    // 🎯 HITUNG NILAI
+    // 🎯 HITUNG NILAI (FIX ALL JALUR)
     // =========================
     $nilaiTotal = null;
     $statusNilai = null;
 
-    if ($item->nilai_rapor !== null && $item->nilai_prestasi !== null) {
-        $nilaiTotal = round(($item->nilai_rapor + $item->nilai_prestasi) / 2);
+    if ($item->nilai_rapor !== null) {
 
-        if ($nilaiTotal >= 80) {
-    $statusNilai = 'valid';
-} elseif ($nilaiTotal >= 75) {
-    $statusNilai = 'memenuhi';
-} else {
-    $statusNilai = 'kurang';
-}
+        // 🔥 beda per jalur
+        if ($item->jalur == 'prestasi') {
+            if ($item->nilai_prestasi !== null) {
+                $nilaiTotal = round(($item->nilai_rapor + $item->nilai_prestasi) / 2);
+            }
+        } else {
+            // ✅ reguler & afirmasi
+            $nilaiTotal = $item->nilai_rapor;
+        }
+
+        // 🔥 tentukan status nilai
+        if ($nilaiTotal !== null) {
+            if ($nilaiTotal >= 80) {
+                $statusNilai = 'valid';
+            } elseif ($nilaiTotal >= 75) {
+                $statusNilai = 'memenuhi';
+            } else {
+                $statusNilai = 'kurang';
+            }
+        }
     }
 
     // =========================
-    // 📂 STATUS BERKAS
+    // 📂 STATUS BERKAS (AMBIL DARI VERIFIKASI)
     // =========================
     $statusBerkas = 'tidak_valid';
 
-    if ($item->status == 'lulus') {
+    if ($item->verifikasi_dokumen) {
+
+    // 🔥 FIX: ubah ke array
+    $dok = is_array($item->verifikasi_dokumen)
+        ? $item->verifikasi_dokumen
+        : json_decode($item->verifikasi_dokumen, true);
+
+    if (!in_array('tidak_valid', $dok)) {
         $statusBerkas = 'valid';
     }
+}
 
     // =========================
-    // 🧠 HASIL AKHIR
+    // 🧠 HASIL AKHIR (FIX LOGIKA)
     // =========================
     $hasil = '-';
 
-if ($statusBerkas == 'valid' && $statusNilai == 'valid') {
-    $hasil = 'Lulus';
-}
-elseif ($statusBerkas == 'valid' && $statusNilai == 'memenuhi') {
-    $hasil = 'Lulus';
-}
-elseif ($statusBerkas == 'tidak_valid' && $statusNilai == 'valid') {
-    $hasil = 'Perbaikan';
-}
-elseif ($statusBerkas == 'tidak_valid' && $statusNilai == 'memenuhi') {
-    $hasil = 'Perbaikan';
-}
-elseif ($statusNilai == 'kurang') {
-    $hasil = 'Tidak Lulus';
-}
+    if ($statusBerkas == 'valid' && $statusNilai == 'valid') {
+        $hasil = 'Lulus';
+    }
+    elseif ($statusBerkas == 'valid' && $statusNilai == 'memenuhi') {
+        $hasil = 'Lulus';
+    }
+    elseif ($statusBerkas == 'tidak_valid' && $statusNilai == 'valid') {
+        $hasil = 'Perbaikan';
+    }
+    elseif ($statusBerkas == 'tidak_valid' && $statusNilai == 'memenuhi') {
+        $hasil = 'Perbaikan';
+    }
+    elseif ($statusNilai == 'kurang') {
+        $hasil = 'Tidak Lulus';
+    }
 
     // =========================
     // 📊 STATUS VERIFIKASI UI
@@ -99,11 +119,12 @@ elseif ($statusNilai == 'kurang') {
         'checked' => false
     ];
 });
+$rows = $rows->sortByDesc('nilai_total')->values();
 
         $total = $rows->count();
         $lulus = $rows->where('hasil', 'Lulus')->count();
         $tidak_lulus = $rows->where('hasil', 'Tidak Lulus')->count();
-        $perbaikan = $rows->where('hasil', 'Perlu Perbaikan')->count();
+        $perbaikan = $rows->where('hasil', 'Perbaikan')->count();
 
         $siap_diumumkan = $rows
             ->where('status_email', 'belum_terkirim')

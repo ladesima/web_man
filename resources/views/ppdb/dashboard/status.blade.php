@@ -5,7 +5,7 @@
 @section('content')
 
 @php
-    // gunakan status dari controller (sudah di-map)
+    $status = $status ?? 'menunggu';
 @endphp
 
 <div class="px-6 py-6">

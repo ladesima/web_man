@@ -91,7 +91,59 @@
 
     </div>
 </div>
+@php
+$dokumen = [
+    [
+        'nama' => 'akta_lahir',
+        'label' => 'Akta Lahir',
+        'file' => $pendaftaran->akta_lahir,
+    ],
+    [
+        'nama' => 'kartu_keluarga',
+        'label' => 'Kartu Keluarga',
+        'file' => $pendaftaran->kartu_keluarga,
+    ],
+    [
+        'nama' => 'verifikasi_pd',
+        'label' => 'Bukti Verifikasi',
+        'file' => $pendaftaran->verifikasi_pd,
+    ],
+];
 
+// =============================
+// 🔥 LOGIKA BERDASARKAN JALUR
+// =============================
+
+if ($pendaftaran->jalur === 'prestasi') {
+    $dokumen[] = [
+        'nama' => 'sertifikat_prestasi',
+        'label' => 'Sertifikat Prestasi',
+        'file' => $pendaftaran->sertifikat_prestasi,
+    ];
+}
+
+if ($pendaftaran->jalur === 'afirmasi') {
+    $dokumen[] = [
+        'nama' => 'kip',
+        'label' => 'Kartu Indonesia Pintar (KIP)',
+        'file' => $pendaftaran->kip,
+    ];
+}
+
+// ❌ reguler tidak ada sertifikat
+
+$dokumen[] = [
+    'nama' => 'rapor',
+    'label' => 'Rapor',
+    'file' => $pendaftaran->rapor,
+];
+
+$dokumen[] = [
+    'nama' => 'sk_sekolah',
+    'label' => 'SKL',
+    'file' => $pendaftaran->sk_sekolah,
+];
+@endphp
 {{-- ================= DOKUMEN ================= --}}
 <form method="POST" action="{{ route('panitia.operasional.verifikasi.simpan', $pendaftaran->id) }}">
 @csrf

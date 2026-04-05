@@ -113,8 +113,9 @@ class AuthPpdbController extends Controller
     |------------------------------------------------------------------
     */
     $pendaftaran = Pendaftaran::where('user_id', $user->id)
-        ->latest()
-        ->first();
+    ->whereNotIn('status', ['tidak_lulus'])
+    ->latest()
+    ->first();
 
     $routes = [
         'form' => 'siswa.pendaftaran',
@@ -154,8 +155,7 @@ class AuthPpdbController extends Controller
             'form_selesai' => redirect()->route('siswa.upload.berkas', $pendaftaran->jalur),
             'berkas_selesai' => redirect()->route('siswa.verifikasi', $pendaftaran->jalur),
             'perbaikan' => redirect()->route('siswa.pendaftaran', $pendaftaran->jalur),
-            'lulus' => redirect()->route('siswa.pengumuman', $pendaftaran->jalur),
-            'tidak_lulus' => redirect()->route('ppdb.dashboard')
+            'lulus' => redirect()->route('siswa.pengumuman', $pendaftaran->jalur)
                 ->with('error', 'Anda tidak lulus, silakan daftar jalur lain'),
             default => redirect()->route('ppdb.dashboard'),
         };

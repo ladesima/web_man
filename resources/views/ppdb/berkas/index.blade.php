@@ -32,15 +32,24 @@
             <div class="grid grid-cols-1 md:grid-cols-3 gap-5">
 
                 @php
-                $berkas = [
-                    ['name' => 'akta',      'label' => 'Akta Lahir'],
-                    ['name' => 'kk',        'label' => 'Kartu Keluarga'],
-                    ['name' => 'rapor',     'label' => 'Rapor'],
-                    ['name' => 'bukti_pd',  'label' => 'Bukti Verifikasi & Validasi PD'],
-                    ['name' => 'sertifikat','label' => 'Sertifikat Prestasi'],
-                    ['name' => 'skl',       'label' => 'SK Aktif Sekolah / SKL'],
-                ];
-                @endphp
+$berkas = [
+    ['name' => 'akta',      'label' => 'Akta Lahir'],
+    ['name' => 'kk',        'label' => 'Kartu Keluarga'],
+    ['name' => 'rapor',     'label' => 'Rapor'],
+    ['name' => 'bukti_pd',  'label' => 'Bukti Verifikasi & Validasi PD'],
+];
+
+// 🔥 LOGIKA JALUR
+if ($jalur === 'prestasi') {
+    $berkas[] = ['name' => 'sertifikat','label' => 'Sertifikat Prestasi'];
+}
+
+if ($jalur === 'afirmasi') {
+    $berkas[] = ['name' => 'kip','label' => 'Scan KIP'];
+}
+
+$berkas[] = ['name' => 'skl', 'label' => 'SK Aktif Sekolah / SKL'];
+@endphp
 
                 @foreach($berkas as $b)
                 <div>
@@ -137,7 +146,19 @@
     const inputs  = document.querySelectorAll('input.file-input');
     const button  = document.getElementById('btn-submit');
     // sertifikat tidak wajib
-    const required = ['akta', 'kk', 'rapor', 'bukti_pd', 'skl'];
+
+const jalur = "{{ $jalur }}";
+
+let required = ['akta', 'kk', 'rapor', 'bukti_pd', 'skl'];
+
+if (jalur === 'prestasi') {
+    required.push('sertifikat');
+}
+
+if (jalur === 'afirmasi') {
+    required.push('kip');
+}
+
 
     function checkFiles() {
         const allFilled = required.every(name => {

@@ -39,7 +39,8 @@ class Pendaftaran extends Model
         'is_publish',
         'email_status',
         'nilai_rapor',
-        'nilai_prestasi'
+        'nilai_prestasi',
+        'kip'
     ];
     protected $casts = [
     'verifikasi_dokumen' => 'array',

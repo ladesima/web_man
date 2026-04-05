@@ -128,14 +128,26 @@ $config = match ($status) {
 <div class="mb-4 border-b"></div>
 
 @php
-$dokumen = [
-    'Akta Lahir' => $pendaftaran->akta_lahir,
-    'Kartu Keluarga' => $pendaftaran->kartu_keluarga,
-    'Bukti Verifikasi' => $pendaftaran->verifikasi_pd,
-    'SK/Sertifikat Juara' => $pendaftaran->sertifikat_prestasi,
-    'Rapor' => $pendaftaran->rapor,
-    'SKL' => $pendaftaran->sk_sekolah,
-];
+    $jalur = strtolower($pendaftaran->jalur);
+
+    $dokumen = [
+        'Akta Lahir' => $pendaftaran->akta_lahir,
+        'Kartu Keluarga' => $pendaftaran->kartu_keluarga,
+        'Bukti Verifikasi' => $pendaftaran->verifikasi_pd,
+        'Rapor' => $pendaftaran->rapor,
+        'SKL' => $pendaftaran->sk_sekolah,
+    ];
+
+    // ➕ Tambahan sesuai jalur
+    if ($jalur == 'prestasi') {
+        $dokumen['SK/Sertifikat Juara'] = $pendaftaran->sertifikat_prestasi;
+    }
+
+    if ($jalur == 'afirmasi') {
+        $dokumen['KIP'] = $pendaftaran->kip ?? null;
+    }
+
+    // ❌ reguler tidak ditambah apa-apa
 @endphp
 
 <table class="w-full text-[12px]">

@@ -73,13 +73,18 @@ filterStatus: '',
     // HITUNG NILAI
     // =========================
     get nilaiTotalCalc() {
-        const r = parseFloat(this.form.nilaiRapor);
-        const p = parseFloat(this.form.nilaiPrestasi);
+    const r = parseFloat(this.form.nilaiRapor);
+    const p = parseFloat(this.form.nilaiPrestasi);
 
+    if (this.selectedPeserta?.jalur === 'prestasi') {
         if (isNaN(r) || isNaN(p)) return null;
-
         return Math.round((r + p) / 2);
-    },
+    }
+
+    // 🔥 REGULER & AFIRMASI
+    if (isNaN(r)) return null;
+    return r;
+},
 
     // =========================
     // STATUS (MODAL)
@@ -324,9 +329,9 @@ x-effect="updateButton()"
             <select class="appearance-none w-full pl-4 pr-8 py-2.5 text-[12px] border border-slate-200 bg-white text-slate-600 focus:outline-none card-shadow" x-model="filterJalur"
                     style="border-radius:8px;">
                 <option value="">Jalur</option>
-    <option value="Prestasi">Prestasi</option>
-    <option value="Reguler">Reguler</option>
-    <option value="Afirmasi">Afirmasi</option>
+    <option value="prestasi">Prestasi</option>
+    <option value="reguler">Reguler</option>
+    <option value="afirmasi">Afirmasi</option>
             </select>
             <svg class="pointer-events-none absolute right-2 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
@@ -350,7 +355,7 @@ x-effect="updateButton()"
 
     {{-- ===== TABEL UTAMA ===== --}}
     <div class="bg-white rounded-2xl overflow-hidden card-shadow">
-        <div class="w-full overflow-x-auto no-scrollbar">
+        <div class="w-full overflow-x-auto">
             <table class="w-full min-w-[1400px] border-separate border-spacing-0">
                 <thead>
                     <tr style="background:#C4F4FD;">
@@ -475,14 +480,20 @@ x-effect="updateButton()"
                                    class="flex-1 px-3 py-2 text-[13px] text-center font-semibold focus:outline-none focus:ring-2 focus:ring-[#27C2DE] transition-all bg-[#F5F7FF] border-[#DFEAF2]"
                                    style="border-radius:10px; border:1px solid #DFEAF2;">
                         </div>
-                        <div class="flex items-center gap-4">
-                            <label class="text-[12px] font-medium text-[#575551] shrink-0 whitespace-nowrap" style="min-width:100px;">Nilai Prestasi</label>
-                            <input x-model="form.nilaiPrestasi"
-                                   :readonly="modalMode === 'view'"
-                                   type="number" min="0" max="100" placeholder="–"
-                                   class="flex-1 px-3 py-2 text-[13px] text-center font-semibold focus:outline-none focus:ring-2 focus:ring-[#27C2DE] transition-all bg-[#F5F7FF] border-[#DFEAF2]"
-                                   style="border-radius:10px; border:1px solid #DFEAF2;">
-                        </div>
+                        <template x-if="selectedPeserta && selectedPeserta.jalur === 'prestasi'">
+    <div class="flex items-center gap-4">
+        <label class="text-[12px] font-medium text-[#575551]" style="min-width:100px;">
+            Nilai Prestasi
+        </label>
+        <input x-model="form.nilaiPrestasi"
+               :readonly="modalMode === 'view'"
+               type="number" min="0" max="100"
+               class="flex-1 px-3 py-2 text-[13px] text-center font-semibold
+               focus:outline-none focus:ring-2 focus:ring-[#27C2DE]
+               bg-[#F5F7FF] border-[#DFEAF2]"
+               style="border-radius:10px; border:1px solid #DFEAF2;">
+    </div>
+</template>
                         <div class="flex items-center gap-4">
                             <label class="text-[12px] font-medium text-[#575551] shrink-0 whitespace-nowrap" style="min-width:100px;">Nilai Total</label>
                             <div class="flex-1 px-3 py-2 text-[13px] text-center font-bold bg-slate-50 border border-slate-200"
@@ -520,12 +531,18 @@ x-effect="updateButton()"
                             id="btnSimpanNilai"
                             data-valid="false"
                             @click="
-                                if (nilaiTotalCalc === null) {
-                                    alert('Harap lengkapi nilai rapor dan prestasi terlebih dahulu!');
-                                } else {
-                                    saveNilai();
-                                }
-                            "
+    if (nilaiTotalCalc === null) {
+
+        if (selectedPeserta?.jalur === 'prestasi') {
+            alert('Harap lengkapi nilai rapor dan prestasi!');
+        } else {
+            alert('Harap isi nilai rapor!');
+        }
+
+    } else {
+        saveNilai();
+    }
+"
                             @mouseenter="
                                 if ($el.dataset.valid !== 'true') {
                                     $el.style.backgroundColor = '#27C2DE';

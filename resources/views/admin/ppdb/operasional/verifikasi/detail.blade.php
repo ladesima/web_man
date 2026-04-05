@@ -253,15 +253,27 @@
     <div class="mb-4" style="border-bottom: 1px solid #E6E6E6;"></div>
 
     @php
+    $jalur = strtolower($pendaftaran->jalur);
+
     $dokumen = [
         'Akta Lahir' => $pendaftaran->akta_lahir,
         'Kartu Keluarga' => $pendaftaran->kartu_keluarga,
         'Bukti Verifikasi' => $pendaftaran->verifikasi_pd,
-        'SK/Sertifikat Juara' => $pendaftaran->sertifikat_prestasi,
         'Rapor' => $pendaftaran->rapor,
         'SKL' => $pendaftaran->sk_sekolah,
     ];
-    @endphp
+
+    // ➕ Tambahan sesuai jalur
+    if ($jalur == 'prestasi') {
+        $dokumen['SK/Sertifikat Juara'] = $pendaftaran->sertifikat_prestasi;
+    }
+
+    if ($jalur == 'afirmasi') {
+        $dokumen['KIP'] = $pendaftaran->kip ?? null;
+    }
+
+    // ❌ reguler tidak ditambah apa-apa
+@endphp
 
     <table class="w-full text-[12px]">
         <thead>
