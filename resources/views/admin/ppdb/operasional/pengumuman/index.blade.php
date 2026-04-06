@@ -236,6 +236,12 @@
           style="background:#FCE7F3; border:1px solid #F80ECD; color:#F80ECD; border-radius:4px;">
         Siap Seleksi
     </span>
+    {{-- TAMBAHKAN INI setelah span 'Siap Seleksi' --}}
+<span x-show="row.status_verifikasi === 'Berkas Ditolak'"
+      class="px-3 py-1 text-[11px]"
+      style="background:#FEE2E2; border:1px solid #DC2626; color:#DC2626; border-radius:4px;">
+    Berkas Ditolak
+</span>
 </td>
                                 <td class="text-center py-3 px-3 text-[12px] text-[#2B2A28] whitespace-nowrap" x-text="row.hasil"></td>
                                 <td class="text-center py-3 px-3 whitespace-nowrap">

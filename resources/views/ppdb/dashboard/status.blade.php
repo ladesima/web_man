@@ -29,7 +29,7 @@
                 </h2>
                 <p class="text-sm text-slate-500 leading-6 max-w-sm">
                     Berkas Anda sedang diperiksa oleh panitia PPDB. Proses verifikasi
-                    membutuhkan waktu maksimal 1–3 hari kerja.
+                    membutuhkan waktu maksimal 1-3 hari kerja.
                 </p>
             </div>
         </div>

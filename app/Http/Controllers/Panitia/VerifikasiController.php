@@ -10,13 +10,13 @@ class VerifikasiController extends Controller
 {
     public function index()
     {
-        $data = Pendaftaran::latest()->get();
+         $data = Pendaftaran::latest()->get();
 
         $pendaftar = $data->map(function ($item) {
             return [
                 'id' => $item->id,
                 'nama' => $item->nama_lengkap ?? '-',
-                'no' => $item->nisn ?? '-',
+                'no' => $item->nisn,
                 'jalur' => ucfirst($item->jalur),
 
                 'status' => match ($item->status) {
@@ -97,64 +97,59 @@ public function validasi($id)
 }
 public function simpanValidasi(Request $request, $id)
 {
-    $pendaftaran = \App\Models\Pendaftaran::findOrFail($id);
+    $pendaftaran = Pendaftaran::findOrFail($id);
 
-    $input = $request->verifikasi ?? [];
-    $hasil = [];
+        $data = $request->verifikasi ?? [];
 
-    $total = count($input);
-    $valid = 0;
-    $ditolak = 0;
-    $perbaikan = 0;
+        $catatanGlobal = [];
 
-    foreach ($input as $key => $dok) {
+        foreach ($data as $key => $item) {
 
-        $status = $dok['status'] ?? null;
-        $catatan = $dok['catatan'] ?? null;
+            $status = $item['status'] ?? null;
+            $catatan = $item['catatan'] ?? null;
 
-        // 🔥 RULE UTAMA
-        if ($status === 'ok') {
-            // ✅ kalau approved → catatan DIHAPUS
-            $hasil[$key] = [
-                'status' => 'ok',
-                'catatan' => null
-            ];
-            $valid++;
-        }
-
-        elseif ($status === 'no') {
+            // ❗ wajib isi catatan jika ditolak
+            if ($status === 'no' && empty($catatan)) {
+                return back()->with('error', 'Catatan wajib diisi jika ada dokumen ditolak');
+            }
 
             if (!empty($catatan)) {
-                // ✅ ada catatan → perbaikan
-                $hasil[$key] = [
-                    'status' => 'no',
-                    'catatan' => $catatan
-                ];
-                $perbaikan++;
-            } else {
-                // ❌ tidak ada catatan → ditolak
-                $hasil[$key] = [
-                    'status' => 'no',
-                    'catatan' => null
-                ];
-                $ditolak++;
+                $catatanGlobal[] =
+                    strtoupper(str_replace('_', ' ', $key)) . ' : ' . $catatan;
             }
         }
-    }
 
-    // 🔥 SIMPAN JSON
-    $pendaftaran->verifikasi_dokumen = json_encode($hasil);
+        // 🔥 SIMPAN JSON
+        $pendaftaran->verifikasi_dokumen = json_encode($data);
 
-    // 🔥 STATUS GLOBAL
-    if ($valid === $total) {
-        $pendaftaran->status = 'lulus';
-    } elseif ($ditolak === $total) {
-        $pendaftaran->status = 'tidak_lulus';
-    } else {
-        $pendaftaran->status = 'perbaikan';
-    }
+        // 🔥 LOGIC STATUS BARU
+        $statuses = collect($data)->pluck('status');
 
-    $pendaftaran->save();
+        $allOk = $statuses->every(fn($s) => $s === 'ok');
+        $allNo = $statuses->every(fn($s) => $s === 'no');
+
+        if ($allOk) {
+            $finalStatus = 'lulus';
+
+        } elseif ($allNo) {
+            $finalStatus = 'tidak_lulus';
+
+        } else {
+            $finalStatus = 'perbaikan';
+        }
+
+        $pendaftaran->status = $finalStatus;
+
+        // 🔥 CATATAN GLOBAL
+        $pendaftaran->catatan_revisi = count($catatanGlobal)
+            ? implode(' | ', $catatanGlobal)
+            : null;
+
+        $pendaftaran->last_step = 'verifikasi';
+
+        $pendaftaran->save();
+
+        logAktivitas('Verifikasi data pendaftar: ' . $pendaftaran->nama_lengkap);
 
     return redirect()
         ->route('panitia.operasional.verifikasi', $id)

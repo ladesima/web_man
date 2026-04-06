@@ -16,17 +16,17 @@ class PengumumanController extends Controller
 public function index()
 {
     $pendaftaran = Pendaftaran::with('user')->latest()->get();
-
+ 
         $rows = $pendaftaran->map(function ($item) {
-
+ 
     // =========================
     // 🎯 HITUNG NILAI (FIX ALL JALUR)
     // =========================
     $nilaiTotal = null;
     $statusNilai = null;
-
+ 
     if ($item->nilai_rapor !== null) {
-
+ 
         // 🔥 beda per jalur
         if ($item->jalur == 'prestasi') {
             if ($item->nilai_prestasi !== null) {
@@ -36,7 +36,7 @@ public function index()
             // ✅ reguler & afirmasi
             $nilaiTotal = $item->nilai_rapor;
         }
-
+ 
         // 🔥 tentukan status nilai
         if ($nilaiTotal !== null) {
             if ($nilaiTotal >= 80) {
@@ -48,88 +48,119 @@ public function index()
             }
         }
     }
-
+ 
     // =========================
     // 📂 STATUS BERKAS (AMBIL DARI VERIFIKASI)
     // =========================
-    $statusBerkas = 'tidak_valid';
-
-    if ($item->verifikasi_dokumen) {
-
-    // 🔥 FIX: ubah ke array
+    // =========================
+// 📂 STATUS BERKAS (REAL DARI JSON)
+// =========================
+$statusBerkas = 'tidak_valid';
+ 
+if ($item->verifikasi_dokumen) {
+ 
     $dok = is_array($item->verifikasi_dokumen)
         ? $item->verifikasi_dokumen
         : json_decode($item->verifikasi_dokumen, true);
-
-    if (!in_array('tidak_valid', $dok)) {
-        $statusBerkas = 'valid';
+ 
+    if (is_array($dok)) {
+ 
+        $statuses = collect($dok)->pluck('status');
+ 
+        $allOk = $statuses->every(fn($s) => $s === 'ok');
+        $allNo = $statuses->every(fn($s) => $s === 'no');
+ 
+        if ($allOk) {
+            $statusBerkas = 'valid';
+        } elseif ($allNo) {
+            $statusBerkas = 'tidak_valid';
+        } else {
+            $statusBerkas = 'perbaikan';
+        }
     }
 }
-
+ 
     // =========================
     // 🧠 HASIL AKHIR (FIX LOGIKA)
     // =========================
     $hasil = '-';
-
-    if ($statusBerkas == 'valid' && $statusNilai == 'valid') {
+ 
+    if ($statusBerkas == 'valid' && in_array($statusNilai, ['valid', 'memenuhi'])) {
         $hasil = 'Lulus';
     }
-    elseif ($statusBerkas == 'valid' && $statusNilai == 'memenuhi') {
-        $hasil = 'Lulus';
-    }
-    elseif ($statusBerkas == 'tidak_valid' && $statusNilai == 'valid') {
+    elseif ($statusBerkas == 'perbaikan') {
         $hasil = 'Perbaikan';
     }
-    elseif ($statusBerkas == 'tidak_valid' && $statusNilai == 'memenuhi') {
+    elseif ($statusBerkas == 'tidak_valid' && in_array($statusNilai, ['valid', 'memenuhi'])) {
         $hasil = 'Perbaikan';
     }
     elseif ($statusNilai == 'kurang') {
         $hasil = 'Tidak Lulus';
     }
-
-    // =========================
-    // 📊 STATUS VERIFIKASI UI
-    // =========================
+    elseif ($statusBerkas == 'tidak_valid' && $statusNilai === null) {
+        $hasil = 'Tidak Lulus';
+    }
+ 
+ 
+// =========================
+// 📊 STATUS VERIFIKASI (SYNC DENGAN VERIFIKASI BERKAS)
+// =========================
+ 
+// 🔥 LANGSUNG DARI STATUS DB — sama persis dengan VerifikasiController
+$status_verifikasi = match ($item->status) {
+    'belum', 'form_selesai'  => 'Menunggu',
+    'berkas_selesai'          => 'Siap Seleksi',
+    'perbaikan'               => 'Perlu Perbaikan',
+    'lulus'                   => 'Berkas Valid',
+    'tidak_lulus'             => 'Berkas Ditolak',
+    default                   => 'Menunggu',  // ✅ tidak pernah null
+};
+ 
+// 🔥 FALLBACK: jika status DB belum/null, pakai hasil verifikasi dokumen
+if (in_array($item->status, ['belum', null]) && $item->verifikasi_dokumen) {
+ 
     $status_verifikasi = match ($statusBerkas) {
         'valid' => 'Berkas Valid',
-        'tidak_valid' => 'Perlu Perbaikan',
+        'perbaikan' => 'Perlu Perbaikan',
+        'tidak_valid' => 'Berkas Ditolak',
         default => 'Menunggu',
     };
-
+}
+ 
     return [
         'id' => $item->id,
         'nama' => $item->nama_lengkap ?? '-',
         'no' => $item->id ?? '-',
         'jalur' => $item->jalur ?? '-',
-
+ 
         'nilai_total' => $nilaiTotal,
         'status_nilai' => $statusNilai,
         'status_berkas' => $statusBerkas,
-
+ 
         'status_verifikasi' => $status_verifikasi,
         'hasil' => $hasil,
-
+ 
         'status_pub' => $item->is_publish ? 'publish' : 'belum',
         'status_email' => $item->email_status ?? 'belum_terkirim',
-
+ 
         'tgl' => $item->updated_at
             ? Carbon::parse($item->updated_at)->format('d/m/y - H:i') . ' WITA'
             : '-',
-
+ 
         'checked' => false
     ];
 });
 $rows = $rows->sortByDesc('nilai_total')->values();
-
+ 
         $total = $rows->count();
         $lulus = $rows->where('hasil', 'Lulus')->count();
         $tidak_lulus = $rows->where('hasil', 'Tidak Lulus')->count();
         $perbaikan = $rows->where('hasil', 'Perbaikan')->count();
-
+ 
         $siap_diumumkan = $rows
             ->where('status_email', 'belum_terkirim')
             ->count();
-
+ 
     return view('admin.ppdb.operasional.pengumuman.index', compact(
         'rows',
         'total',
@@ -139,6 +170,7 @@ $rows = $rows->sortByDesc('nilai_total')->values();
         'siap_diumumkan' // 👈 WAJIB TAMBAH
     ));
 }
+
     public function publishMassal(Request $request)
 {
     $ids = $request->ids ?? [];
@@ -273,7 +305,8 @@ public function publish(Request $request)
             // ✅ update status
             $item->update([
                 'is_publish' => 1,
-                'email_status' => 'terkirim'
+                'email_status' => 'terkirim',
+                'last_step' => 'pengumuman'
             ]);
 
             $success++;
