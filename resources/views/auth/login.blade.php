@@ -15,7 +15,9 @@
     </div>
 
     <div class="relative z-10 w-full max-w-4xl bg-white rounded-3xl shadow-2xl flex px-6 pt-6 pb-8 gap-6 pr-4">
-
+        @php
+use Illuminate\Support\Facades\Storage;
+@endphp
         {{-- Form Section --}}
         <div class="flex-1 flex flex-col items-center justify-center px-8 py-4">
             <img src="{{ asset('ppdb/man.svg') }}" alt="MAN Jeneponto" class="w-12 h-12 object-contain mb-3">
@@ -91,8 +93,12 @@
 
         {{-- Image Section --}}
         <div class="hidden md:flex w-[420px] flex-shrink-0 items-center justify-center p-4 pr-8">
-            <img src="{{ asset('ppdb/manjepot.png') }}" alt="MAN Jeneponto"
-                 class="w-full h-auto object-contain rounded-2xl">
+            
+        <img src="{{ isset($media['admin_login']) 
+    ? Storage::url($media['admin_login']) 
+    : asset('ppdb/manjepot.png') }}"
+     alt="MAN Jeneponto"
+     class="w-full h-auto object-contain rounded-2xl">
         </div>
     </div>
 

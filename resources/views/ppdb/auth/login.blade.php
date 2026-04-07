@@ -80,8 +80,11 @@
         </div>
 
         <div class="hidden md:flex w-[420px] flex-shrink-0 items-center justify-center p-4 pr-8">
-            <img src="{{ asset('ppdb/siswalogin.svg') }}" alt="Siswa Login"
-                 class="w-full h-auto object-contain rounded-2xl">
+            <img src="{{ isset($media['registrasi_login']) 
+    ? Storage::url($media['registrasi_login']) 
+    : asset('ppdb/siswalogin.svg') }}"
+    alt="Siswa Login"
+    class="w-full h-auto object-contain rounded-2xl">
         </div>
     </div>
 

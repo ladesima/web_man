@@ -8,12 +8,14 @@ use App\Http\Controllers\Controller;
 use App\Models\Panitia;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Session;
+use App\Models\MediaGambar;
 
 class AdminAuthController extends Controller
 {
     public function showLogin()
     {
-        return view('auth.login');
+        $media = MediaGambar::pluck('file', 'key');
+        return view('auth.login', compact('media'));
     }
 
     public function login(Request $request)

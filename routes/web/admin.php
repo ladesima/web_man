@@ -14,6 +14,7 @@ use App\Http\Controllers\Admin\Ppdb\PanitiaController;
 use App\Http\Controllers\Admin\Ppdb\RiwayatController;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Response;
+use App\Http\Controllers\Admin\MediaGambarController;
 
 Route::get('/test-log', function () {
     logAktivitas('TEST AKTIVITAS MASUK');
@@ -74,16 +75,25 @@ Route::prefix('admin')->middleware(['auth'])->group(function () {
     // Route::view('/operasional/verifikasi/{id}/validasi', 'admin.ppdb.operasional.verifikasi.validasi')->name('admin.operasional.verifikasi.validasi');
 
      // MEDIA GAMBAR
-    Route::view('/manajemen/media-gambar', 'admin.ppdb.manajemen.media-gambar.index')
-->name('admin.manajemen.media-gambar');
-    Route::view('/manajemen/media-gambar/sistem-informasi', 'admin.ppdb.manajemen.media-gambar.sistem-informasi')
-        ->name('admin.manajemen.media-gambar.sistem-informasi');
-    Route::view('/manajemen/media-gambar/siswa', 'admin.ppdb.manajemen.media-gambar.siswa')
-        ->name('admin.manajemen.media-gambar.siswa');
-    Route::view('/manajemen/media-gambar/admin', 'admin.ppdb.manajemen.media-gambar.admin')
+    Route::prefix('/manajemen/media-gambar')->group(function () {
+
+    Route::get('/', [MediaGambarController::class, 'index'])
+        ->name('admin.manajemen.media-gambar');
+
+    Route::get('/admin', [MediaGambarController::class, 'indexAdmin'])
         ->name('admin.manajemen.media-gambar.admin');
-    Route::view('/manajemen/media-gambar/panitia', 'admin.ppdb.manajemen.media-gambar.panitia')
-        ->name('admin.manajemen.media-gambar.panitia');
+
+    Route::get('/siswa', [MediaGambarController::class, 'indexSiswa'])
+        ->name('admin.manajemen.media-gambar.siswa');
+
+    Route::post('/store', [MediaGambarController::class, 'store'])
+        ->name('admin.media.store');
+        
+    Route::get('/sistem-informasi',
+    [MediaGambarController::class, 'indexSistemInformasi']
+)->name('admin.manajemen.media-gambar.sistem-informasi');
+
+});
         
     // PENGUMUMAN
     Route::get('/operasional/pengumuman', [PengumumanController::class, 'index'])

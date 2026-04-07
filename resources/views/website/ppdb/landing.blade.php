@@ -9,12 +9,16 @@
 ================================================================ --}}
 <section id="beranda" class="relative min-h-[520px] flex items-center overflow-hidden" style="scroll-margin-top: 80px;">
     <div class="absolute inset-0">
-        <img src="{{ asset('ppdb/landingpage.svg') }}"
-             alt="Hero" class="w-full h-full object-cover object-center">
-        <div class="absolute inset-0"
-             style="background: linear-gradient(to right, rgba(0, 0, 0, 0.2), rgba(54, 174, 120, 0.35) 80.96%, rgba(185,216,76,0.2));">
-        </div>
+    <img src="{{ isset($media['homepage']) 
+            ? Storage::url($media['homepage']) 
+            : asset('ppdb/landingpage.svg') }}"
+         alt="Hero"
+         class="w-full h-full object-cover object-center">
+
+    <div class="absolute inset-0"
+         style="background: linear-gradient(to right, rgba(0, 0, 0, 0.2), rgba(54, 174, 120, 0.35) 80.96%, rgba(185,216,76,0.2));">
     </div>
+</div>
 
     <div class="relative z-10 w-full text-center px-4 py-28 md:py-36">
         <h1 class="hero-title text-2xl md:text-4xl font-extrabold text-white leading-snug drop-shadow">

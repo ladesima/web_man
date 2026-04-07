@@ -83,19 +83,33 @@ $jalurs = collect($ppdb->jalurs ?? [])
 </div>
 
 {{-- Hero Card --}}
+    @php
+$media = \App\Models\MediaGambar::pluck('file', 'key');
+@endphp
+
 <section class="bg-white pt-4 px-6 md:px-12">
     <div class="max-w-7xl mx-auto">
         <div class="hero-card relative rounded-3xl overflow-hidden" style="min-height: 320px;">
-            <img src="{{ asset($jalur['banner']) }}"
-                 alt="{{ $jalur['judul'] }}"
-                 class="w-full h-full object-fill absolute inset-0">
-            <div class="hero-text relative z-10 flex flex-col justify-center px-10 py-12 h-full" style="min-height: 320px;">
+            
+            <img src="{{ 
+                isset($media['sampul_'.$slug]) 
+                ? Storage::url($media['sampul_'.$slug]) 
+                : asset($jalur['banner']) 
+            }}"
+            alt="{{ $jalur['judul'] }}"
+            class="w-full h-full object-fill absolute inset-0">
+
+            <div class="hero-text relative z-10 flex flex-col justify-center px-10 py-12 h-full">
                 <h1 class="text-3xl md:text-4xl font-extrabold text-white">
                     {{ $jalur['judul'] }}
                 </h1>
-                <p class="mt-4 text-sm md:text-base leading-7 text-white/90 max-w-lg">
+                <p class="mt-4 text-sm text-white/90 max-w-lg">
                     {{ $jalur['deskripsi'] }}
                 </p>
+            </div>
+        </div>
+    </div>
+</section>
                 {{-- Tombol buka popup konfirmasi --}}
                 <button onclick="document.getElementById('popup-jalur').classList.add('active')"
                         class="mt-6 inline-block bg-white text-[#00758A] font-semibold px-8 py-2.5 rounded-full transition-all text-sm w-fit hover:bg-slate-100">

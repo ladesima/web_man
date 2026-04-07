@@ -7,6 +7,7 @@ use App\Models\MasterPpdb;
 use App\Models\Pendaftaran;
 use App\Models\Faq;
 use App\Models\PpdbJalur;
+use App\Models\MediaGambar;
 
 class LandingPpdbController extends Controller
 {
@@ -55,6 +56,7 @@ class LandingPpdbController extends Controller
     */
  public function landing()
 {
+    $media = MediaGambar::pluck('file', 'key');
     $ppdb = MasterPpdb::where('is_active', 1)->first();
 
     // 🔥 AMBIL SEMUA JALUR
@@ -78,7 +80,8 @@ class LandingPpdbController extends Controller
     return view('website.ppdb.landing', [
         'ppdb' => $ppdb,
         'jalurs' => $jalurs, // 🔥 TAMBAHAN PENTING
-        'faqs' => $faqs
+        'faqs' => $faqs,
+        'media' => $media
     ]);
 }
 public function jalur($slug)

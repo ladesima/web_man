@@ -8,9 +8,18 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Auth;
 use App\Models\Pendaftaran;
+use App\Models\MediaGambar;
+
+
 
 class AuthPpdbController extends Controller
 {
+    public function showLogin()
+{
+    $media = MediaGambar::pluck('file', 'key');
+
+    return view('ppdb.auth.login', compact('media'));
+}
     /*
     |--------------------------------------------------------------------------
     | REGISTER

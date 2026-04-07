@@ -38,7 +38,8 @@ Route::prefix('ppdb')->group(function () {
 
     Route::get('/jalur/{slug}', [LandingPpdbController::class, 'jalur'])->name('ppdb.jalur');
 
-    Route::get('/login', fn() => view('ppdb.auth.login'))->name('ppdb.login');
+    Route::get('/login', [AuthPpdbController::class, 'showLogin'])
+    ->name('ppdb.login');
     Route::post('/login', [AuthPpdbController::class, 'login'])->name('ppdb.login.post');
 
     Route::view('/daftar', 'ppdb.auth.registrasi')->name('ppdb.daftar');

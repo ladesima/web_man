@@ -36,8 +36,8 @@
     <div class="bg-white rounded-2xl p-5 flex gap-4" style="box-shadow:0 2px 12px rgba(0,0,0,0.07);">
         <img src="{{ asset('ppdb/admin/operasional/admin.png') }}" alt="" class="w-24 h-24 object-contain shrink-0 self-start">
         <div class="flex flex-col gap-2">
-            <p class="font-bold text-[14px] text-[#2B2A28]">Admin</p>
-            <p class="text-[11px] text-slate-400 leading-relaxed">Atur tampilan user Admin agar sesuai dengan kegiatan dan kebutuhan anda</p>
+            <p class="font-bold text-[14px] text-[#2B2A28]">Admin / Panitia</p>
+            <p class="text-[11px] text-slate-400 leading-relaxed">Atur tampilan user Admin dan Panitia agar sesuai dengan kegiatan dan kebutuhan anda</p>
             <a href="{{ route('admin.manajemen.media-gambar.admin') }}"
                class="inline-block text-center px-4 py-2 rounded-lg text-white text-[12px] font-semibold transition-all hover:opacity-90 mt-1"
                style="background:#27C2DE;">
@@ -46,19 +46,7 @@
         </div>
     </div>
 
-    {{-- Panitia --}}
-    <div class="bg-white rounded-2xl p-5 flex gap-4" style="box-shadow:0 2px 12px rgba(0,0,0,0.07);">
-        <img src="{{ asset('ppdb/admin/operasional/panitia.png') }}" alt="" class="w-24 h-24 object-contain shrink-0 self-start">
-        <div class="flex flex-col gap-2">
-            <p class="font-bold text-[14px] text-[#2B2A28]">Panitia</p>
-            <p class="text-[11px] text-slate-400 leading-relaxed">Atur tampilan user panitia agar sesuai dengan kegiatan dan kebutuhan anda</p>
-            <a href="{{ route('admin.manajemen.media-gambar.panitia') }}"
-               class="inline-block text-center px-4 py-2 rounded-lg text-white text-[12px] font-semibold transition-all hover:opacity-90 mt-1"
-               style="background:#27C2DE;">
-                Atur Tampilan
-            </a>
-        </div>
-    </div>
+    
 
 </div>
 
