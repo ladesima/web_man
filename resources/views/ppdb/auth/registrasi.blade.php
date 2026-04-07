@@ -85,54 +85,62 @@
     </div>
 </div>
    <script>
-    let nisnValue = '';
+let nisnValue = '';
 
-    function cekNisn() {
-        const nisn = document.getElementById('nisnInput').value.trim();
-        const error = document.getElementById('nisnError');
+function cekNisn() {
+    const nisn = document.getElementById('nisnInput').value.trim();
+    const error = document.getElementById('nisnError');
 
-        error.style.display = 'none';
+    error.style.display = 'none';
 
-        if (nisn === '') {
-            error.textContent = 'NISN tidak boleh kosong.';
+    if (nisn === '') {
+        error.textContent = 'NISN tidak boleh kosong.';
+        error.style.display = 'block';
+        return;
+    }
+
+    if (nisn.length !== 10) {
+        error.textContent = 'NISN harus 10 digit.';
+        error.style.display = 'block';
+        return;
+    }
+
+    // 🔥 FETCH KE BACKEND
+    fetch("{{ route('ppdb.cek.nisn') }}", {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json",
+            "X-CSRF-TOKEN": "{{ csrf_token() }}"
+        },
+        body: JSON.stringify({ nisn: nisn })
+    })
+    .then(res => res.json())
+    .then(res => {
+
+        // ❌ JIKA SUDAH ADA
+        if (!res.status) {
+            error.textContent = res.message;
             error.style.display = 'block';
             return;
         }
-        if (nisn.length < 10) {
-            error.textContent = 'NISN harus 10 digit.';
-            error.style.display = 'block';
-            return;
-        }
 
-        nisnValue = nisn;
-        document.getElementById('popupNisnText').textContent = nisn + ' - Nama Siswa';
-        
-        const popup = document.getElementById('popupNisn');
-        popup.style.display = 'flex';
-        popup.style.position = 'fixed';
-        popup.style.top = '0';
-        popup.style.left = '0';
-        popup.style.width = '100%';
-        popup.style.height = '100%';
-        popup.style.zIndex = '9999';
-        popup.style.backgroundColor = 'rgba(0,0,0,0.5)';
-        popup.style.alignItems = 'center';
-        popup.style.justifyContent = 'center';
-    }
+        // ✅ JIKA VALID
+        nisnValue = res.nisn;
 
-    function lanjutRegistrasi() {
-        window.location.href = "{{ route('ppdb.daftar.step2') }}?nisn=" + nisnValue;
-    }
+        document.getElementById('popupNisnText').textContent =
+            res.nisn + ' - ' + res.nama;
 
-    document.getElementById('popupNisn').addEventListener('click', function(e) {
-        if (e.target === this) {
-            this.style.display = 'none';
-        }
+        document.getElementById('popupNisn').style.display = 'flex';
+    })
+    .catch(() => {
+        error.textContent = 'Terjadi kesalahan server.';
+        error.style.display = 'block';
     });
+}
 
-    document.getElementById('nisnInput').addEventListener('keypress', function(e) {
-        if (e.key === 'Enter') cekNisn();
-    });
+function lanjutRegistrasi() {
+    window.location.href = "{{ route('ppdb.daftar.step2') }}?nisn=" + nisnValue;
+}
 </script>
 
 </body>

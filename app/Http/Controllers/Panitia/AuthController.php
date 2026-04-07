@@ -12,7 +12,7 @@ class AuthController extends Controller
 {
     public function showLogin()
     {
-        return view('panitia.auth.login'); // jangan ubah blade
+        return view('auth.login'); // jangan ubah blade
     }
 
     public function login(Request $request)

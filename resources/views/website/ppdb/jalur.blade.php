@@ -106,10 +106,6 @@ $media = \App\Models\MediaGambar::pluck('file', 'key');
                 <p class="mt-4 text-sm text-white/90 max-w-lg">
                     {{ $jalur['deskripsi'] }}
                 </p>
-            </div>
-        </div>
-    </div>
-</section>
                 {{-- Tombol buka popup konfirmasi --}}
                 <button onclick="document.getElementById('popup-jalur').classList.add('active')"
                         class="mt-6 inline-block bg-white text-[#00758A] font-semibold px-8 py-2.5 rounded-full transition-all text-sm w-fit hover:bg-slate-100">
