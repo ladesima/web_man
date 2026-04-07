@@ -86,39 +86,35 @@ class PendaftaranController extends Controller
     */
     public function store(Request $request, $jalur)
 {
-    $user = Auth('ppdb')->user();
-    $cek = Pendaftaran::where('user_id', $user->id)
-    ->where('jalur', $jalur)
-    ->whereNotIn('status', ['tidak_lulus'])
-    ->exists();
-
-if ($cek && !$pendaftaran) {
-    return back()->with('error', 'Anda sudah mendaftar di jalur ini');
-}
     $user = Auth::guard('ppdb')->user();
 
     if (!$user) {
         return redirect()->route('ppdb.login');
     }
 
+    // 🔥 ambil data lama
     $pendaftaran = Pendaftaran::where('user_id', $user->id)
-    ->where('jalur', $jalur)
-    ->latest()
-    ->first();
+        ->where('jalur', $jalur)
+        ->latest()
+        ->first();
 
-    // 🔒 VALIDASI JALUR
-    if ($pendaftaran && $pendaftaran->jalur !== $jalur) {
-    // biarkan lanjut (multi jalur)
-    $pendaftaran = null;
-}
+    // 🔒 CEK DUPLIKAT (FIX BUG)
+    $cek = Pendaftaran::where('user_id', $user->id)
+        ->where('jalur', $jalur)
+        ->whereNotIn('status', ['tidak_lulus'])
+        ->exists();
 
-    // 🔒 LOCK DATA
+    if ($cek && !$pendaftaran) {
+        return back()->with('error', 'Anda sudah mendaftar di jalur ini');
+    }
+
+    // 🔒 LOCK DATA (kecuali revisi)
     if ($pendaftaran && !$pendaftaran->is_revisi && $pendaftaran->status !== 'belum') {
         return redirect()->route('siswa.upload.berkas', $pendaftaran->jalur)
             ->with('error', 'Data sudah dikunci dan tidak bisa diubah');
     }
 
-    // ✅ VALIDASI
+    // ✅ VALIDASI (FOTO DINAMIS)
     $request->validate([
         'ttl' => 'required',
         'asal_sekolah' => 'required',
@@ -128,22 +124,21 @@ if ($cek && !$pendaftaran) {
         'penghasilan_ortu' => 'required',
         'alamat_ortu' => 'required',
         'jumlah_saudara' => 'required|integer',
-        'foto' => 'required|image|mimes:jpg,jpeg,png|max:2048',
+        'foto' => $pendaftaran
+            ? 'nullable|image|mimes:jpg,jpeg,png|max:2048'
+            : 'required|image|mimes:jpg,jpeg,png|max:2048',
     ]);
-    
 
-    // 🔥 HANDLE FOTO (SIMPAN KE PENDAFTARAN)
-    $fotoPath = $pendaftaran ? $pendaftaran->foto : null;
+    // 🔥 HANDLE FOTO (AMAN)
+    $fotoPath = $pendaftaran->foto ?? null;
+
     if ($request->hasFile('foto')) {
 
-        $file = $request->file('foto');
-
-        // hapus foto lama
         if ($pendaftaran && $pendaftaran->foto) {
             Storage::disk('public')->delete($pendaftaran->foto);
         }
 
-        $fotoPath = $file->store('foto_ppdb', 'public');
+        $fotoPath = $request->file('foto')->store('foto_ppdb', 'public');
     }
 
     // 🔥 DATA
@@ -163,11 +158,13 @@ if ($cek && !$pendaftaran) {
         'alamat_ortu' => $request->alamat_ortu,
         'jumlah_saudara' => $request->jumlah_saudara,
 
-        // 🔥 FIX UTAMA
         'foto' => $fotoPath,
 
+        // 🔥 RESET SETELAH PERBAIKAN
         'status' => 'form_selesai',
-        'last_step' => 'berkas'
+        'last_step' => 'berkas',
+        'catatan' => null,
+        'is_revisi' => false,
     ];
 
     // 🔥 SIMPAN
@@ -303,10 +300,14 @@ if ($cek && !$pendaftaran) {
 }
 public function pengumuman($jalur)
 {
-    $user = \Auth::guard('ppdb')->user();
+    
+    $user = Auth::guard('ppdb')->user();
 
-    // 🔥 ambil data sesuai jalur + yang SUDAH publish
-    $pendaftaran = \App\Models\Pendaftaran::where('user_id', $user->id)
+    if (!$user) {
+        return redirect()->route('ppdb.login');
+    }
+
+    $pendaftaran = Pendaftaran::where('user_id', $user->id)
         ->where('jalur', $jalur)
         ->latest()
         ->first();
@@ -315,31 +316,120 @@ public function pengumuman($jalur)
 
     if ($pendaftaran) {
 
-        // DEBUG (opsional, bisa kamu cek dulu)
-        // dd($pendaftaran->status, $pendaftaran->is_publish);
-
         if ($pendaftaran->is_publish == 1) {
 
-            if ($pendaftaran->status === 'lulus') {
-                $status = 'diterima';
-
-            } elseif ($pendaftaran->status === 'perbaikan') {
-                $status = 'perbaikan';
-
-            } else {
-                $status = 'tidaklolos';
-            }
+            $status = match ($pendaftaran->status) {
+                'lulus' => 'diterima',
+                'perbaikan' => 'perbaikan',
+                default => 'tidaklolos',
+            };
 
         } else {
             $status = 'menunggu';
         }
     }
-
     return view('ppdb.pengumuman.index', compact(
         'jalur',
         'status',
         'pendaftaran'
     ));
 }
+public function daftarUlang($jalur)
+{
+    $user = Auth::guard('ppdb')->user();
 
+    if (!$user) {
+        return redirect()->route('ppdb.login');
+    }
+
+    $pendaftaran = Pendaftaran::where('user_id', $user->id)
+        ->where('jalur', $jalur)
+        ->latest()
+        ->first();
+
+    // 🔒 VALIDASI
+    if (!$pendaftaran) {
+        abort(404, 'Data tidak ditemukan');
+    }
+
+    if (!$pendaftaran->is_publish) {
+        abort(403, 'Pengumuman belum dibuka');
+    }
+
+    if ($pendaftaran->status !== 'lulus') {
+        abort(403, 'Hanya siswa yang lulus yang bisa daftar ulang');
+    }
+
+    return view('ppdb.daftar-ulang.index', compact(
+        'jalur',
+        'pendaftaran'
+    ));
+}
+public function dashboard()
+{
+    $user = Auth::guard('ppdb')->user();
+
+    if (!$user) {
+        return redirect()->route('ppdb.login');
+    }
+
+    // 🔥 ambil master ppdb + relasi jalur
+    $ppdb = MasterPpdb::aktifWithRelasi();
+
+    // 🔥 ambil semua pendaftaran user (multi jalur support)
+    $pendaftaran = Pendaftaran::where('user_id', $user->id)
+        ->get();
+
+    return view('ppdb.dashboard.beranda', compact(
+        'user',
+        'ppdb',
+        'pendaftaran'
+    ));
+}
+public function perbaikan($jalur)
+{
+    $user = Auth::guard('ppdb')->user();
+
+    if (!$user) {
+        return redirect()->route('ppdb.login');
+    }
+
+    $pendaftaran = Pendaftaran::where('user_id', $user->id)
+        ->where('jalur', $jalur)
+        ->latest()
+        ->first();
+
+    if (!$pendaftaran) {
+        abort(404);
+    }
+
+    // 🔥 MODE REVISI
+    $pendaftaran->update([
+    'status' => 'form_selesai',
+    'last_step' => 'berkas',
+
+    // 🔥 RESET SYSTEM
+    'is_publish' => 0,
+    'email_status' => null,
+
+    // opsional tapi bagus
+    'catatan' => null,
+]);
+
+    return redirect()->route('siswa.pendaftaran', $jalur);
+}
+public function form($jalur)
+{
+    $user = Auth::guard('ppdb')->user();
+
+    $pendaftaran = Pendaftaran::where('user_id', $user->id)
+        ->where('jalur', $jalur)
+        ->latest()
+        ->first();
+
+    return view('ppdb.pendaftaran.isi-formulir', compact(
+        'jalur',
+        'pendaftaran'
+    ));
+}
 }

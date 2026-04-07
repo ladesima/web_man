@@ -176,7 +176,7 @@
 
         <div class="mt-4 w-full rounded-xl p-3" style="background:rgba(255,212,192,0.35);">
             <p class="text-[12px] text-[#2B2A28]">Total Pendaftar : <span class="font-bold">{{ $total }}</span></p>
-            <p class="text-[12px] text-[#2B2A28]">Kuota : <span class="font-bold">1000</span></p>
+            <p class="text-[12px] text-[#2B2A28]">Kuota : <span class="font-bold">324</span></p>
         </div>
     </div>
 

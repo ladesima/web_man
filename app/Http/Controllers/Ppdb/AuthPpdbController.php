@@ -126,6 +126,15 @@ class AuthPpdbController extends Controller
 
     /*
     |------------------------------------------------------------------
+    | 🔥 PRIORITAS 3: DARI JALUR
+    |------------------------------------------------------------------
+    */
+    if (session()->has('redirect_jalur')) {
+        $jalur = session()->pull('redirect_jalur');
+        return redirect()->route('siswa.pendaftaran', $jalur);
+    }
+    /*
+    |------------------------------------------------------------------
     | 🔥 PRIORITAS 1: LAST STEP
     |------------------------------------------------------------------
     */
@@ -161,15 +170,7 @@ class AuthPpdbController extends Controller
         };
     }
 
-    /*
-    |------------------------------------------------------------------
-    | 🔥 PRIORITAS 3: DARI JALUR
-    |------------------------------------------------------------------
-    */
-    if (session()->has('redirect_jalur')) {
-        $jalur = session()->pull('redirect_jalur');
-        return redirect()->route('siswa.pendaftaran', $jalur);
-    }
+    
 
     /*
     |------------------------------------------------------------------
@@ -293,13 +294,18 @@ public function resetPassword(Request $request)
     | LOGOUT
     |--------------------------------------------------------------------------
     */
-    public function logout(Request $request)
-    {
-        Auth::guard('ppdb')->logout();
+   public function logout(Request $request)
+{
+    // 🔥 logout semua kemungkinan guard
+    Auth::guard('ppdb')->logout();
+    Auth::guard('web')->logout(); // penting!
 
-        $request->session()->invalidate();
-        $request->session()->regenerateToken();
+    // 🔥 hapus semua data session
+    $request->session()->flush();
 
-        return redirect()->route('ppdb.login');
-    }
+    // 🔥 regenerate session ID baru
+    $request->session()->regenerate();
+
+    return redirect()->route('ppdb.login');
+}
 }

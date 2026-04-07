@@ -69,18 +69,18 @@ Route::post('/ppdb/pertanyaan', [FaqController::class, 'kirimPertanyaan'])
 */
 Route::get('/ppdb/pilih/{jalur}', function ($jalur) {
 
-    $allowed = ['prestasi', 'reguler', 'afirmasi'];
-    if (!in_array($jalur, $allowed)) abort(404);
+//  dd([
+//         'ppdb_check' => Auth::guard('ppdb')->check(),
+//         'user' => Auth::guard('ppdb')->user()
+//     ]);
+//     $allowed = ['prestasi', 'reguler', 'afirmasi'];
+//    session(['redirect_jalur' => $jalur]);
 
-    // 🔥 simpan tujuan jalur
-    session(['redirect_jalur' => $jalur]);
-
-    // 🔥 jika belum login → login dulu
-    if (!auth('ppdb')->check()) {
+    // 🔥 PAKAI GUARD FIX
+    if (!Auth::guard('ppdb')->check()) {
         return redirect()->route('ppdb.login');
     }
 
-    // 🔥 jika sudah login → langsung ke form
     return redirect()->route('siswa.pendaftaran', $jalur);
 
 })->name('ppdb.pilih_jalur');
@@ -90,12 +90,8 @@ Route::get('/ppdb/pilih/{jalur}', function ($jalur) {
 | PENDAFTARAN
 |--------------------------------------------------------------------------
 */
-Route::get('/siswa/pendaftaran/{jalur}', function ($jalur) {
-    $allowed = ['prestasi', 'reguler', 'afirmasi'];
-    if (!in_array($jalur, $allowed)) abort(404);
-
-    return view('ppdb.pendaftaran.isi-formulir', compact('jalur'));
-})->middleware(['auth:ppdb'])->name('siswa.pendaftaran');
+Route::get('/siswa/pendaftaran/{jalur}', [PendaftaranController::class, 'form'])
+    ->name('siswa.pendaftaran');
 
 Route::post('/siswa/pendaftaran/{jalur}', [PendaftaranController::class, 'store'])
     ->name('siswa.pendaftaran.post');
@@ -122,7 +118,8 @@ Route::post('/siswa/upload-berkas/{jalur}', [
 */
 Route::prefix('siswa')->middleware(['auth:ppdb', 'ppdb.step'])->group(function () {
 
-    Route::view('/dashboard', 'ppdb.dashboard.beranda')->name('siswa.dashboard');
+   Route::get('/dashboard', [PendaftaranController::class, 'dashboard'])
+    ->name('siswa.dashboard');
 
     Route::get('/verifikasi/{jalur}', fn($jalur) =>
         view('ppdb.dashboard.status', compact('jalur'))
@@ -131,13 +128,36 @@ Route::prefix('siswa')->middleware(['auth:ppdb', 'ppdb.step'])->group(function (
     Route::get('/pengumuman/{jalur}', [PendaftaranController::class, 'pengumuman'])
     ->name('siswa.pengumuman');
 
-    Route::get('/daftar-ulang/{jalur}', fn($jalur) =>
-        view('ppdb.daftar-ulang.index', compact('jalur'))
-    )->name('siswa.daftar-ulang');
+   Route::get('/daftar-ulang/{jalur}', [PendaftaranController::class, 'daftarUlang'])
+    ->withoutMiddleware(['ppdb.step'])
+    ->name('siswa.daftar-ulang');
 
-    Route::post('/daftar-ulang/{jalur}', fn($jalur) =>
-        redirect()->route('siswa.dashboard')
-    )->name('siswa.daftar-ulang.post');
+    Route::post('/daftar-ulang/{jalur}', [PendaftaranController::class, 'simpanDaftarUlang'])
+    ->name('siswa.daftar-ulang.post');
+
+    Route::get('/perbaikan/{jalur}', function ($jalur) {
+
+    $user = Auth::guard('ppdb')->user();
+
+    $pendaftaran = \App\Models\Pendaftaran::where('user_id', $user->id)
+        ->where('jalur', $jalur)
+        ->latest()
+        ->first();
+
+    if (!$pendaftaran) {
+        abort(404);
+    }
+
+    $pendaftaran->update([
+        'last_step' => 'form',
+        'status' => 'belum'
+    ]);
+
+    return redirect()->route('siswa.pendaftaran', $jalur);
+
+})
+->withoutMiddleware(['ppdb.step']) // 🔥 INI KUNCI
+->name('siswa.perbaikan');
 });
 
 /*

@@ -30,12 +30,13 @@
        <div style="margin-top: -20px;">
             <h3 class="text-base font-bold text-[#2B2A28] mb-6">Pilih Jalur Pendaftaran</h3>
              @php
-    $activeJalur = optional($ppdb->jalurs->firstWhere('is_active', 1))->jalur;
+    $activeJalurs = $ppdb->jalurs->where('is_active', 1)->pluck('jalur')->toArray();
 @endphp
+
             <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
 
                 {{-- Prestasi --}}
-                @php $isPrestasi = $activeJalur === 'prestasi'; @endphp
+                @php $isPrestasi = in_array('prestasi', $activeJalurs); @endphp
                 <div class="jalur-card relative pt-8 flex flex-col {{ !$isPrestasi ? 'opacity-50' : '' }}" style="--delay: 0ms">
                     <div class="absolute top-0 left-6 z-10">
                         <img src="{{ asset('ppdb/Group 18.svg') }}" alt="Prestasi" class="w-14 h-14 object-contain">
@@ -49,7 +50,7 @@
                         </p>
                        <div class="border-t border-slate-100 mt-6">
     @if($isPrestasi)
-        <a href="{{ route('ppdb.jalur', 'prestasi') }}"
+        <a href="{{ route('ppdb.pilih_jalur', 'prestasi') }}"
            class="inline-flex items-center gap-1.5 py-4 font-semibold text-sm group"
            style="color: #16A9D1;">
             Baca Selengkapnya <span class="group-hover:translate-x-1 transition-transform">→</span>
@@ -64,7 +65,7 @@
                 </div>
 
                 {{-- Regular --}}
-                @php $isReguler = $activeJalur === 'reguler'; @endphp
+                @php $isReguler = in_array('reguler', $activeJalurs); @endphp
 
 <div class="jalur-card relative pt-8 flex flex-col {{ !$isReguler ? 'opacity-50' : '' }}" style="--delay: 200ms">
                     <div class="absolute top-0 left-6 z-10">
@@ -79,7 +80,7 @@
                         </p>
                         <div class="border-t border-slate-100 mt-6">
     @if($isReguler)
-        <a href="{{ route('ppdb.jalur', 'reguler') }}"
+        <a href="{{ route('ppdb.pilih_jalur', 'reguler') }}"
            class="inline-flex items-center gap-1.5 py-4 font-semibold text-sm group"
            style="color: #16A9D1;">
             Baca Selengkapnya <span class="group-hover:translate-x-1 transition-transform">→</span>
@@ -94,7 +95,7 @@
                 </div>
 
                 {{-- Afirmasi --}}
-                @php $isAfirmasi = $activeJalur === 'afirmasi'; @endphp
+                @php $isAfirmasi = in_array('afirmasi', $activeJalurs); @endphp
 
 <div class="jalur-card relative pt-8 flex flex-col {{ !$isAfirmasi ? 'opacity-50' : '' }}" style="--delay: 400ms">
                     <div class="absolute top-0 left-6 z-10">
@@ -109,7 +110,7 @@
                         </p>
                         <div class="border-t border-slate-100 mt-6">
     @if($isAfirmasi)
-        <a href="{{ route('ppdb.jalur', 'afirmasi') }}"
+        <a href="{{ route('ppdb.pilih_jalur', 'afirmasi') }}"
            class="inline-flex items-center gap-1.5 py-4 font-semibold text-sm group"
            style="color: #16A9D1;">
             Baca Selengkapnya <span class="group-hover:translate-x-1 transition-transform">→</span>

@@ -69,7 +69,7 @@
                     {{-- TTL --}}
                     <div>
                         <label class="block text-sm mb-1.5">Tempat, Tanggal Lahir</label>
-                        <input type="text" name="ttl" value="{{ old('ttl') }}"
+                        <input type="text" name="ttl" value="{{ old('ttl', $pendaftaran->ttl ?? '') }}"
                                class="w-full px-4 py-2.5 rounded-[10px] text-sm outline-none bg-[#F5F7FF] border border-[#DFEAF2]
                                @error('ttl') border border-red-500 @enderror">
                         @error('ttl')
@@ -89,7 +89,7 @@
                     {{-- Asal Sekolah --}}
                     <div>
                         <label class="block text-sm mb-1.5">Asal Sekolah</label>
-                        <input type="text" name="asal_sekolah" value="{{ old('asal_sekolah') }}"
+                        <input type="text" name="asal_sekolah" value="{{ old('asal_sekolah', $pendaftaran->asal_sekolah ?? '') }}"
                                class="w-full px-4 py-2.5 rounded-[10px] text-sm outline-none bg-[#F5F7FF] border border-[#DFEAF2]
                                @error('asal_sekolah') border border-red-500 @enderror">
                         @error('asal_sekolah')
@@ -100,7 +100,7 @@
                     {{-- Alamat --}}
                     <div>
                         <label class="block text-sm mb-1.5">Alamat</label>
-                        <input type="text" name="alamat" value="{{ old('alamat') }}"
+                        <input type="text" name="alamat" value="{{ old('alamat', $pendaftaran->alamat ?? '') }}"
                                class="w-full px-4 py-2.5 rounded-[10px] text-sm outline-none bg-[#F5F7FF] border border-[#DFEAF2]
                                @error('alamat') border border-red-500 @enderror">
                         @error('alamat')
@@ -115,7 +115,7 @@
                     {{-- Nama Ortu --}}
                     <div>
                         <label class="block text-sm mb-1.5">Nama Orang Tua/Wali</label>
-                        <input type="text" name="nama_ortu" value="{{ old('nama_ortu') }}"
+                        <input type="text" name="nama_ortu" value="{{ old('nama_ortu', $pendaftaran->nama_ortu ?? '') }}"
                                class="w-full px-4 py-2.5 rounded-[10px] text-sm outline-none bg-[#F5F7FF] border border-[#DFEAF2]
                                @error('nama_ortu') border border-red-500 @enderror">
                         @error('nama_ortu')
@@ -126,7 +126,7 @@
                     {{-- Pekerjaan --}}
                     <div>
                         <label class="block text-sm mb-1.5">Pekerjaan Orang Tua</label>
-                        <input type="text" name="pekerjaan_ortu" value="{{ old('pekerjaan_ortu') }}"
+                        <input type="text" name="pekerjaan_ortu" value="{{ old('pekerjaan_ortu', $pendaftaran->pekerjaan_ortu ?? '') }}"
                                class="w-full px-4 py-2.5 rounded-[10px] text-sm outline-none bg-[#F5F7FF] border border-[#DFEAF2]
                                @error('pekerjaan_ortu') border border-red-500 @enderror">
                         @error('pekerjaan_ortu')
@@ -137,7 +137,7 @@
                     {{-- Penghasilan --}}
                     <div>
                         <label class="block text-sm mb-1.5">Penghasilan Orang Tua</label>
-                        <input type="text" name="penghasilan_ortu" value="{{ old('penghasilan_ortu') }}"
+                        <input type="text" name="penghasilan_ortu" value="{{ old('penghasilan_ortu', $pendaftaran->penghasilan_ortu ?? '') }}"
                                class="w-full px-4 py-2.5 rounded-[10px] text-sm outline-none bg-[#F5F7FF] border border-[#DFEAF2]
                                @error('penghasilan_ortu') border border-red-500 @enderror">
                         @error('penghasilan_ortu')
@@ -148,7 +148,7 @@
                     {{-- Alamat Ortu --}}
                     <div>
                         <label class="block text-sm mb-1.5">Alamat Orang Tua</label>
-                        <input type="text" name="alamat_ortu" value="{{ old('alamat_ortu') }}"
+                        <input type="text" name="alamat_ortu" value="{{ old('alamat_ortu', $pendaftaran->alamat_ortu ?? '') }}"
                                class="w-full px-4 py-2.5 rounded-[10px] text-sm outline-none bg-[#F5F7FF] border border-[#DFEAF2]
                                @error('alamat_ortu') border border-red-500 @enderror">
                         @error('alamat_ortu')
@@ -159,7 +159,7 @@
                     {{-- Jumlah Saudara --}}
                     <div>
                         <label class="block text-sm mb-1.5">Jumlah Bersaudara</label>
-                        <input type="number" name="jumlah_saudara" value="{{ old('jumlah_saudara') }}"
+                        <input type="number" name="jumlah_saudara" value="{{ old('jumlah_saudara', $pendaftaran->jumlah_saudara ?? '') }}"
                                class="w-full px-4 py-2.5 rounded-[10px] text-sm outline-none bg-[#F5F7FF] border border-[#DFEAF2]
                                @error('jumlah_saudara') border border-red-500 @enderror">
                         @error('jumlah_saudara')

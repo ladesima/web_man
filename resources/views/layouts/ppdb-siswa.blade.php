@@ -84,15 +84,21 @@
                                     Dashboard
                                 </a>
                                 <div style="border-top:1px solid #f0f0f0; margin:4px 0;"></div>
-                                <a href="{{ route('ppdb.login') }}"
-                                   style="display:flex; align-items:center; gap:10px; padding:10px 16px; font-size:13px; color:#ef4444; text-decoration:none;"
-                                   onmouseover="this.style.backgroundColor='#FFF5F5'"
-                                   onmouseout="this.style.backgroundColor='transparent'">
-                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/>
-                                    </svg>
-                                    Keluar
-                                </a>
+                                <form method="POST" action="{{ route('ppdb.logout') }}">
+    @csrf
+    <button type="submit"
+        style="display:flex; align-items:center; gap:10px; padding:10px 16px; font-size:13px; color:#ef4444; text-decoration:none; width:100%; background:none; border:none; text-align:left;"
+        onmouseover="this.style.backgroundColor='#FFF5F5'"
+        onmouseout="this.style.backgroundColor='transparent'">
+
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/>
+        </svg>
+
+        Keluar
+    </button>
+</form>
                             </div>
                         </div>
                     </div>

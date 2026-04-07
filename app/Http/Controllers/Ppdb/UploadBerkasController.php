@@ -81,7 +81,6 @@ class UploadBerkasController extends Controller
         return redirect()->route('ppdb.login');
     }
 
-    // 🔥 FIX: filter berdasarkan jalur
     $pendaftaran = Pendaftaran::where('user_id', $user->id)
         ->where('jalur', $jalur)
         ->latest()
@@ -99,34 +98,9 @@ class UploadBerkasController extends Controller
     }
 
     /*
-    |------------------------------------------------------------------
-    | 🔥 VALIDASI DINAMIS SESUAI JALUR
-    |------------------------------------------------------------------
-    */
-    $rules = [
-        'akta' => 'required|file|mimes:jpg,jpeg,png,pdf|max:5120',
-        'kk' => 'required|file|mimes:jpg,jpeg,png,pdf|max:5120',
-        'rapor' => 'required|file|mimes:jpg,jpeg,png,pdf|max:5120',
-        'bukti_pd' => 'required|file|mimes:jpg,jpeg,png,pdf|max:5120',
-        'skl' => 'required|file|mimes:jpg,jpeg,png,pdf|max:5120',
-    ];
-
-    // 🔥 JALUR PRESTASI
-    if ($jalur === 'prestasi') {
-        $rules['sertifikat'] = 'required|file|mimes:jpg,jpeg,png,pdf|max:5120';
-    }
-
-    // 🔥 JALUR AFIRMASI (pakai KIP)
-    if ($jalur === 'afirmasi') {
-        $rules['kip'] = 'required|file|mimes:jpg,jpeg,png,pdf|max:5120';
-    }
-
-    $request->validate($rules);
-
-    /*
-    |------------------------------------------------------------------
-    | 🔥 FILE MAPPING DINAMIS
-    |------------------------------------------------------------------
+    |--------------------------------------------------------------------------
+    | 🔥 FILE MAPPING (SATU KALI SAJA)
+    |--------------------------------------------------------------------------
     */
     $files = [
         'akta' => 'akta_lahir',
@@ -144,13 +118,36 @@ class UploadBerkasController extends Controller
         $files['kip'] = 'kip';
     }
 
+    /*
+    |--------------------------------------------------------------------------
+    | 🔥 VALIDASI DINAMIS (INI YANG BENAR)
+    |--------------------------------------------------------------------------
+    */
+    $rules = [];
+
+    foreach ($files as $input => $column) {
+
+        if (empty($pendaftaran->$column)) {
+            $rules[$input] = 'required|file|mimes:jpg,jpeg,png,pdf|max:5120';
+        } else {
+            $rules[$input] = 'nullable|file|mimes:jpg,jpeg,png,pdf|max:5120';
+        }
+    }
+
+    $request->validate($rules);
+
+    /*
+    |--------------------------------------------------------------------------
+    | 🔥 UPLOAD FILE (TIDAK HAPUS JIKA TIDAK DIUPLOAD)
+    |--------------------------------------------------------------------------
+    */
     $data = [];
 
     foreach ($files as $input => $column) {
 
         if ($request->hasFile($input)) {
 
-            // hapus file lama
+            // hapus file lama jika ada
             if (!empty($pendaftaran->$column)) {
                 Storage::disk('public')->delete($pendaftaran->$column);
             }
@@ -164,14 +161,22 @@ class UploadBerkasController extends Controller
     }
 
     /*
-    |------------------------------------------------------------------
+    |--------------------------------------------------------------------------
     | 🔥 UPDATE STATUS
-    |------------------------------------------------------------------
+    |--------------------------------------------------------------------------
     */
-    $pendaftaran->update(array_merge($data, [
-        'status' => 'berkas_selesai',
-        'last_step' => 'verifikasi'
-    ]));
+   $pendaftaran->update(array_merge($data, [
+    'status' => 'berkas_selesai',
+    'last_step' => 'verifikasi',
+
+    // 🔥 RESET WAJIB
+    'is_publish' => 0,
+    'email_status' => null,
+
+    // opsional
+    'catatan' => null,
+]));
+$pendaftaran->refresh();
 
     return redirect()
         ->route('siswa.verifikasi', $jalur)

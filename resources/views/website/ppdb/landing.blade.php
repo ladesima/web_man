@@ -25,9 +25,19 @@
     Saat ini pendaftaran sedang berlangsung untuk
 </p>
 
+@php
+    $jalurAktif = $ppdb->jalurs->where('is_active', 1);
+@endphp
+
 <p class="hero-jalur mt-1 text-2xl md:text-4xl font-extrabold drop-shadow"
    style="color: #DBE124;">
-    {{ optional($ppdb->jalurs->where('is_active', 1)->first())->jalur ?? 'Jalur belum tersedia' }}
+    
+    @if($jalurAktif->count() > 0)
+        {{ $jalurAktif->pluck('jalur')->join(' & ') }}
+    @else
+        Jalur belum tersedia
+    @endif
+
 </p>
         <div class="hero-btn mt-8">
             <a href="/ppdb/daftar"
@@ -182,14 +192,14 @@
         </div>
 
         {{-- Cards --}}
-        @php
-    $activeJalur = optional($ppdb->jalurs->firstWhere('is_active', 1))->jalur;
+       @php
+    $activeJalurs = $ppdb->jalurs->where('is_active', 1)->pluck('jalur')->toArray();
 @endphp
 
 <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
 
     {{-- ================= PRESTASI ================= --}}
-    @php $isPrestasi = $activeJalur === 'prestasi'; @endphp
+    @php $isPrestasi = in_array('prestasi', $activeJalurs); @endphp
 
     <div class="jalur-card relative pt-8 flex flex-col {{ !$isPrestasi ? 'opacity-50' : '' }}" style="--delay: 0ms">
         <div class="absolute top-0 left-6 z-10">
@@ -223,7 +233,7 @@
     </div>
 
     {{-- ================= REGULER ================= --}}
-    @php $isReguler = $activeJalur === 'reguler'; @endphp
+    @php $isReguler = in_array('reguler', $activeJalurs); @endphp
 
     <div class="jalur-card relative pt-8 flex flex-col {{ !$isReguler ? 'opacity-50' : '' }}" style="--delay: 200ms">
         <div class="absolute top-0 left-6 z-10">
@@ -257,7 +267,7 @@
     </div>
 
     {{-- ================= AFIRMASI ================= --}}
-    @php $isAfirmasi = $activeJalur === 'afirmasi'; @endphp
+    @php $isAfirmasi = in_array('afirmasi', $activeJalurs); @endphp
 
     <div class="jalur-card relative pt-8 flex flex-col {{ !$isAfirmasi ? 'opacity-50' : '' }}" style="--delay: 400ms">
         <div class="absolute top-0 left-6 z-10">
